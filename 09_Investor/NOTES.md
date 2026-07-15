@@ -1,0 +1,1 @@
+Pitch deck deferred — trigger: 100 paying users OR a deliberate fundraise decision (Manual: Volume VIII). The 13-slide skeleton is agreed in the Manual. Metrics-Bible.md in this folder is the KPI foundation the deck will draw from.

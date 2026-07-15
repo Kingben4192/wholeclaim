@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-paper: #f2f1ec;
+  --color-ledger: #1e4b3c;
+  --color-ink: #1b1f1d;
+
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-public-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
