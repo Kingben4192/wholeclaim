@@ -8,6 +8,21 @@
   --font-display: var(--font-archivo), system-ui, sans-serif;
   --font-sans: var(--font-public-sans), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Homepage v2 only (docs/wholeclaim_spec_homepage_and_roadmap.md,
+     Part 1.1) — separately named so the redesign can't shift color or
+     type anywhere outside the homepage. Do not reuse hp-* tokens on
+     other pages without a deliberate decision to unify them. */
+  --color-hp-paper: #f2f0eb;
+  --color-hp-paper-deep: #eae7df;
+  --color-hp-ink: #14201a;
+  --color-hp-ink-soft: #43514a;
+  --color-hp-pine: #1e4636;
+  --color-hp-pine-deep: #153528;
+  --color-hp-sage: #e3e9e2;
+  --color-hp-line: #d8d3c6;
+  --color-hp-stamp: #8a2f23;
+  --font-hp-display: var(--font-bricolage), "Arial Black", sans-serif;
 }
 
 body {

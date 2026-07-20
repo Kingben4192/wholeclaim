@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WholeClaim — Your claim. Organized from day one.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#F2F0EB;
+    --paper-deep:#EAE7DF;
+    --ink:#14201A;
+    --ink-soft:#43514A;
+    --pine:#1E4636;
+    --pine-deep:#153528;
+    --sage:#E3E9E2;
+    --line:#D8D3C6;
+    --stamp:#8A2F23;
+    --radius:10px;
+    --maxw:1020px;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --display:'Bricolage Grotesque', 'Arial Black', sans-serif;
+    --body:'Public Sans', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  img{max-width:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .wordmark{font-family:var(--display);font-weight:800;font-size:1.25rem;letter-spacing:-.01em;text-decoration:none}
+  .wordmark span{color:var(--pine)}
+  .nav-right{display:flex;align-items:center;gap:20px}
+  .nav-link{font-size:.9rem;font-weight:600;text-decoration:none;color:var(--ink-soft)}
+  .nav-link:hover{color:var(--ink)}
+  .nav-help{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:.78rem;font-weight:500;
+    border:1px solid var(--line);border-radius:99px;
+    padding:6px 14px;text-decoration:none;background:#fff;
+  }
+  .nav-help:hover{border-color:var(--pine);color:var(--pine)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:72px 0 56px;text-align:center}
+  .eyebrow{
+    font-family:var(--mono);font-size:.72rem;font-weight:600;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--pine);
+    display:inline-block;margin-bottom:20px;
+  }
+  h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(2.3rem, 6vw, 3.9rem);
+    line-height:1.04;letter-spacing:-.025em;
+    max-width:15ch;margin:0 auto 18px;
+  }
+  .hero p.sub{
+    font-size:1.08rem;color:var(--ink-soft);
+    max-width:44ch;margin:0 auto 32px;
+  }
+  .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--body);font-weight:700;font-size:.98rem;
+    padding:15px 26px;border-radius:var(--radius);
+    text-decoration:none;cursor:pointer;border:1.5px solid var(--pine);
+    transition:transform .12s ease, background .12s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--pine);color:#fff}
+  .btn-primary:hover{background:var(--pine-deep)}
+  .btn-secondary{background:transparent;color:var(--pine)}
+  .btn-secondary:hover{background:var(--sage)}
+  .login-line{font-size:.9rem;color:var(--ink-soft)}
+  .login-line a{font-weight:600;color:var(--pine)}
+
+  /* ---------- section shell ---------- */
+  section{padding:64px 0}
+  .sec-head{text-align:center;margin-bottom:44px}
+  .sec-eyebrow{
+    font-family:var(--mono);font-size:.68rem;font-weight:600;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);
+    display:block;margin-bottom:12px;
+  }
+  h2{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(1.6rem, 3.5vw, 2.2rem);
+    letter-spacing:-.02em;
+  }
+
+  /* ---------- how it works ---------- */
+  .steps{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .step{background:var(--paper);padding:28px 22px}
+  .step-num{
+    font-family:var(--mono);font-size:.75rem;font-weight:600;
+    color:var(--pine);letter-spacing:.1em;display:block;margin-bottom:14px;
+  }
+  .step h3{font-family:var(--display);font-weight:700;font-size:1.05rem;margin-bottom:8px;letter-spacing:-.01em}
+  .step p{font-size:.9rem;color:var(--ink-soft)}
+
+  /* ---------- dashboard preview: the claim file ---------- */
+  .file-section{background:var(--paper-deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .file-outer{max-width:640px;margin:0 auto;position:relative}
+  .file-tab{
+    display:inline-block;position:relative;z-index:2;
+    font-family:var(--mono);font-size:.72rem;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;
+    background:#fff;border:1px solid var(--line);border-bottom:none;
+    border-radius:8px 8px 0 0;padding:9px 20px 7px;margin-left:26px;
+  }
+  .file-card{
+    position:relative;background:#fff;border:1px solid var(--line);
+    border-radius:var(--radius);padding:30px 30px 26px;
+    box-shadow:0 1px 0 var(--line), 0 14px 34px -22px rgba(20,32,26,.35);
+    overflow:hidden;
+  }
+  .stamp{
+    position:absolute;top:46%;left:50%;
+    transform:translate(-50%,-50%) rotate(-14deg);
+    font-family:var(--mono);font-weight:600;font-size:3.4rem;
+    letter-spacing:.3em;color:var(--stamp);opacity:.13;
+    border:4px solid var(--stamp);border-radius:8px;
+    padding:6px 28px 6px 34px;pointer-events:none;white-space:nowrap;
+  }
+  .file-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+  .claim-title{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:-.01em}
+  .claim-status{
+    font-family:var(--mono);font-size:.72rem;font-weight:500;
+    color:var(--pine);background:var(--sage);
+    border-radius:99px;padding:5px 12px;display:inline-block;margin-top:8px;
+  }
+  .grade-box{
+    flex-shrink:0;width:74px;height:74px;
+    border:2.5px solid var(--ink);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-weight:800;font-size:2rem;
+  }
+  .grade-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-top:6px}
+  .file-stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;margin-bottom:22px;
+  }
+  .stat{background:var(--paper);padding:14px 16px}
+  .stat b{font-family:var(--display);font-weight:800;font-size:1.35rem;display:block;letter-spacing:-.02em}
+  .stat span{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .ledger-label{font-family:var(--mono);font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px}
+  .ledger{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .ledger-row{
+    display:grid;grid-template-columns:78px 1fr auto;gap:12px;align-items:center;
+    padding:11px 16px;font-size:.85rem;background:#fff;
+  }
+  .ledger-row + .ledger-row{border-top:1px solid var(--line)}
+  .ledger-type{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.08em;color:var(--pine)}
+  .ledger-date{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft)}
+  .file-note{
+    text-align:center;font-family:var(--mono);font-size:.72rem;
+    color:var(--ink-soft);margin-top:16px;
+  }
+
+  /* ---------- features ---------- */
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .feat-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;display:flex;flex-direction:column;gap:10px}
+  .feat-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .feat-kicker{font-family:var(--mono);font-size:.66rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .badge{font-family:var(--mono);font-size:.6rem;font-weight:600;letter-spacing:.12em;border-radius:99px;padding:4px 10px;text-transform:uppercase}
+  .badge-free{background:var(--sage);color:var(--pine)}
+  .badge-planned{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
+  .feat-card h3{font-family:var(--display);font-weight:700;font-size:1.08rem;letter-spacing:-.01em}
+  .feat-card p{font-size:.9rem;color:var(--ink-soft)}
+  .feat-card.planned{background:var(--paper)}
+  @media (max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
+  @media (max-width:600px){.feat-grid{grid-template-columns:1fr}}
+
+  /* ---------- what do I need ---------- */
+  .need-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    max-width:760px;margin:0 auto 26px;
+  }
+  .need-item{
+    display:flex;align-items:center;gap:11px;
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 18px;font-weight:600;font-size:.92rem;
+  }
+  .check{
+    flex-shrink:0;width:22px;height:22px;border-radius:6px;
+    background:var(--sage);color:var(--pine);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .need-reassure{
+    text-align:center;font-size:1rem;color:var(--ink-soft);
+    font-style:italic;
+  }
+  .need-reassure b{color:var(--ink);font-style:normal}
+
+  /* ---------- trust row ---------- */
+  .trust-section{background:var(--pine);color:#EDF2EC}
+  .trust-section h2{color:#fff}
+  .trust-section .sec-eyebrow{color:#A9C2AF}
+  .trust-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:26px;
+    max-width:900px;margin:0 auto 34px;text-align:center;
+  }
+  .trust-item svg{width:26px;height:26px;stroke:#A9C2AF;margin-bottom:10px}
+  .trust-item h4{font-family:var(--display);font-weight:700;font-size:.98rem;margin-bottom:5px;color:#fff}
+  .trust-item p{font-size:.83rem;color:#C3D3C6}
+  .trust-disclaimer{
+    max-width:640px;margin:0 auto;text-align:center;
+    font-family:var(--mono);font-size:.74rem;line-height:1.7;
+    color:#A9C2AF;border-top:1px solid rgba(255,255,255,.16);
+    padding-top:24px;
+  }
+
+  /* ---------- account preview ---------- */
+  .account-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+    max-width:900px;margin:0 auto;
+  }
+  .menu-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .menu-card-head{
+    font-family:var(--mono);font-size:.68rem;font-weight:600;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+    padding:14px 18px;border-bottom:1px solid var(--line);background:var(--paper);
+  }
+  .menu-card ul{list-style:none}
+  .menu-card li{border-bottom:1px solid var(--paper-deep)}
+  .menu-card li:last-child{border-bottom:none}
+  .menu-card a{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;font-size:.9rem;font-weight:500;text-decoration:none;
+  }
+  .menu-card a:hover{background:var(--paper)}
+  .menu-card a::after{content:"→";color:var(--line);font-weight:400}
+  .menu-card a:hover::after{color:var(--pine)}
+
+  /* ---------- final cta ---------- */
+  .final-cta{text-align:center;padding:80px 0 96px}
+  .final-cta h2{max-width:16ch;margin:0 auto 14px}
+  .final-cta p{color:var(--ink-soft);max-width:42ch;margin:0 auto 30px}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0 110px;background:var(--paper-deep)}
+  .foot{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;justify-content:space-between}
+  .foot small{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);line-height:1.7;max-width:58ch}
+
+  /* ---------- mobile bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:50;
+    display:none;background:#fff;border-top:1px solid var(--line);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav a{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    text-decoration:none;font-family:var(--mono);font-size:.62rem;
+    font-weight:500;color:var(--ink-soft);letter-spacing:.04em;
+  }
+  .bottom-nav a.active{color:var(--pine)}
+  .bottom-nav svg{width:21px;height:21px;stroke:currentColor}
+
+  /* ---------- reveal motion ---------- */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease, transform .55s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+  }
+
+  /* ---------- focus ---------- */
+  a:focus-visible,.btn:focus-visible{outline:2.5px solid var(--pine);outline-offset:3px;border-radius:6px}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:860px){
+    .steps{grid-template-columns:1fr 1fr}
+    .trust-grid{grid-template-columns:1fr 1fr;gap:30px 18px}
+    .account-grid{grid-template-columns:1fr}
+    .need-grid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:600px){
+    .hero{padding:52px 0 44px}
+    section{padding:52px 0}
+    .steps{grid-template-columns:1fr}
+    .need-grid{grid-template-columns:1fr}
+    .file-card{padding:22px 18px 20px}
+    .file-stats{grid-template-columns:1fr 1fr 1fr}
+    .stat{padding:11px 10px}
+    .stat b{font-size:1.1rem}
+    .stamp{font-size:2.4rem;letter-spacing:.22em;padding:4px 18px 4px 24px}
+    .bottom-nav{display:flex}
+    .nav-right .nav-link{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="wordmark" href="#">Whole<span>Claim</span></a>
+    <nav class="nav-right" aria-label="Primary">
+      <a class="nav-link" href="#account">Log in</a>
+      <a class="nav-help" href="#help">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>
+        Help
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero wrap">
+  <span class="eyebrow reveal">The insurance claim workspace for homeowners</span>
+  <h1 class="reveal">Your claim. Organized from day one.</h1>
+  <p class="sub reveal">Store photos, documents, timelines, and conversations in one secure claim file.</p>
+  <div class="cta-row reveal">
+    <a class="btn btn-primary" href="#start">Start Free Claim Binder</a>
+    <a class="btn btn-secondary" href="#grade">Check Your Claim Grade</a>
+  </div>
+  <p class="login-line reveal">Already have an account? <a href="#login">Log in</a></p>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">The process</span>
+      <h2>How WholeClaim works</h2>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <span class="step-num">STEP 1</span>
+        <h3>Create your claim</h3>
+        <p>Add property details and claim information.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">STEP 2</span>
+        <h3>Upload your evidence</h3>
+        <p>Photos, receipts, invoices, estimates, conversations.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">STEP 3</span>
+        <h3>Build your timeline</h3>
+        <p>Keep every important event organized.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">STEP 4</span>
+        <h3>Share your claim file</h3>
+        <p>Give contractors, adjusters, or professionals one organized record.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="file-section">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Inside the workspace</span>
+      <h2>Everything lives in one claim file</h2>
+    </div>
+    <div class="file-outer reveal">
+      <span class="file-tab">Example claim file</span>
+      <div class="file-card">
+        <div class="stamp" aria-hidden="true">SAMPLE</div>
+        <div class="file-head">
+          <div>
+            <div class="claim-title">Water Damage</div>
+            <span class="claim-status">STATUS · DOCUMENTATION STARTED</span>
+          </div>
+          <div>
+            <div class="grade-box">B+</div>
+            <div class="grade-label">Claim Grade</div>
+          </div>
+        </div>
+        <div class="file-stats">
+          <div class="stat"><b>47</b><span>Photos</span></div>
+          <div class="stat"><b>6</b><span>Documents</span></div>
+          <div class="stat"><b>3</b><span>Receipts</span></div>
+        </div>
+        <div class="ledger-label">Timeline · 12 events added</div>
+        <div class="ledger">
+          <div class="ledger-row">
+            <span class="ledger-type">PHOTO</span>
+            <span>Kitchen ceiling — 6 images</span>
+            <span class="ledger-date">2026-07-15</span>
+          </div>
+          <div class="ledger-row">
+            <span class="ledger-type">EMAIL</span>
+            <span>Adjuster follow-up sent</span>
+            <span class="ledger-date">2026-07-14</span>
+          </div>
+          <div class="ledger-row">
+            <span class="ledger-type">CALL</span>
+            <span>Plumber estimate received</span>
+            <span class="ledger-date">2026-07-12</span>
+          </div>
+        </div>
+      </div>
+      <p class="file-note">Sample data shown for illustration. Your file starts empty — and fills fast.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">What you get</span>
+      <h2>Built around the free experience</h2>
+    </div>
+    <div class="feat-grid reveal">
+      <div class="feat-card">
+        <div class="feat-top"><span class="feat-kicker">Claim Grade</span><span class="badge badge-free">Free</span></div>
+        <h3>Know where your claim file stands</h3>
+        <p>Get a quick assessment of your documentation and see what areas you can organize next.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top"><span class="feat-kicker">Claim Binder</span><span class="badge badge-free">Free</span></div>
+        <h3>Everything in one organized place</h3>
+        <p>Keep photos, documents, receipts, notes, and important claim details together.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top"><span class="feat-kicker">Evidence Vault</span><span class="badge badge-free">Free</span></div>
+        <h3>Store your documentation securely</h3>
+        <p>Upload and organize important files, photos, and records related to your claim.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top"><span class="feat-kicker">Timeline</span><span class="badge badge-free">Free</span></div>
+        <h3>Track every important moment</h3>
+        <p>Create a clear record of events, updates, and documentation as your claim progresses.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top"><span class="feat-kicker">Guided Organization</span><span class="badge badge-free">Free</span></div>
+        <h3>Know what to add next</h3>
+        <p>Follow a simple workflow that helps you build a more complete claim file.</p>
+      </div>
+      <div class="feat-card planned">
+        <div class="feat-top"><span class="feat-kicker">Sharing</span><span class="badge badge-planned">Planned</span></div>
+        <h3>Share your organized claim file</h3>
+        <p>Future feature for securely sharing claim information with approved recipients.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT DO I NEED -->
+<section id="need">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Getting started</span>
+      <h2>What do I need to start?</h2>
+    </div>
+    <div class="need-grid reveal">
+      <div class="need-item"><span class="check">✓</span>Photos &amp; videos</div>
+      <div class="need-item"><span class="check">✓</span>Repair estimates</div>
+      <div class="need-item"><span class="check">✓</span>Receipts</div>
+      <div class="need-item"><span class="check">✓</span>Emails &amp; text messages</div>
+      <div class="need-item"><span class="check">✓</span>Contractor invoices</div>
+      <div class="need-item"><span class="check">✓</span>Inspection reports</div>
+    </div>
+    <p class="need-reassure reveal">Don't have everything? <b>Start with what you have.</b></p>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-section">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Built for trust</span>
+      <h2>Your evidence, handled carefully</h2>
+    </div>
+    <div class="trust-grid reveal">
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+        <h4>Secure evidence storage</h4>
+        <p>Photos and PDFs stored privately — only you can view them.</p>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        <h4>Organized documentation</h4>
+        <p>Every file, receipt, and note in one structured place.</p>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <h4>Timeline tracking</h4>
+        <p>Dates, calls, and events logged as they happen.</p>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        <h4>Export anytime</h4>
+        <p>Your claim file belongs to you. Download it whenever you need it.</p>
+      </div>
+    </div>
+    <p class="trust-disclaimer">
+      WholeClaim helps organize claim documentation. It is an educational tool — not legal, insurance, or financial advice, and it does not guarantee insurance outcomes.
+    </p>
+  </div>
+</section>
+
+<!-- ACCOUNT PREVIEW -->
+<section id="account">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Inside your account</span>
+      <h2>Simple to find. Simple to manage.</h2>
+    </div>
+    <div class="account-grid reveal">
+      <div class="menu-card">
+        <div class="menu-card-head">My Account</div>
+        <ul>
+          <li><a href="#">Profile</a></li>
+          <li><a href="#">Subscription</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Export my data</a></li>
+          <li><a href="#">Delete account</a></li>
+        </ul>
+      </div>
+      <div class="menu-card">
+        <div class="menu-card-head">My Claims</div>
+        <ul>
+          <li><a href="#">Active claims</a></li>
+          <li><a href="#">Completed claims</a></li>
+          <li><a href="#">Shared files</a></li>
+        </ul>
+      </div>
+      <div class="menu-card">
+        <div class="menu-card-head">Support</div>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Contact support</a></li>
+          <li><a href="#">Report a problem</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta wrap">
+  <span class="sec-eyebrow reveal">Start here</span>
+  <h2 class="reveal">Build your claim file before you need it.</h2>
+  <p class="reveal">A homeowner dealing with damage shouldn't have to figure out what to do next. WholeClaim gives you the next step — every step.</p>
+  <div class="cta-row reveal">
+    <a class="btn btn-primary" href="#start">Start Free Claim Binder</a>
+    <a class="btn btn-secondary" href="#grade">Take the 60-Second Claim Grade</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <a class="wordmark" href="#">Whole<span>Claim</span></a>
+    <small>
+      getwholeclaim.com · WholeClaim helps organize claim documentation. It does not provide legal advice or guarantee insurance outcomes. © 2026 WholeClaim.
+    </small>
+  </div>
+</footer>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" aria-label="App navigation">
+  <a href="#" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    Home
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+    My Claims
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 15l-4.5-4.5L9 18"/></svg>
+    Evidence
+  </a>
+  <a href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>
+    Profile
+  </a>
+  <a href="#help">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.2a2.8 2.8 0 015.4.9c0 1.8-2.7 2.7-2.7 2.7"/><line x1="12" y1="16.4" x2="12" y2="16.5"/></svg>
+    Help
+  </a>
+</nav>
+
+<script>
+  // gentle scroll reveal — respects reduced motion via CSS
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

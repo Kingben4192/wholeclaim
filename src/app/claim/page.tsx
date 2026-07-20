@@ -31,9 +31,14 @@ export default async function ClaimListPage() {
     <main className="max-w-2xl mx-auto px-6 py-16">
       <div className="flex items-center justify-between mb-10">
         <h1 className="font-display text-2xl font-extrabold">Your claims</h1>
-        <form action={signOut}>
-          <button className="text-sm text-ink/60 underline">Sign out</button>
-        </form>
+        <div className="flex items-center gap-4">
+          <Link href="/account" className="text-sm text-ink/60 underline">
+            Account
+          </Link>
+          <form action={signOut}>
+            <button className="text-sm text-ink/60 underline">Sign out</button>
+          </form>
+        </div>
       </div>
 
       {claims && claims.length > 0 ? (

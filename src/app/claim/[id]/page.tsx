@@ -3,13 +3,36 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { addEntry, addDeadline, addEvidenceItem } from "../actions";
 import { EvidenceRow } from "./EvidenceRow";
+import { FileRow } from "./FileRow";
+import CameraCapture from "./CameraCapture";
+import { PendingPhotoUploader } from "./PendingPhotoUploader";
+import BeforeAfterGrade from "./BeforeAfterGrade";
+import { PolicyDecoderCard } from "./PolicyDecoderCard";
+import { LossCountAuditorCard } from "./LossCountAuditorCard";
+import { EstimateGapAnalyzerCard } from "./EstimateGapAnalyzerCard";
+import { DecisionAssistantCard } from "./DecisionAssistantCard";
+import { LetterBuilderCard } from "./LetterBuilderCard";
+import { MoldTimelineCard } from "./MoldTimelineCard";
+import { SupplementAssistantCard } from "./SupplementAssistantCard";
+import { DepreciationCalculator } from "./DepreciationCalculator";
+import { PublicAdjusterGuide } from "./PublicAdjusterGuide";
+import { LossOfUseTracker } from "./LossOfUseTracker";
+import { PushReminderToggle } from "@/app/push/PushReminderToggle";
+import { computeClaimHealth } from "@/lib/claimHealth";
+import { isPro as resolveIsPro } from "@/lib/entitlements";
+import { ensureGuaranteeSnapshot } from "@/lib/guarantee";
 
 export default async function ClaimDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ seed?: string }>;
 }) {
   const { id } = await params;
+  const { seed } = await searchParams;
+  const seedDeadlineTitle =
+    seed === "suit" ? "Suit limitation — find and verify in your policy" : undefined;
 
   if (!isSupabaseConfigured()) {
     return (
@@ -27,27 +50,92 @@ export default async function ClaimDetailPage({
 
   const supabase = await createClient();
 
-  const [{ data: claim }, { data: entries }, { data: deadlines }, { data: evidenceItems }] =
+  const [
+    { data: claim },
+    { data: entries },
+    { data: deadlines },
+    { data: evidenceItems },
+    { data: files },
+    { data: lossOfUseExpenses },
+    {
+      data: { user },
+    },
+  ] =
     await Promise.all([
       supabase.from("claims").select("*").eq("id", id).single(),
       supabase
         .from("entries")
-        .select("id, date, type, contact, summary")
+        .select("id, date, type, contact, summary, created_at")
         .eq("claim_id", id)
         .order("date", { ascending: false }),
       supabase
         .from("deadlines")
-        .select("id, title, due_date")
+        .select("id, title, due_date, created_at")
         .eq("claim_id", id)
         .order("due_date", { ascending: true }),
       supabase
         .from("evidence_items")
-        .select("id, label, checked")
+        .select("id, label, checked, file_id, created_at")
         .eq("claim_id", id)
         .order("created_at", { ascending: true }),
+      supabase
+        .from("files")
+        .select("id, kind, original_name, uploaded_at, storage_path")
+        .eq("claim_id", id)
+        .order("uploaded_at", { ascending: false }),
+      supabase
+        .from("loss_of_use_expenses")
+        .select("id, date, category, amount, description")
+        .eq("claim_id", id)
+        .order("date", { ascending: false }),
+      supabase.auth.getUser(),
     ]);
 
   if (!claim) notFound();
+
+  // Billing Build Order Step 5: UI display now reflects the same
+  // isPro(claimId, userId) resolver the server actions actually enforce —
+  // previously this read profiles.plan directly, which a claim-only
+  // lifetime purchaser (no subscription) would fail even though the real
+  // server-side gate would correctly allow them through. UI hiding alone
+  // is never the enforcement (requireProAccess in claim/actions.ts is);
+  // this only fixes what the page displays to match reality.
+  const isPro = user ? await resolveIsPro(supabase, id, user.id) : false;
+
+  const health = computeClaimHealth({
+    claimCreatedAt: claim.created_at,
+    entries: entries ?? [],
+    deadlines: deadlines ?? [],
+    evidenceItems: evidenceItems ?? [],
+    files: files ?? [],
+  });
+
+  // Success Guarantee (Decision #36, Step 7): snapshot the Claim Health
+  // Score at the first Pro-user page load for this claim. No-op once a
+  // snapshot already exists (claim_guarantee.claim_id is unique). This is
+  // the closest reliable "at time of purchase" trigger available without
+  // touching the webhook, which every prior step marked DO NOT MODIFY —
+  // in the normal flow this fires within seconds of checkout's
+  // ?upgraded=1 redirect back to this exact page.
+  if (user && isPro) {
+    await ensureGuaranteeSnapshot(supabase, id, user.id, health.total);
+  }
+
+  const filesWithUrls = await Promise.all(
+    (files ?? []).map(async (f) => {
+      const { data: signed } = await supabase.storage
+        .from("evidence")
+        .createSignedUrl(f.storage_path, 3600);
+      return { ...f, url: signed?.signedUrl ?? null };
+    }),
+  );
+
+  // Postgres numeric columns come back as strings via PostgREST (precision
+  // safety) — convert once here rather than in the pure summary function.
+  const lossOfUseExpensesTyped = (lossOfUseExpenses ?? []).map((e) => ({
+    ...e,
+    amount: Number(e.amount),
+  }));
 
   const boundAddEntry = addEntry.bind(null, id);
   const boundAddDeadline = addDeadline.bind(null, id);
@@ -64,11 +152,50 @@ export default async function ClaimDetailPage({
         </p>
       </header>
 
-      {/* Deadlines */}
+      <PendingPhotoUploader claimId={id} userEmail={user?.email ?? null} />
+
+      {/* Claim Health Score — before/after against the grader's baseline */}
+      <BeforeAfterGrade
+        current={health}
+        baselineGrade={claim.baseline_grade}
+        claimCreatedAt={claim.created_at}
+      />
+
+      {/* Claim Education — free tier, no AI cost */}
       <section>
         <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
-          Deadline Tracker
+          Claim Education
         </h2>
+        <div className="flex flex-col gap-3">
+          <DepreciationCalculator />
+          <PublicAdjusterGuide />
+        </div>
+      </section>
+
+      {/* Analysis */}
+      <section>
+        <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
+          Analysis
+        </h2>
+        <div className="flex flex-col gap-3">
+          <PolicyDecoderCard claimId={id} />
+          <MoldTimelineCard claimId={id} />
+          <LossCountAuditorCard claimId={id} />
+          <EstimateGapAnalyzerCard claimId={id} />
+          <SupplementAssistantCard claimId={id} />
+          <DecisionAssistantCard claimId={id} />
+          <LetterBuilderCard claimId={id} />
+        </div>
+      </section>
+
+      {/* Deadlines */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60">
+            Deadline Tracker
+          </h2>
+          <PushReminderToggle />
+        </div>
         <div className="border border-ink/15 rounded-sm mb-4">
           {deadlines && deadlines.length > 0 ? (
             deadlines.map((d) => (
@@ -92,6 +219,7 @@ export default async function ClaimDetailPage({
           <input
             name="title"
             placeholder="Suit limitation, follow-up..."
+            defaultValue={seedDeadlineTitle}
             required
             className="flex-1 text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
           />
@@ -106,6 +234,9 @@ export default async function ClaimDetailPage({
           </button>
         </form>
       </section>
+
+      {/* Loss-of-Use Tracker */}
+      <LossOfUseTracker claimId={id} expenses={lossOfUseExpensesTyped} isPro={isPro} />
 
       {/* Binder log */}
       <section>
@@ -200,6 +331,28 @@ export default async function ClaimDetailPage({
             Add
           </button>
         </form>
+      </section>
+
+      {/* Evidence Vault */}
+      <section>
+        <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
+          Evidence Vault
+        </h2>
+        <div className="border border-ink/15 rounded-sm mb-4">
+          {filesWithUrls.length > 0 ? (
+            filesWithUrls.map((f) => (
+              <FileRow key={f.id} claimId={id} file={f} />
+            ))
+          ) : (
+            <p className="px-3 py-3 text-sm text-ink/50">
+              No photos or documents yet. Upload the first one below.
+            </p>
+          )}
+        </div>
+        <CameraCapture claimId={id} />
+        <p className="text-xs text-ink/40 mt-2">
+          Photos and PDFs, up to 15MB. Stored privately — only you can view them.
+        </p>
       </section>
     </main>
   );

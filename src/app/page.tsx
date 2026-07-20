@@ -1,288 +1,442 @@
 import Link from "next/link";
 import {
-  BookOpen,
-  Gauge,
-  ListChecks,
-  Clock,
-  Archive,
-  SearchCheck,
-  Mail,
-  Library,
+  Lock,
+  FolderOpen,
+  Clock3,
+  Download,
 } from "lucide-react";
 
-const FEATURES = [
-  {
-    Icon: BookOpen,
-    title: "The Binder",
-    body: "Log every call, email, and adjuster visit in under 30 seconds. The chronology is the case.",
-  },
-  {
-    Icon: Gauge,
-    title: "Claim Health Score",
-    body: "The condition of your documentation, 0–100, every point explained. It scores your file, never your odds.",
-  },
-  {
-    Icon: ListChecks,
-    title: "Evidence Checklist",
-    body: "Exactly what a complete file contains for your damage type, from field-tested contractor standards.",
-  },
-  {
-    Icon: Clock,
-    title: "Deadline Tracker",
-    body: "Suit limitations and follow-ups with countdown stamps. Red means due. Nothing dies to a missed date.",
-  },
-  {
-    Icon: Archive,
-    title: "Evidence Vault",
-    body: "Every photo, PDF, invoice, and letter in one organized place, timestamps preserved.",
-  },
-  {
-    Icon: SearchCheck,
-    title: "Analyze",
-    body: "Policy Decoder, Estimate Gap Analyzer, Loss-Count Auditor. Carrier paperwork, made legible.",
-  },
-  {
-    Icon: Mail,
-    title: "Letters",
-    body: "Professional drafts built from your file. You review every line. You send it.",
-  },
-  {
-    Icon: Library,
-    title: "Knowledge Library",
-    body: "Analysis grounded in statutes, codes, and prices you approved. Nothing enters without your sign-off.",
-  },
-];
-
-const SCORE_BREAKDOWN = [
-  ["Evidence", 34, 40],
-  ["Paper Trail", 18, 20],
-  ["Deadlines", 20, 20],
-  ["Freshness", 17, 20],
-] as const;
+// Homepage v2 (docs/wholeclaim_spec_homepage_and_roadmap.md, Part 1 —
+// approved; docs/wholeclaim_homepage_mockup.html is the visual reference).
+// Part 1 (this file) only — no Part 2 roadmap features, no account menu
+// section, no mobile bottom nav (both depend on pages that don't exist
+// yet: Subscription, Help Center, Export data). Colors/display font use
+// the new hp-* tokens (globals.css) so this redesign can't shift anything
+// on other pages built with the existing paper/ledger/ink tokens.
 
 const STEPS = [
   {
-    title: "Open your claim file — 3 minutes.",
-    body: "Carrier, claim number, date of loss, damage type. The system starts working immediately.",
+    title: "Create your claim",
+    body: "Add property details and claim information.",
   },
   {
-    title: "Build the record — 30 seconds at a time.",
-    body: "Log contacts, upload documents, check off the evidence your damage type requires.",
+    title: "Upload your evidence",
+    body: "Photos, receipts, invoices, estimates, conversations.",
   },
   {
-    title: "Understand and act.",
-    body: "Decode your policy, audit the estimate, track every deadline, draft the letters — all from your own file, all reviewed by you.",
+    title: "Build your timeline",
+    body: "Keep every important event organized.",
   },
-];
+  {
+    title: "Share your claim file",
+    body: "Give contractors, adjusters, or professionals one organized record.",
+  },
+] as const;
 
-const FOOTER_LINKS = [
-  "Features",
-  "Pricing",
-  "FAQ",
-  "About",
-  "Contact",
-  "Privacy",
-  "Terms",
-  "AI Disclaimer",
+const LEDGER_ENTRIES = [
+  { type: "PHOTO", label: "Kitchen ceiling — 6 images", date: "2026-07-15" },
+  { type: "EMAIL", label: "Adjuster follow-up sent", date: "2026-07-14" },
+  { type: "CALL", label: "Plumber estimate received", date: "2026-07-12" },
+] as const;
+
+const FEATURES = [
+  {
+    kicker: "Claim Grade",
+    badge: "free" as const,
+    title: "Know where your claim file stands",
+    body: "Get a quick assessment of your documentation and see what areas you can organize next.",
+  },
+  {
+    kicker: "Claim Binder",
+    badge: "free" as const,
+    title: "Everything in one organized place",
+    body: "Keep photos, documents, receipts, notes, and important claim details together.",
+  },
+  {
+    kicker: "Evidence Vault",
+    badge: "free" as const,
+    title: "Store your documentation securely",
+    body: "Upload and organize important files, photos, and records related to your claim.",
+  },
+  {
+    kicker: "Timeline",
+    badge: "free" as const,
+    title: "Track every important moment",
+    body: "Create a clear record of events, updates, and documentation as your claim progresses.",
+  },
+  {
+    kicker: "Guided Organization",
+    badge: "free" as const,
+    title: "Know what to add next",
+    body: "Follow a simple workflow that helps you build a more complete claim file.",
+  },
+  {
+    kicker: "Sharing",
+    badge: "planned" as const,
+    title: "Share your organized claim file",
+    body: "Future feature for securely sharing claim information with approved recipients.",
+  },
+] as const;
+
+const NEED_ITEMS = [
+  "Photos & videos",
+  "Repair estimates",
+  "Receipts",
+  "Emails & text messages",
+  "Contractor invoices",
+  "Inspection reports",
+] as const;
+
+const TRUST_ITEMS = [
+  {
+    Icon: Lock,
+    title: "Secure evidence storage",
+    body: "Photos and PDFs stored privately — only you can view them.",
+  },
+  {
+    Icon: FolderOpen,
+    title: "Organized documentation",
+    body: "Every file, receipt, and note in one structured place.",
+  },
+  {
+    Icon: Clock3,
+    title: "Timeline tracking",
+    body: "Dates, calls, and events logged as they happen.",
+  },
+  {
+    Icon: Download,
+    title: "Export anytime",
+    body: "Your claim file belongs to you. Download it whenever you need it.",
+  },
+] as const;
+
+const FOOTER_LINKS: [string, string | null][] = [
+  ["Privacy", "/privacy"],
+  ["Terms", "/terms"],
+  ["AI Disclaimer", "/ai-disclaimer"],
+  ["Help", "/help"],
 ];
 
 export default function Page() {
   return (
-    <main className="flex flex-col">
-      {/* Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-ink/10">
+    <main className="flex flex-col bg-hp-paper text-hp-ink">
+      {/* Header — left as-is per scope, only the Help pill is new */}
+      <header className="sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-ink/10 bg-hp-paper/90 backdrop-blur">
         <span className="font-display font-extrabold uppercase tracking-[0.06em] text-sm">
           Whole<span className="text-ledger">Claim</span>
         </span>
-        <Link href="/login" className="text-sm font-semibold text-ledger">
-          Log in
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href="/login" className="text-sm font-semibold text-ledger">
+            Log in
+          </Link>
+          <Link
+            href="/help"
+            className="inline-flex items-center gap-1.5 text-xs font-mono border border-hp-line rounded-full px-3.5 py-1.5 bg-white hover:border-hp-pine hover:text-hp-pine transition-colors"
+          >
+            Help
+          </Link>
+        </div>
       </header>
 
       {/* Hero */}
-      <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="font-display text-xs font-bold uppercase tracking-[0.15em] text-ink/60 mb-4">
-            The Insurance Claim Workspace for Homeowners
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl font-extrabold leading-tight mb-6">
-            Build the claim file your insurance company wishes you didn&apos;t
-            have.
-          </h1>
-          <p className="text-lg text-ink/70 mb-8 max-w-2xl mx-auto">
-            WholeClaim turns scattered photos, letters, and phone calls into
-            an organized, deadline-tracked claim file — with AI analysis you
-            review and control.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
-            <button className="bg-ledger text-paper px-6 py-3 rounded-sm font-semibold text-sm">
-              Grade my claim free — 2 minutes
-            </button>
-            <button className="border border-ink/30 text-ink px-6 py-3 rounded-sm font-semibold text-sm">
-              See how it works
-            </button>
-          </div>
-          <p className="text-sm text-ink/70 max-w-xl mx-auto">
-            Built by a contractor whose first claim opened at $40,000 and
-            closed past $125,000 — through documented supplements, not a
-            lawyer.{" "}
-            <span className="italic text-ink/50">
-              A documented individual result. WholeClaim doesn&apos;t promise
-              outcomes — it organizes evidence.
+      <section className="px-6 pt-16 pb-14 text-center">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-hp-pine mb-5">
+          The insurance claim workspace for homeowners
+        </p>
+        <h1 className="font-hp-display text-4xl md:text-6xl font-extrabold leading-[1.04] tracking-tight max-w-2xl mx-auto mb-5">
+          Your claim. Organized from day one.
+        </h1>
+        <p className="text-base md:text-lg text-hp-ink-soft max-w-md mx-auto mb-8">
+          Store photos, documents, timelines, and conversations in one secure claim file.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-3.5 mb-5">
+          <Link
+            href="/claim/new"
+            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+          >
+            Start Free Claim Binder
+          </Link>
+          <Link
+            href="/grade"
+            className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+          >
+            Check Your Claim Grade
+          </Link>
+        </div>
+        <p className="text-sm text-hp-ink-soft">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-hp-pine">
+            Log in
+          </Link>
+        </p>
+      </section>
+
+      {/* How WholeClaim Works */}
+      <section className="px-6 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              The process
             </span>
-          </p>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 text-center mb-10">
-            Everything your claim needs, in one file
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map(({ Icon, title, body }) => (
-              <div key={title} className="flex flex-col">
-                <span className="inline-flex items-center justify-center w-9 h-9 rounded-sm border border-ledger bg-ledger/10 text-ledger mb-3">
-                  <Icon size={18} />
-                </span>
-                <h3 className="font-display font-bold text-sm mb-1">
-                  {title}
-                </h3>
-                <p className="text-sm text-ink/60 leading-relaxed">{body}</p>
-              </div>
-            ))}
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
+              How WholeClaim works
+            </h2>
           </div>
-        </div>
-      </section>
-
-      {/* Claim Health Score sample */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-md mx-auto border border-ink/15 rounded-sm p-6 bg-ledger/5">
-          <div className="flex items-baseline justify-between mb-4">
-            <h3 className="font-display font-bold text-sm uppercase tracking-wide">
-              Claim Health Score
-            </h3>
-            <span className="font-mono text-2xl font-extrabold text-ledger">
-              89<span className="text-sm text-ink/50">/100</span>
-            </span>
-          </div>
-          <div className="space-y-2 mb-4">
-            {SCORE_BREAKDOWN.map(([label, points, max]) => (
-              <div key={label} className="flex items-center gap-3">
-                <span className="text-xs w-20 shrink-0 uppercase tracking-wide text-ink/60">
-                  {label}
-                </span>
-                <div className="h-1.5 flex-1 rounded-sm bg-ink/10">
-                  <div
-                    className="h-1.5 rounded-sm bg-ledger"
-                    style={{ width: `${(points / max) * 100}%` }}
-                  />
-                </div>
-                <span className="font-mono text-xs w-10 text-right text-ink/60">
-                  {points}/{max}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-ink/50 italic">
-            Every point explained. Never a prediction.
-          </p>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 text-center mb-10">
-            How it works
-          </h2>
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hp-line border border-hp-line rounded-[10px] overflow-hidden">
             {STEPS.map((step, i) => (
-              <div key={step.title} className="flex gap-4">
-                <span className="font-display font-extrabold text-2xl text-ledger shrink-0 w-8">
-                  {i + 1}
+              <div key={step.title} className="bg-hp-paper p-7">
+                <span className="block font-mono text-xs font-semibold text-hp-pine tracking-wide mb-3.5">
+                  STEP {i + 1}
                 </span>
-                <div>
-                  <h3 className="font-display font-bold text-base mb-1">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-ink/60 leading-relaxed">
-                    {step.body}
-                  </p>
-                </div>
+                <h3 className="font-hp-display font-bold text-base mb-2 tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-hp-ink-soft">{step.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trust block */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-sm text-ink/70 leading-relaxed">
-            WholeClaim is claim documentation software — <strong>not</strong>{" "}
-            an insurance company, public adjuster, law firm, or claims
-            negotiator. We never contact your insurer, never take a
-            percentage, never give legal advice. Your data is yours: export
-            everything or delete your account, self-serve, anytime. Our AI
-            system is regression-tested against real, documented claim files
-            before every release.
+      {/* Example Claim File preview — SAMPLE stamp + caption are mandatory, non-negotiable */}
+      <section className="px-6 py-16 bg-hp-paper-deep border-y border-hp-line">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              Inside the workspace
+            </span>
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
+              Everything lives in one claim file
+            </h2>
+          </div>
+          <div className="max-w-xl mx-auto">
+            <span className="inline-block font-mono text-xs font-semibold uppercase tracking-wider bg-white border border-hp-line border-b-0 rounded-t-lg px-5 py-2 ml-6 relative z-10">
+              Example claim file
+            </span>
+            <div className="relative bg-white border border-hp-line rounded-[10px] p-7 md:p-8 shadow-[0_1px_0_var(--color-hp-line),0_14px_34px_-22px_rgba(20,32,26,0.35)] overflow-hidden">
+              <div
+                aria-hidden
+                className="absolute top-[46%] left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-[14deg] font-mono font-semibold text-4xl md:text-5xl tracking-[0.3em] text-hp-stamp opacity-[0.13] border-4 border-hp-stamp rounded-lg px-7 py-1.5 pointer-events-none whitespace-nowrap"
+              >
+                SAMPLE
+              </div>
+
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <div className="font-hp-display font-bold text-xl md:text-2xl tracking-tight">
+                    Water Damage
+                  </div>
+                  <span className="inline-block font-mono text-xs font-medium text-hp-pine bg-hp-sage rounded-full px-3 py-1 mt-2">
+                    STATUS · DOCUMENTATION STARTED
+                  </span>
+                </div>
+                <div className="shrink-0 text-center">
+                  <div className="w-[74px] h-[74px] border-[2.5px] border-hp-ink rounded-lg flex items-center justify-center font-hp-display font-extrabold text-3xl">
+                    B+
+                  </div>
+                  <div className="font-mono text-[0.62rem] tracking-wider uppercase text-hp-ink-soft mt-1.5">
+                    Claim Grade
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-px bg-hp-line border border-hp-line rounded-lg overflow-hidden mb-6">
+                {[
+                  ["47", "Photos"],
+                  ["6", "Documents"],
+                  ["3", "Receipts"],
+                ].map(([n, label]) => (
+                  <div key={label} className="bg-hp-paper px-4 py-3.5">
+                    <b className="font-hp-display font-extrabold text-xl md:text-2xl tracking-tight block">
+                      {n}
+                    </b>
+                    <span className="font-mono text-[0.66rem] tracking-wider uppercase text-hp-ink-soft">
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2.5">
+                Timeline · 12 events added
+              </div>
+              <div className="border border-hp-line rounded-lg overflow-hidden">
+                {LEDGER_ENTRIES.map((entry, i) => (
+                  <div
+                    key={entry.label}
+                    className={`grid grid-cols-[70px_1fr_auto] sm:grid-cols-[78px_1fr_auto] gap-3 items-center px-4 py-2.5 text-sm bg-white ${
+                      i > 0 ? "border-t border-hp-line" : ""
+                    }`}
+                  >
+                    <span className="font-mono text-xs font-semibold tracking-wide text-hp-pine">
+                      {entry.type}
+                    </span>
+                    <span>{entry.label}</span>
+                    <span className="font-mono text-xs text-hp-ink-soft">{entry.date}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-center font-mono text-xs text-hp-ink-soft mt-4">
+              Sample data shown for illustration. Your file starts empty — and fills fast.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features grid */}
+      <section className="px-6 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              What you get
+            </span>
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
+              Built around the free experience
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURES.map((f) => (
+              <div
+                key={f.kicker}
+                className={`border border-hp-line rounded-[10px] p-6 flex flex-col gap-2.5 ${
+                  f.badge === "planned" ? "bg-hp-paper" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2.5">
+                  <span className="font-mono text-[0.66rem] font-semibold uppercase tracking-wider text-hp-ink-soft">
+                    {f.kicker}
+                  </span>
+                  <span
+                    className={`font-mono text-[0.6rem] font-semibold uppercase tracking-wider rounded-full px-2.5 py-1 ${
+                      f.badge === "free"
+                        ? "bg-hp-sage text-hp-pine"
+                        : "border border-hp-line text-hp-ink-soft"
+                    }`}
+                  >
+                    {f.badge === "free" ? "Free" : "Planned"}
+                  </span>
+                </div>
+                <h3 className="font-hp-display font-bold text-[1.08rem] tracking-tight">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-hp-ink-soft">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What do I need to start? */}
+      <section className="px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              Getting started
+            </span>
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
+              What do I need to start?
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-7">
+            {NEED_ITEMS.map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-2.5 bg-white border border-hp-line rounded-[10px] px-4 py-3.5 font-semibold text-sm"
+              >
+                <span className="shrink-0 w-[22px] h-[22px] rounded-md bg-hp-sage text-hp-pine flex items-center justify-center text-xs">
+                  ✓
+                </span>
+                {item}
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-base text-hp-ink-soft italic">
+            Don&apos;t have everything?{" "}
+            <b className="text-hp-ink not-italic">Start with what you have.</b>
           </p>
         </div>
       </section>
 
-      {/* Founder story */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
-            Founder story
-          </h2>
-          <p className="text-sm text-ink/70 leading-relaxed">
-            WholeClaim wasn&apos;t built by a software company. It was built
-            by a general contractor who ran his own claim like a case file —
-            and watched a $40,000 first payment become more than $125,000 of
-            documented, covered repairs. Then he checked the carrier&apos;s
-            math and found a 16-year rating error worth another $1,235. The
-            system he used is the product you&apos;re looking at.
+      {/* Trust band */}
+      <section className="px-6 py-16 bg-hp-pine text-[#EDF2EC]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[#A9C2AF] mb-3">
+              Built for trust
+            </span>
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight text-white">
+              Your evidence, handled carefully
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-7 max-w-3xl mx-auto text-center mb-9">
+            {TRUST_ITEMS.map(({ Icon, title, body }) => (
+              <div key={title}>
+                <Icon size={26} strokeWidth={1.8} className="text-[#A9C2AF] mx-auto mb-2.5" />
+                <h4 className="font-hp-display font-bold text-sm mb-1 text-white">{title}</h4>
+                <p className="text-[0.83rem] text-[#C3D3C6]">{body}</p>
+              </div>
+            ))}
+          </div>
+          <p className="max-w-lg mx-auto text-center font-mono text-xs leading-relaxed text-[#A9C2AF] border-t border-white/15 pt-6">
+            WholeClaim helps organize claim documentation. It is an educational tool — not
+            legal, insurance, or financial advice, and it does not guarantee insurance
+            outcomes.
           </p>
         </div>
       </section>
 
-      {/* Pricing teaser */}
-      <section className="px-6 py-16 border-t border-ink/10">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-sm text-ink/70">
-            Start free — the Binder, deadlines, checklist, score, and one full
-            AI analysis. Go Pro when the claim gets complicated.
-          </p>
-        </div>
-      </section>
-
-      {/* Closing CTA */}
-      <section className="px-6 py-20 border-t border-ink/10 bg-ledger/5">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="font-display text-2xl font-extrabold mb-6">
-            Your insurance company already has a file on your claim. Build
-            yours.
-          </h2>
-          <button className="bg-ledger text-paper px-6 py-3 rounded-sm font-semibold text-sm">
-            Grade my claim free
-          </button>
+      {/* Final CTA */}
+      <section className="px-6 py-20 text-center">
+        <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+          Start here
+        </span>
+        <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight max-w-xs mx-auto mb-3.5">
+          Build your claim file before you need it.
+        </h2>
+        <p className="text-hp-ink-soft max-w-md mx-auto mb-7">
+          A homeowner dealing with damage shouldn&apos;t have to figure out what to do next.
+          WholeClaim gives you the next step — every step.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-3.5">
+          <Link
+            href="/claim/new"
+            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+          >
+            Start Free Claim Binder
+          </Link>
+          <Link
+            href="/grade"
+            className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+          >
+            Take the 60-Second Claim Grade
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-10 border-t border-ink/10">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs text-ink/50 leading-relaxed mb-4">
-            WholeClaim is self-help claim documentation software. We are not
-            an insurance company, public adjuster, law firm, or claims
-            negotiator. Nothing on this site is legal or insurance advice.
-          </p>
-          <p className="text-xs text-ink/40 uppercase tracking-wide">
-            {FOOTER_LINKS.join(" · ")}
-          </p>
+      <footer className="border-t border-hp-line py-9 bg-hp-paper-deep">
+        <div className="max-w-4xl mx-auto px-6 flex flex-wrap gap-4 items-baseline justify-between">
+          <span className="font-display font-extrabold uppercase tracking-[0.06em] text-sm">
+            Whole<span className="text-ledger">Claim</span>
+          </span>
+          <small className="font-mono text-xs text-hp-ink-soft leading-relaxed max-w-xl">
+            getwholeclaim.com · WholeClaim helps organize claim documentation. It does not
+            provide legal advice or guarantee insurance outcomes. © 2026 WholeClaim.
+            <span className="mx-1" />
+            {FOOTER_LINKS.map(([label, href], i) => (
+              <span key={label}>
+                {i === 0 ? " · " : " · "}
+                {href ? (
+                  <Link href={href} className="underline">
+                    {label}
+                  </Link>
+                ) : (
+                  label
+                )}
+              </span>
+            ))}
+          </small>
         </div>
       </footer>
     </main>

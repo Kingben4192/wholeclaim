@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isAnthropicConfigured, callClaude } from "@/lib/anthropic/client";
-import { checkUsageGate, logAiRun } from "@/lib/anthropic/rateLimit";
+import { checkAiAccess, logAiRun } from "@/lib/anthropic/rateLimit";
 import { buildClaimContext, buildLibraryContext } from "@/lib/anthropic/context";
 import { letterPrompt, PROMPT_VERSION, type LetterType } from "@/lib/anthropic/prompts";
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const gate = await checkUsageGate(supabase, user.id, ip);
+  const gate = await checkAiAccess(supabase, user.id, claimId, ip);
   if (!gate.allowed) {
     return NextResponse.json({ error: gate.reason }, { status: 429 });
   }
@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
   let result;
   try {
     result = await callClaude(prompt);
-  } catch {
+  } catch (err) {
+    console.error("letter route: callClaude threw:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: "The analysis service hit an error — your binder is untouched. Try again." },
       { status: 502 },

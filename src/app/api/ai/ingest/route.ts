@@ -30,8 +30,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "raw material is required." }, { status: 400 });
   }
 
+  // No claim context — Knowledge Library ingestion is admin-only (Decision
+  // #10) and outside Decision #32's per-claim scope. Unchanged behavior:
+  // claimId: null keeps the original global-per-user, 1-lifetime-call rule.
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const gate = await checkUsageGate(supabase, user.id, ip);
+  const gate = await checkUsageGate(supabase, user.id, null, ip);
   if (!gate.allowed) {
     return NextResponse.json({ error: gate.reason }, { status: 429 });
   }
@@ -41,7 +44,8 @@ export async function POST(request: NextRequest) {
   let result;
   try {
     result = await callClaude(prompt);
-  } catch {
+  } catch (err) {
+    console.error("ingest route: callClaude threw:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: "The analysis service hit an error — your binder is untouched. Try again." },
       { status: 502 },
