@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UpgradeOptions } from "../claim/[id]/UpgradeOptions";
+import { SUBSCRIPTION_STATUSES_GRANTING_PRO, LIFETIME_ENTITLEMENT_TYPES } from "@/lib/entitlements";
 
 // Pre-Launch Prep: Pricing Connection (2026-07-19) — the monthly
 // subscription button creates a real Stripe TEST MODE checkout session
@@ -32,6 +33,8 @@ export default async function PricingPreviewPage() {
 
   let signedIn = false;
   let lifetimeRedirectHref = "/claim/new";
+  let isSubscriber = false;
+  let hasAnyLifetimeUnlocked = false;
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
@@ -41,20 +44,44 @@ export default async function PricingPreviewPage() {
     signedIn = Boolean(user);
 
     if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("subscription_status")
+        .eq("id", user.id)
+        .maybeSingle();
+      isSubscriber = Boolean(
+        profile?.subscription_status && SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(profile.subscription_status),
+      );
+
+      // Embedded claim_entitlements (real FK, claim_entitlements.claim_id
+      // -> claims.id, 0011 migration) so we know per-claim lifetime status
+      // in one query, not N+1 — needed to route the lifetime CTA at a
+      // claim that isn't already unlocked, and to know whether to show
+      // "Lifetime Access Active" at all.
       const { data: claims } = await supabase
         .from("claims")
-        .select("id")
+        .select("id, claim_entitlements(status, entitlement_type)")
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
-      if (claims && claims.length === 1) {
-        lifetimeRedirectHref = `/claim/${claims[0].id}`;
-      } else if (claims && claims.length > 1) {
+      const claimsWithLifetimeStatus = (claims ?? []).map((c) => ({
+        id: c.id,
+        lifetimeUnlocked: (c.claim_entitlements ?? []).some(
+          (e) => e.status === "active" && LIFETIME_ENTITLEMENT_TYPES.includes(e.entitlement_type),
+        ),
+      }));
+
+      hasAnyLifetimeUnlocked = claimsWithLifetimeStatus.some((c) => c.lifetimeUnlocked);
+
+      const unlockable = claimsWithLifetimeStatus.filter((c) => !c.lifetimeUnlocked);
+      if (unlockable.length === 1) {
+        lifetimeRedirectHref = `/claim/${unlockable[0].id}`;
+      } else if (unlockable.length > 1) {
         lifetimeRedirectHref = "/claim";
       }
-      // claims.length === 0 (or query failure) keeps the default
-      // "/claim/new" — never blocks the user, worst case sends them to
-      // create a claim first.
+      // unlockable.length === 0 (no claims at all, or every claim already
+      // lifetime-unlocked) keeps the default "/claim/new" — offering to
+      // unlock a future new claim is still a real, non-redundant option.
     }
   }
 
@@ -75,18 +102,34 @@ export default async function PricingPreviewPage() {
 
       {signedIn ? (
         <div className="mb-16">
-          <UpgradeOptions lifetimeRedirectHref={lifetimeRedirectHref} />
+          {isSubscriber ? (
+            <div className="border-2 border-ledger bg-ledger/10 rounded-sm p-6 text-center">
+              <p className="font-display font-bold text-ledger">
+                ✔ You are currently subscribed to WholeClaim Pro.
+              </p>
+            </div>
+          ) : (
+            <>
+              {hasAnyLifetimeUnlocked && (
+                <div className="border-2 border-ledger bg-ledger/10 rounded-sm p-4 mb-4 text-center">
+                  <p className="font-display font-bold text-ledger text-sm">
+                    💎 WholeClaim Pro Lifetime Access Active
+                  </p>
+                </div>
+              )}
+              <UpgradeOptions lifetimeRedirectHref={lifetimeRedirectHref} />
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
           <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
-            <div className="font-display font-bold text-sm">WholeClaim Pro Monthly</div>
+            <div className="font-display font-bold text-sm">WholeClaim Pro</div>
             <div className="font-mono text-3xl font-extrabold text-ledger">
               $19<span className="text-base font-sans font-normal text-ink/50">/month</span>
             </div>
             <p className="text-sm text-ink/60 flex-1">
-              Unlimited AI analysis and drafting across every claim you own,
-              full binder export, unlimited uploads. Cancel anytime.
+              Unlock WholeClaim Pro features with a monthly subscription.
             </p>
             <Link
               href="/login"
@@ -97,13 +140,12 @@ export default async function PricingPreviewPage() {
           </div>
 
           <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
-            <div className="font-display font-bold text-sm">WholeClaim Lifetime Claim Pro</div>
+            <div className="font-display font-bold text-sm">WholeClaim Pro</div>
             <div className="font-mono text-3xl font-extrabold text-ledger">
               $49<span className="text-base font-sans font-normal text-ink/50"> one-time</span>
             </div>
             <p className="text-sm text-ink/60 flex-1">
-              Lifetime access to every Pro tool on one claim — no subscription,
-              no recurring charge.
+              Unlock WholeClaim Pro features for this claim permanently.
             </p>
             <Link
               href="/login"

@@ -7,6 +7,7 @@ import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
 import { WelcomeFlow } from "./WelcomeFlow";
 import { AccountMenu } from "../AccountMenu";
+import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -61,7 +62,7 @@ export default async function AccountPage() {
   const [{ data: profile }, { data: claims }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("name, stripe_customer_id, created_at, onboarding_seen_at")
+      .select("name, stripe_customer_id, created_at, onboarding_seen_at, subscription_status")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -191,6 +192,11 @@ export default async function AccountPage() {
             <span className="text-ink/50">Member since: </span>
             {new Date(profile?.created_at ?? user.created_at).toLocaleDateString()}
           </div>
+          {profile?.subscription_status && SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(profile.subscription_status) && (
+            <div className="text-ledger font-semibold">
+              ✔ Included with your WholeClaim Pro subscription
+            </div>
+          )}
         </div>
       </section>
 

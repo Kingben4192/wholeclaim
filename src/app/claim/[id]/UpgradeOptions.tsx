@@ -64,8 +64,7 @@ export function UpgradeOptions({
             $19<span className="text-sm font-sans font-normal text-ink/50">/month</span>
           </div>
           <p className="text-xs text-ink/60 flex-1">
-            Unlimited AI analysis and drafting across every claim you own,
-            full binder export, unlimited uploads. Cancel anytime.
+            Unlock WholeClaim Pro features with a monthly subscription.
           </p>
           <button
             type="button"
@@ -74,7 +73,7 @@ export function UpgradeOptions({
             className="inline-flex items-center justify-center gap-2 bg-ledger text-paper px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
           >
             {loadingType === "subscription" && <Loader2 size={14} className="animate-spin" />}
-            {loadingType === "subscription" ? "Starting checkout…" : "Subscribe monthly"}
+            {loadingType === "subscription" ? "Starting checkout…" : "Upgrade to Pro"}
           </button>
         </div>
 
@@ -84,8 +83,7 @@ export function UpgradeOptions({
             $49<span className="text-sm font-sans font-normal text-ink/50"> one-time</span>
           </div>
           <p className="text-xs text-ink/60 flex-1">
-            Lifetime access to every Pro tool on this claim only — no
-            subscription, no recurring charge.
+            Unlock WholeClaim Pro features for this claim permanently.
           </p>
           {claimId ? (
             <button
@@ -95,7 +93,7 @@ export function UpgradeOptions({
               className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
             >
               {loadingType === "lifetime" && <Loader2 size={14} className="animate-spin" />}
-              {loadingType === "lifetime" ? "Starting checkout…" : "Unlock this claim"}
+              {loadingType === "lifetime" ? "Starting checkout…" : "Unlock This Claim"}
             </button>
           ) : lifetimeRedirectHref ? (
             <Link
