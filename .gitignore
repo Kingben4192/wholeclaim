@@ -41,6 +41,10 @@ yarn-error.log*
 # claude code (per-machine permission state)
 .claude/settings.local.json
 
+# proprietary/confidential reference docs — never committed, never pushed
+/docs/confidential/
+/legal/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
