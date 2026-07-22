@@ -13,14 +13,21 @@ import { UpgradeOptions } from "./UpgradeOptions";
 const currency = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+const PRO_ACCESS_MESSAGE = {
+  subscription: "Included with your WholeClaim Pro subscription",
+  lifetime: "Included with your WholeClaim Pro lifetime claim access",
+} as const;
+
 export function LossOfUseTracker({
   claimId,
   expenses,
   isPro,
+  proSource,
 }: {
   claimId: string;
   expenses: LossOfUseExpense[];
   isPro: boolean;
+  proSource?: "subscription" | "lifetime" | null;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -62,6 +69,11 @@ export function LossOfUseTracker({
             </>
           ) : (
             <>
+              {proSource && (
+                <p className="text-xs font-semibold text-ledger">
+                  ✔ {PRO_ACCESS_MESSAGE[proSource]}
+                </p>
+              )}
               <form
                 action={async (formData) => {
                   await addLossOfUseExpense(claimId, formData);

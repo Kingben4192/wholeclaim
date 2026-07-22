@@ -89,3 +89,43 @@ export async function isPro(
 
   return true;
 }
+
+export type ProAccessSource = "subscription" | "lifetime" | null;
+
+// Additive alongside isPro() — same two checks, same precedence
+// (subscription checked first), but reports WHICH grant matched instead
+// of collapsing to a boolean. Built for Pro-access messaging ("Included
+// with your subscription" vs "...lifetime claim access") — isPro() itself
+// is unchanged, still the source of truth every existing gate uses.
+export async function resolveProAccessSource(
+  supabase: SupabaseClient,
+  claimId: string,
+  userId: string,
+): Promise<ProAccessSource> {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("subscription_status")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!profileError && profile?.subscription_status && SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(profile.subscription_status)) {
+    return "subscription";
+  }
+
+  const { data: entitlements, error: entitlementError } = await supabase
+    .from("claim_entitlements")
+    .select("id, expires_at")
+    .eq("claim_id", claimId)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .in("entitlement_type", LIFETIME_ENTITLEMENT_TYPES)
+    .limit(1);
+
+  if (entitlementError) return null;
+
+  const entitlement = entitlements?.[0];
+  if (!entitlement) return null;
+  if (entitlement.expires_at && new Date(entitlement.expires_at) < new Date()) return null;
+
+  return "lifetime";
+}

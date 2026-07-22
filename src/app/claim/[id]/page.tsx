@@ -19,10 +19,11 @@ import { PublicAdjusterGuide } from "./PublicAdjusterGuide";
 import { LossOfUseTracker } from "./LossOfUseTracker";
 import { PushReminderToggle } from "@/app/push/PushReminderToggle";
 import { computeDocumentationScore, toClientView } from "@/lib/scoring/documentationScore";
-import { isPro as resolveIsPro } from "@/lib/entitlements";
+import { isPro as resolveIsPro, resolveProAccessSource } from "@/lib/entitlements";
 import { ensureGuaranteeSnapshot } from "@/lib/guarantee";
 import { computeOnboardingProgress } from "@/lib/onboarding/progress";
 import { OnboardingProgressCard } from "./OnboardingProgress";
+import { AccountMenu } from "@/app/AccountMenu";
 
 export default async function ClaimDetailPage({
   params,
@@ -103,6 +104,7 @@ export default async function ClaimDetailPage({
   // is never the enforcement (requireProAccess in claim/actions.ts is);
   // this only fixes what the page displays to match reality.
   const isPro = user ? await resolveIsPro(supabase, id, user.id) : false;
+  const proSource = user && isPro ? await resolveProAccessSource(supabase, id, user.id) : null;
 
   const documentationScore = computeDocumentationScore({
     claim: {
@@ -157,6 +159,7 @@ export default async function ClaimDetailPage({
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-16 flex flex-col gap-12">
+      <AccountMenu />
       <header>
         <h1 className="font-display text-2xl font-extrabold mb-1">
           {claim.carrier || "Unnamed carrier"}
@@ -164,6 +167,16 @@ export default async function ClaimDetailPage({
         <p className="text-sm text-ink/60 font-mono">
           {claim.claim_number || "no claim #"} · {claim.damage_category || "damage type not set"}
         </p>
+        {proSource === "subscription" && (
+          <p className="text-xs font-semibold text-ledger mt-2">
+            ✔ Included with your WholeClaim Pro subscription
+          </p>
+        )}
+        {proSource === "lifetime" && (
+          <p className="text-xs font-semibold text-ledger mt-2">
+            💎 Included with your WholeClaim Pro lifetime claim access
+          </p>
+        )}
       </header>
 
       <PendingPhotoUploader claimId={id} userEmail={user?.email ?? null} />
@@ -259,7 +272,7 @@ export default async function ClaimDetailPage({
       </section>
 
       {/* Loss-of-Use Tracker */}
-      <LossOfUseTracker claimId={id} expenses={lossOfUseExpensesTyped} isPro={isPro} />
+      <LossOfUseTracker claimId={id} expenses={lossOfUseExpensesTyped} isPro={isPro} proSource={proSource} />
 
       {/* Binder log */}
       <section>
