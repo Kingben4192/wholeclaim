@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { signOut } from "./actions";
+import { AccountMenu } from "../AccountMenu";
 
 export default async function ClaimListPage() {
   if (!isSupabaseConfigured()) {
@@ -29,16 +29,9 @@ export default async function ClaimListPage() {
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-16">
+      <AccountMenu />
       <div className="flex items-center justify-between mb-10">
         <h1 className="font-display text-2xl font-extrabold">Your claims</h1>
-        <div className="flex items-center gap-4">
-          <Link href="/account" className="text-sm text-ink/60 underline">
-            Account
-          </Link>
-          <form action={signOut}>
-            <button className="text-sm text-ink/60 underline">Sign out</button>
-          </form>
-        </div>
       </div>
 
       {claims && claims.length > 0 ? (

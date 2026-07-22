@@ -6,6 +6,7 @@ import { computeDocumentationScore, toClientView } from "@/lib/scoring/documenta
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
 import { WelcomeFlow } from "./WelcomeFlow";
+import { AccountMenu } from "../AccountMenu";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -80,6 +81,7 @@ export default async function AccountPage() {
   if (!profile?.onboarding_seen_at && (!claims || claims.length === 0)) {
     return (
       <main className="max-w-2xl mx-auto px-6 py-16">
+        <AccountMenu />
         <WelcomeFlow />
       </main>
     );
@@ -163,6 +165,7 @@ export default async function AccountPage() {
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-16 flex flex-col gap-12">
+      <AccountMenu />
       <div>
         <h1 className="font-display text-2xl font-extrabold">Your dashboard</h1>
         <p className="text-sm text-ink/60 mt-1">{user.email}</p>
