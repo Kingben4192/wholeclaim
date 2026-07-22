@@ -23,6 +23,18 @@ import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
 // Step 4 (native <details>, no extra JS) — not a 5th required step. These
 // were never removed from createClaim's own formData handling, so this is
 // purely a UI addition.
+//
+// The Next/Submit button pair below has explicit, distinct `key`s
+// (2026-07-22, reported: step 4 auto-submitting before it could be
+// interacted with). Without a differentiating key, the two branches of
+// that ternary sit in the same JSX position and React can reuse the same
+// underlying DOM <button> node across the type="button" -> type="submit"
+// transition, patching its type in place rather than mounting a fresh
+// element. In that shape, the same click that advances step 3->4 can also
+// fire the button's now-mutated native submit behavior. Not confirmed as
+// the exact cause (three separate live reproduction attempts didn't
+// trigger it), but it's a real, well-documented category of bug and this
+// fix removes the underlying risk outright regardless.
 
 const DAMAGE_CATEGORY_OPTIONS = [
   "Water / plumbing",
@@ -263,6 +275,7 @@ export function ClaimWizard() {
           )}
           {step < 4 ? (
             <button
+              key="next"
               type="button"
               onClick={next}
               className="flex-1 bg-ledger text-paper px-6 py-3 rounded-sm font-semibold text-sm"
@@ -271,6 +284,7 @@ export function ClaimWizard() {
             </button>
           ) : (
             <button
+              key="submit"
               type="submit"
               className="flex-1 bg-ledger text-paper px-6 py-3 rounded-sm font-semibold text-sm"
             >
