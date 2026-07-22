@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { computeClaimHealth } from "@/lib/claimHealth";
+import { computeDocumentationScore, toClientView } from "@/lib/scoring/documentationScore";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
+import { WelcomeFlow } from "./WelcomeFlow";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -12,12 +13,12 @@ import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
 // middleware-level (src/lib/supabase/middleware.ts PROTECTED_PREFIXES),
 // same mechanism as /claim, not just this page's own inline check.
 //
-// Every section here reads real data from tables that already exist —
-// no new schema, no placeholder backend. "My Claims" reuses the exact
-// query /claim/page.tsx already uses; Claim Grade summary reuses
-// computeClaimHealth (src/lib/claimHealth.ts) unchanged; Settings reuses
-// the account page's pre-existing export/delete/billing-portal
-// functionality verbatim.
+// Every section here reads real data from tables that already exist.
+// "My Claims" reuses the exact query /claim/page.tsx already uses; Claim
+// Grade summary uses the Documentation Score engine
+// (src/lib/scoring/documentationScore.ts) — client view only, per Decision
+// #40's confidentiality boundary; Settings reuses the account page's
+// pre-existing export/delete/billing-portal functionality verbatim.
 
 const RECENT_CLAIMS_LIMIT = 5;
 const RECENT_ACTIVITY_LIMIT = 8;
@@ -57,13 +58,32 @@ export default async function AccountPage() {
   }
 
   const [{ data: profile }, { data: claims }] = await Promise.all([
-    supabase.from("profiles").select("name, stripe_customer_id, created_at").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("name, stripe_customer_id, created_at, onboarding_seen_at")
+      .eq("id", user.id)
+      .maybeSingle(),
     supabase
       .from("claims")
-      .select("id, carrier, claim_number, damage_category, created_at")
+      .select("id, carrier, claim_number, damage_category, date_of_loss, offer_amount, created_at")
       .order("created_at", { ascending: false })
       .limit(RECENT_CLAIMS_LIMIT),
   ]);
+
+  // Welcome Flow (Onboarding Step 3) — first-time direct-signup users only.
+  // Path A (grader-converted) users never hit this: /claim/from-grade
+  // redirects straight into a populated /claim/[id] before /account is
+  // ever rendered, so they always already have >=1 claim by the time (if
+  // ever) they visit this page. Skipping the rest of the dashboard here is
+  // deliberate — Recent Activity/Claim Grade Summary are meaningless noise
+  // with zero claims.
+  if (!profile?.onboarding_seen_at && (!claims || claims.length === 0)) {
+    return (
+      <main className="max-w-2xl mx-auto px-6 py-16">
+        <WelcomeFlow />
+      </main>
+    );
+  }
 
   const claimIds = (claims ?? []).map((c) => c.id);
   const claimLabel = (id: string) => {
@@ -75,22 +95,31 @@ export default async function AccountPage() {
   // deterministic scoring every other grade display in the app uses.
   // Scoped to the same small preview list as "My Claims" (not every claim
   // the user has ever created) to keep this one page's query count bounded.
+  // toClientView() strips weights/maxes/raw points before anything here is
+  // rendered — this page never holds the full DocumentationScoreResult.
   const grades = await Promise.all(
     (claims ?? []).map(async (claim) => {
       const [{ data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }] = await Promise.all([
-        supabase.from("entries").select("type, created_at").eq("claim_id", claim.id),
-        supabase.from("deadlines").select("due_date, created_at").eq("claim_id", claim.id),
-        supabase.from("evidence_items").select("checked, file_id, created_at").eq("claim_id", claim.id),
-        supabase.from("files").select("uploaded_at").eq("claim_id", claim.id),
+        supabase.from("entries").select("type, date, created_at").eq("claim_id", claim.id),
+        supabase.from("deadlines").select("title, due_date, created_at").eq("claim_id", claim.id),
+        supabase
+          .from("evidence_items")
+          .select("label, checked, file_id, category, created_at")
+          .eq("claim_id", claim.id),
+        supabase.from("files").select("id, kind, original_name, uploaded_at").eq("claim_id", claim.id),
       ]);
-      const health = computeClaimHealth({
-        claimCreatedAt: claim.created_at,
+      const score = computeDocumentationScore({
+        claim: {
+          dateOfLoss: claim.date_of_loss ?? null,
+          damageCategory: claim.damage_category ?? null,
+          offerAmount: claim.offer_amount !== null && claim.offer_amount !== undefined ? Number(claim.offer_amount) : null,
+        },
         entries: entries ?? [],
         deadlines: deadlines ?? [],
         evidenceItems: evidenceItems ?? [],
         files: files ?? [],
       });
-      return { claimId: claim.id, health };
+      return { claimId: claim.id, view: toClientView(score) };
     }),
   );
 
@@ -209,14 +238,16 @@ export default async function AccountPage() {
             Claim Grade Summary
           </h2>
           <div className="border border-ink/15 rounded-sm divide-y divide-ink/10">
-            {grades.map(({ claimId, health }) => (
+            {grades.map(({ claimId, view }) => (
               <Link
                 key={claimId}
                 href={`/claim/${claimId}`}
                 className="flex items-center justify-between px-4 py-3 text-sm hover:bg-ledger/5"
               >
                 <span>{claimLabel(claimId)}</span>
-                <span className="font-mono text-xs text-ink/60">{health.total}/100</span>
+                <span className="font-mono text-xs text-ink/60">
+                  {view.grade} · {view.total}/100
+                </span>
               </Link>
             ))}
           </div>

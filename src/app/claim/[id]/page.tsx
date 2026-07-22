@@ -18,9 +18,11 @@ import { DepreciationCalculator } from "./DepreciationCalculator";
 import { PublicAdjusterGuide } from "./PublicAdjusterGuide";
 import { LossOfUseTracker } from "./LossOfUseTracker";
 import { PushReminderToggle } from "@/app/push/PushReminderToggle";
-import { computeClaimHealth } from "@/lib/claimHealth";
+import { computeDocumentationScore, toClientView } from "@/lib/scoring/documentationScore";
 import { isPro as resolveIsPro } from "@/lib/entitlements";
 import { ensureGuaranteeSnapshot } from "@/lib/guarantee";
+import { computeOnboardingProgress } from "@/lib/onboarding/progress";
+import { OnboardingProgressCard } from "./OnboardingProgress";
 
 export default async function ClaimDetailPage({
   params,
@@ -75,7 +77,7 @@ export default async function ClaimDetailPage({
         .order("due_date", { ascending: true }),
       supabase
         .from("evidence_items")
-        .select("id, label, checked, file_id, created_at")
+        .select("id, label, checked, file_id, category, created_at")
         .eq("claim_id", id)
         .order("created_at", { ascending: true }),
       supabase
@@ -102,15 +104,27 @@ export default async function ClaimDetailPage({
   // this only fixes what the page displays to match reality.
   const isPro = user ? await resolveIsPro(supabase, id, user.id) : false;
 
-  const health = computeClaimHealth({
-    claimCreatedAt: claim.created_at,
+  const documentationScore = computeDocumentationScore({
+    claim: {
+      dateOfLoss: claim.date_of_loss ?? null,
+      damageCategory: claim.damage_category ?? null,
+      offerAmount: claim.offer_amount !== null && claim.offer_amount !== undefined ? Number(claim.offer_amount) : null,
+    },
     entries: entries ?? [],
     deadlines: deadlines ?? [],
     evidenceItems: evidenceItems ?? [],
     files: files ?? [],
   });
 
-  // Success Guarantee (Decision #36, Step 7): snapshot the Claim Health
+  // Claim Completion Progress System (Onboarding Step 5) — purely derived,
+  // no stored percentage, computed fresh from the same claim/evidenceItems
+  // rows already fetched above. Never influences documentationScore.
+  const onboardingProgress = computeOnboardingProgress(
+    { date_of_loss: claim.date_of_loss ?? null, damage_category: claim.damage_category ?? null },
+    evidenceItems ?? [],
+  );
+
+  // Success Guarantee (Decision #36, Step 7): snapshot the Documentation
   // Score at the first Pro-user page load for this claim. No-op once a
   // snapshot already exists (claim_guarantee.claim_id is unique). This is
   // the closest reliable "at time of purchase" trigger available without
@@ -118,7 +132,7 @@ export default async function ClaimDetailPage({
   // in the normal flow this fires within seconds of checkout's
   // ?upgraded=1 redirect back to this exact page.
   if (user && isPro) {
-    await ensureGuaranteeSnapshot(supabase, id, user.id, health.total);
+    await ensureGuaranteeSnapshot(supabase, id, user.id, documentationScore.total);
   }
 
   const filesWithUrls = await Promise.all(
@@ -154,9 +168,18 @@ export default async function ClaimDetailPage({
 
       <PendingPhotoUploader claimId={id} userEmail={user?.email ?? null} />
 
-      {/* Claim Health Score — before/after against the grader's baseline */}
+      {/* Claim Completion Progress — shown only while setup is incomplete;
+          hands off cleanly to the Documentation Score card below once
+          every milestone is done, rather than showing two indicators
+          indefinitely. */}
+      {!onboardingProgress.complete && <OnboardingProgressCard progress={onboardingProgress} />}
+
+      {/* Documentation Score — before/after against the grader's baseline.
+          Only the client-safe view crosses into this Client Component —
+          never the full result (weights/maxes/raw points stay server-side,
+          Decision #40). */}
       <BeforeAfterGrade
-        current={health}
+        current={toClientView(documentationScore)}
         baselineGrade={claim.baseline_grade}
         claimCreatedAt={claim.created_at}
       />

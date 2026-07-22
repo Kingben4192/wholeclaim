@@ -1,20 +1,16 @@
 'use client';
 
-import type { ClaimHealthResult } from '@/lib/claimHealth';
+import type { DocumentationScoreClientView } from '@/lib/scoring/documentationScore';
 import { GRADE_BANDS } from '@/lib/grader/rubric';
 
 interface BeforeAfterProps {
-  current: ClaimHealthResult;
+  // Client-safe view ONLY — never the full DocumentationScoreResult
+  // (weights, maxes, and raw points must never reach a Client Component;
+  // Decision #40). No raw points/max are rendered anywhere below, only
+  // total/grade and per-category status labels.
+  current: DocumentationScoreClientView;
   baselineGrade?: string | null;
   claimCreatedAt: string;
-}
-
-function letterGrade(total: number): string {
-  if (total >= 90) return 'A';
-  if (total >= 80) return 'B';
-  if (total >= 70) return 'C';
-  if (total >= 60) return 'D';
-  return 'F';
 }
 
 function gradeColor(letter: string): string {
@@ -24,13 +20,28 @@ function gradeColor(letter: string): string {
   return 'text-red-700';
 }
 
+const STATUS_LABEL: Record<DocumentationScoreClientView['categories'][number]['status'], string> = {
+  strong: 'Strong',
+  solid: 'Solid',
+  needs_attention: 'Needs Attention',
+  critical_gap: 'Critical Gap',
+};
+
+const STATUS_COLOR: Record<DocumentationScoreClientView['categories'][number]['status'], string> = {
+  strong: 'text-emerald-700 bg-emerald-50',
+  solid: 'text-lime-700 bg-lime-50',
+  needs_attention: 'text-amber-700 bg-amber-50',
+  critical_gap: 'text-red-700 bg-red-50',
+};
+
 // Reverse-maps a stored grader letter (claims.baseline_grade) to a
 // representative /100 number for the "before" sub-label, using the
-// grader's OWN band minimums (src/lib/grader/rubric.ts GRADE_BANDS) rather
-// than this component's letterGrade() — the two use different thresholds,
-// so round-tripping a stored "C" through the wrong scale would silently
-// display as "D". The letter itself is always the stored one, never
-// recomputed.
+// grader's OWN band minimums (src/lib/grader/rubric.ts GRADE_BANDS) — the
+// "before" side always comes from the public Grader Quiz (Decision #29),
+// a different scoring system entirely from the Documentation Score shown
+// on the "after" side, so it stays pegged to its own scale rather than the
+// Documentation Score's grade bands. The letter itself is always the
+// stored one, never recomputed.
 function baselineTotal(letter: string | null | undefined): number {
   if (!letter) return 0;
   const band = GRADE_BANDS.find((b) => b.g === letter.toUpperCase());
@@ -44,7 +55,7 @@ export default function BeforeAfterGrade({
 }: BeforeAfterProps) {
   const beforeLetter = baselineGrade ? baselineGrade.toUpperCase() : 'F';
   const beforeTotal = baselineTotal(baselineGrade);
-  const afterLetter = letterGrade(current.total);
+  const afterLetter = current.grade;
   const gradeValues = ['F', 'D', 'C', 'B', 'A'];
   const gradesImproved = gradeValues.indexOf(afterLetter) - gradeValues.indexOf(beforeLetter);
   const startedDate = new Date(claimCreatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -81,24 +92,30 @@ export default function BeforeAfterGrade({
           <p className="text-sm text-amber-800">Upload evidence or log a call to start improving your grade.</p>
         </div>
       )}
-      <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-        <div>
-          <p className="text-xs text-neutral-500">Evidence</p>
-          <p className="text-sm font-semibold">{current.evidence.points}/{current.evidence.max}</p>
-        </div>
-        <div>
-          <p className="text-xs text-neutral-500">Paper Trail</p>
-          <p className="text-sm font-semibold">{current.paperTrail.points}/{current.paperTrail.max}</p>
-        </div>
-        <div>
-          <p className="text-xs text-neutral-500">Deadlines</p>
-          <p className="text-sm font-semibold">{current.deadlines.points}/{current.deadlines.max}</p>
-        </div>
-        <div>
-          <p className="text-xs text-neutral-500">Freshness</p>
-          <p className="text-sm font-semibold">{current.freshness.points}/{current.freshness.max}</p>
-        </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        {current.categories.map((cat) => (
+          <div key={cat.key} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md bg-white/60">
+            <span className="text-xs text-neutral-600 truncate">{cat.label}</span>
+            <span
+              className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${STATUS_COLOR[cat.status]}`}
+            >
+              {STATUS_LABEL[cat.status]}
+            </span>
+          </div>
+        ))}
       </div>
+      {current.recommendations.length > 0 && (
+        <div className="mt-4 border-t border-neutral-200 pt-3">
+          <p className="text-xs font-medium uppercase text-neutral-500 mb-2">Next steps</p>
+          <ul className="flex flex-col gap-1">
+            {current.recommendations.slice(0, 3).map((rec, i) => (
+              <li key={i} className="text-sm text-neutral-700">
+                {rec.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

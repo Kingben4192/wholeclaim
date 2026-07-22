@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { GRADE_BANDS } from "./grader/rubric";
-import { computeClaimHealth } from "./claimHealth";
+import { computeDocumentationScore, gradeForScore } from "./scoring/documentationScore";
 import { getAdminClient } from "./supabase/admin";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "./entitlements";
 
@@ -33,16 +32,6 @@ export function isGuaranteeChecklistKey(key: string): key is GuaranteeChecklistK
 
 const GRADE_ORDER = ["F", "D", "C", "B", "A"] as const;
 export type Grade = (typeof GRADE_ORDER)[number];
-
-// Reuses the grader's own GRADE_BANDS thresholds (src/lib/grader/rubric.ts)
-// so a Claim Health numeric score (0-100) maps onto the exact same A-F
-// bands already shown everywhere else in the product — not a second,
-// diverging scale invented for this feature. Read-only reuse; rubric.ts
-// itself is untouched.
-export function scoreToGrade(score: number): Grade {
-  const band = GRADE_BANDS.find((b) => score >= b.min) ?? GRADE_BANDS[GRADE_BANDS.length - 1];
-  return band.g as Grade;
-}
 
 export function gradeRank(grade: string): number {
   const idx = GRADE_ORDER.indexOf(grade as Grade);
@@ -151,7 +140,7 @@ export async function ensureGuaranteeSnapshot(
       claim_id: claimId,
       user_id: userId,
       purchase_type: purchaseType,
-      initial_grade: scoreToGrade(currentScore),
+      initial_grade: gradeForScore(currentScore),
       initial_score: currentScore,
     })
     .select("*")
@@ -190,8 +179,8 @@ export async function setGuaranteeChecklistItem(
 }
 
 // If every checklist item is now complete and this claim hasn't already
-// been finalized (completed_at still null), snapshots the CURRENT Claim
-// Health Score as final_grade/final_score, compares it against the
+// been finalized (completed_at still null), snapshots the CURRENT
+// Documentation Score as final_grade/final_score, compares it against the
 // purchase-time initial_grade, and stores the result — a stored fact
 // about documentation completion vs. score change. Does not trigger, queue,
 // or request any refund; eligible_for_refund here is data, not an action.
@@ -218,22 +207,29 @@ export async function finalizeGuaranteeIfComplete(
 
   const [{ data: claim }, { data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }] =
     await Promise.all([
-      userClient.from("claims").select("created_at").eq("id", claimId).single(),
-      userClient.from("entries").select("type, created_at").eq("claim_id", claimId),
-      userClient.from("deadlines").select("due_date, created_at").eq("claim_id", claimId),
-      userClient.from("evidence_items").select("checked, file_id, created_at").eq("claim_id", claimId),
-      userClient.from("files").select("uploaded_at").eq("claim_id", claimId),
+      userClient.from("claims").select("date_of_loss, damage_category, offer_amount").eq("id", claimId).single(),
+      userClient.from("entries").select("type, date, created_at").eq("claim_id", claimId),
+      userClient.from("deadlines").select("title, due_date, created_at").eq("claim_id", claimId),
+      userClient
+        .from("evidence_items")
+        .select("label, checked, file_id, category, created_at")
+        .eq("claim_id", claimId),
+      userClient.from("files").select("id, kind, original_name, uploaded_at").eq("claim_id", claimId),
     ]);
 
-  const health = computeClaimHealth({
-    claimCreatedAt: claim?.created_at ?? new Date().toISOString(),
+  const score = computeDocumentationScore({
+    claim: {
+      dateOfLoss: claim?.date_of_loss ?? null,
+      damageCategory: claim?.damage_category ?? null,
+      offerAmount: claim?.offer_amount !== null && claim?.offer_amount !== undefined ? Number(claim.offer_amount) : null,
+    },
     entries: entries ?? [],
     deadlines: deadlines ?? [],
     evidenceItems: evidenceItems ?? [],
     files: files ?? [],
   });
 
-  const finalGrade = scoreToGrade(health.total);
+  const finalGrade = score.grade;
   const checklist: GuaranteeChecklistState = {
     step_policy_uploaded: guarantee.step_policy_uploaded,
     step_loss_timeline_added: guarantee.step_loss_timeline_added,
@@ -248,7 +244,7 @@ export async function finalizeGuaranteeIfComplete(
     .from("claim_guarantee")
     .update({
       final_grade: finalGrade,
-      final_score: health.total,
+      final_score: score.total,
       eligibility_checked_at: new Date().toISOString(),
       eligible_for_refund: eligible,
       completed_at: new Date().toISOString(),

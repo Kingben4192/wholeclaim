@@ -65,7 +65,14 @@ export async function GET(request: NextRequest) {
   }
 
   // Pre-checked evidence items — only for what the grader answer actually
-  // established, at the confidence level the answer supports.
+  // established, at the confidence level the answer supports. `category`
+  // tags match the same taxonomy checklistTemplateFor() seeds for direct
+  // signups (Decision #40) — these two items were previously inserted
+  // untagged, which silently excluded them from Documentation Score's
+  // Evidence Coverage / Documentation Completeness scoring entirely (both
+  // categories score 0 when nothing is tagged). Forward-only fix: existing
+  // rows already in the database keep their current NULL tag, matching the
+  // no-retroactive-backfill decision already made for checklist seeding.
   const photosChoice = answers["photos"];
   if (photosChoice !== undefined) {
     await supabase.from("evidence_items").insert({
@@ -73,6 +80,7 @@ export async function GET(request: NextRequest) {
       user_id: user.id,
       label: "Damage photos / video",
       checked: photosChoice === 0,
+      category: "evidence_coverage",
     });
   }
   const logChoice = answers["log"];
@@ -82,6 +90,7 @@ export async function GET(request: NextRequest) {
       user_id: user.id,
       label: "Written contact log (calls & emails)",
       checked: logChoice === 0,
+      category: "documentation_completeness",
     });
   }
 
