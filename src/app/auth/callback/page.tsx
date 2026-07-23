@@ -53,6 +53,25 @@ export default function AuthCallbackPage() {
         return;
       }
 
+      // Supabase redirects failed verifications here with its own error
+      // info in the hash fragment (e.g. #error=access_denied&error_code=
+      // otp_expired&...) rather than as access_token/refresh_token or
+      // ?code=. Without this check that real, specific error was silently
+      // discarded and every such failure showed the generic "invalid or
+      // incomplete" message below, even when Supabase told us exactly what
+      // went wrong (confirmed live, 2026-07-23: a token consumed once
+      // before the real user's click reproducibly redirects here with
+      // error_code=otp_expired).
+      const hashError = hashParams.get("error_code") || hashParams.get("error");
+      if (hashError) {
+        if (hashError === "otp_expired") {
+          setError("This link has expired or already been used. Request a new one.");
+        } else {
+          setError("This sign-in link is invalid or incomplete.");
+        }
+        return;
+      }
+
       setError("This sign-in link is invalid or incomplete.");
     }
     run();
