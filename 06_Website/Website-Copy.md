@@ -79,7 +79,7 @@ Start free — the Binder, deadlines, checklist, score, and one full AI analysis
 | Evidence Vault (document uploads) | — | ✓ |
 | Priority support | — | ✓ |
 
-**Pro: $49 per claim** (one-time) **or $19/month** — cancel anytime · 14-day no-questions refund.
+**WholeClaim Pro — two ways to get it, both always offered:** **$49 per claim** (one-time, unlocks that specific claim permanently) or **$19/month** (unlocks every claim on your account) — cancel anytime · 14-day no-questions refund.
 Small print: fair-use limits apply to AI analysis. WholeClaim is a self-help documentation tool, not legal or insurance advice; no outcome is promised or implied.
 
 ---

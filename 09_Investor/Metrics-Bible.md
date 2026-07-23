@@ -33,7 +33,7 @@
 
 | Metric | Definition / formula | Target |
 |---|---|---|
-| Revenue split | One-time $49 vs. $19/mo cohorts (pricing A/B) | decision by beta wk 2 |
+| Revenue split | One-time $49 vs. $19/mo, both always offered (Decision #16 — no A/B split) | monitor mix, no decision gate |
 | ARPU | Revenue / paying users, monthly | ≥$30 blended |
 | **AI cost per active user** | Anthropic spend / monthly active users | <$1.50/mo |
 | Gross margin per Pro | (price − payment fees − AI cost − infra share) / price | ≥85% |

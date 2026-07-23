@@ -50,7 +50,7 @@ Each route: authenticate → plan gate → rate limit → build prompt → call 
 
 ## 5. Payments
 
-Stripe Products: **WholeClaim Pro** — test both **$49 one-time per claim** and **$19/month** (A/B by cohort). Hosted Checkout; webhook flips `profiles.plan`; Customer Portal for self-service. **Sell on the web only** in Phase 2 — keeps revenue whole and defers app-store commission questions entirely.
+Stripe Products: **WholeClaim Pro** — both **$49 one-time per claim** and **$19/month** offered together, no A/B split (Decision #16). Hosted Checkout; webhook flips `profiles.plan`; Customer Portal for self-service. **Sell on the web only** in Phase 2 — keeps revenue whole and defers app-store commission questions entirely.
 
 ## 6. Migration map (prototype → production)
 
