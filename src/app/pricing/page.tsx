@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UpgradeOptions } from "../claim/[id]/UpgradeOptions";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO, LIFETIME_ENTITLEMENT_TYPES } from "@/lib/entitlements";
+import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
 
 // Pre-Launch Prep: Pricing Connection (2026-07-19) — the monthly
 // subscription button creates a real Stripe TEST MODE checkout session
@@ -126,10 +127,11 @@ export default async function PricingPreviewPage() {
           <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
             <div className="font-display font-bold text-sm">WholeClaim Pro</div>
             <div className="font-mono text-3xl font-extrabold text-ledger">
-              $19<span className="text-base font-sans font-normal text-ink/50">/month</span>
+              {PRO_SUBSCRIPTION.priceAmount}
+              <span className="text-base font-sans font-normal text-ink/50">{PRO_SUBSCRIPTION.pricePeriod}</span>
             </div>
             <p className="text-sm text-ink/60 flex-1">
-              Unlock WholeClaim Pro features with a monthly subscription.
+              {PRO_SUBSCRIPTION.description}
             </p>
             <Link
               href="/login"
@@ -142,10 +144,11 @@ export default async function PricingPreviewPage() {
           <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
             <div className="font-display font-bold text-sm">WholeClaim Pro</div>
             <div className="font-mono text-3xl font-extrabold text-ledger">
-              $49<span className="text-base font-sans font-normal text-ink/50"> one-time</span>
+              {PRO_LIFETIME.priceAmount}
+              <span className="text-base font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
             </div>
             <p className="text-sm text-ink/60 flex-1">
-              Unlock WholeClaim Pro features for this claim permanently.
+              {PRO_LIFETIME.description}
             </p>
             <Link
               href="/login"

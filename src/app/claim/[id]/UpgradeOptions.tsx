@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
 
 // Billing Build Order Step 4 — the dual purchase UI. Replaces the single
 // hidden-cohort "Upgrade to Pro" button (LossOfUseTracker.tsx previously
@@ -61,10 +62,11 @@ export function UpgradeOptions({
         <div className="border border-ink/15 rounded-sm p-4 flex flex-col gap-2">
           <div className="font-display font-bold text-sm">WholeClaim Pro</div>
           <div className="font-mono text-2xl font-extrabold text-ledger">
-            $19<span className="text-sm font-sans font-normal text-ink/50">/month</span>
+            {PRO_SUBSCRIPTION.priceAmount}
+            <span className="text-sm font-sans font-normal text-ink/50">{PRO_SUBSCRIPTION.pricePeriod}</span>
           </div>
           <p className="text-xs text-ink/60 flex-1">
-            Unlock WholeClaim Pro features with a monthly subscription.
+            {PRO_SUBSCRIPTION.description}
           </p>
           <button
             type="button"
@@ -73,17 +75,18 @@ export function UpgradeOptions({
             className="inline-flex items-center justify-center gap-2 bg-ledger text-paper px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
           >
             {loadingType === "subscription" && <Loader2 size={14} className="animate-spin" />}
-            {loadingType === "subscription" ? "Starting checkout…" : "Upgrade to Pro"}
+            {loadingType === "subscription" ? "Starting checkout…" : PRO_SUBSCRIPTION.buttonLabel}
           </button>
         </div>
 
         <div className="border border-ink/15 rounded-sm p-4 flex flex-col gap-2">
           <div className="font-display font-bold text-sm">WholeClaim Pro</div>
           <div className="font-mono text-2xl font-extrabold text-ledger">
-            $49<span className="text-sm font-sans font-normal text-ink/50"> one-time</span>
+            {PRO_LIFETIME.priceAmount}
+            <span className="text-sm font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
           </div>
           <p className="text-xs text-ink/60 flex-1">
-            Unlock WholeClaim Pro features for this claim permanently.
+            {PRO_LIFETIME.description}
           </p>
           {claimId ? (
             <button
@@ -93,7 +96,7 @@ export function UpgradeOptions({
               className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
             >
               {loadingType === "lifetime" && <Loader2 size={14} className="animate-spin" />}
-              {loadingType === "lifetime" ? "Starting checkout…" : "Unlock This Claim"}
+              {loadingType === "lifetime" ? "Starting checkout…" : PRO_LIFETIME.buttonLabel}
             </button>
           ) : lifetimeRedirectHref ? (
             <Link

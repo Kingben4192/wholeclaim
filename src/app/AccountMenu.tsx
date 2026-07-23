@@ -26,7 +26,7 @@ export async function AccountMenu() {
 
   return (
     <div className="flex items-center justify-between px-6 py-3 border-b border-ink/10 text-sm mb-8 -mx-6 sm:mx-0 sm:rounded-sm sm:border">
-      <Link href="/account" className="font-display font-bold text-ink">
+      <Link href="/" className="font-display font-bold text-ink">
         WholeClaim
       </Link>
       <div className="flex items-center gap-4">

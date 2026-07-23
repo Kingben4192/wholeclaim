@@ -5,6 +5,7 @@ import {
   Clock3,
   Download,
 } from "lucide-react";
+import { PRO_SUBSCRIPTION, PRO_LIFETIME, FEATURE_COMPARISON } from "@/lib/pricing";
 
 // Homepage v2 (docs/wholeclaim_spec_homepage_and_roadmap.md, Part 1 —
 // approved; docs/wholeclaim_homepage_mockup.html is the visual reference).
@@ -194,6 +195,92 @@ export default function Page() {
                 <p className="text-sm text-hp-ink-soft">{step.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing — copy/numbers pulled from src/lib/pricing.ts, the same
+         constants UpgradeOptions.tsx and /pricing import, not retyped here.
+         Unauthenticated visitors sign in first (same pattern as
+         /pricing's own unauthenticated fallback) rather than starting a
+         checkout session with no user to attach it to. */}
+      <section className="px-6 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-11">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              Pricing
+            </span>
+            <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
+              Free to start. Two ways to go Pro.
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-14">
+            <div className="bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3">
+              <div className="font-hp-display font-bold text-sm">WholeClaim Pro</div>
+              <div className="font-mono text-3xl font-extrabold text-hp-pine">
+                {PRO_SUBSCRIPTION.priceAmount}
+                <span className="text-base font-sans font-normal text-hp-ink-soft">
+                  {PRO_SUBSCRIPTION.pricePeriod}
+                </span>
+              </div>
+              <p className="text-sm text-hp-ink-soft flex-1">{PRO_SUBSCRIPTION.description}</p>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
+              >
+                Sign in to subscribe
+              </Link>
+            </div>
+
+            <div className="bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3">
+              <div className="font-hp-display font-bold text-sm">WholeClaim Pro</div>
+              <div className="font-mono text-3xl font-extrabold text-hp-pine">
+                {PRO_LIFETIME.priceAmount}
+                <span className="text-base font-sans font-normal text-hp-ink-soft">
+                  {PRO_LIFETIME.pricePeriod}
+                </span>
+              </div>
+              <p className="text-sm text-hp-ink-soft flex-1">{PRO_LIFETIME.description}</p>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
+              >
+                Sign in first
+              </Link>
+            </div>
+          </div>
+
+          {/* Free vs Pro comparison — src/lib/pricing.ts's FEATURE_COMPARISON.
+             Newly proposed alongside this section: no such constant existed
+             anywhere in the codebase before (confirmed via repo search) —
+             built directly from the real current gating logic
+             (rateLimit.ts, uploadLimits.ts, LossOfUseTracker.tsx), not a
+             pre-existing source. See that file's own comment for exactly
+             which code each row traces to. */}
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-center font-hp-display text-lg font-bold tracking-tight mb-5">
+              What&apos;s included
+            </h3>
+            <div className="border border-hp-line rounded-[10px] overflow-hidden bg-white">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-4 py-2.5 bg-hp-paper text-[0.62rem] font-mono font-semibold uppercase tracking-wider text-hp-ink-soft">
+                <span>Feature</span>
+                <span className="text-right w-24 sm:w-32">Free</span>
+                <span className="text-right w-24 sm:w-32">Pro</span>
+              </div>
+              {FEATURE_COMPARISON.map((row, i) => (
+                <div
+                  key={row.feature}
+                  className={`grid grid-cols-[1fr_auto_auto] gap-x-4 px-4 py-3 text-sm ${
+                    i > 0 ? "border-t border-hp-line" : ""
+                  }`}
+                >
+                  <span className="text-hp-ink">{row.feature}</span>
+                  <span className="text-right w-24 sm:w-32 text-hp-ink-soft">{row.free}</span>
+                  <span className="text-right w-24 sm:w-32 text-hp-pine font-semibold">{row.pro}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
