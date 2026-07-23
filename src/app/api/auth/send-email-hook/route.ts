@@ -106,13 +106,17 @@ export async function POST(request: NextRequest) {
     });
     if (error) throw error;
   } catch (err) {
+    // Resend's own error objects aren't `instanceof Error` -- logging the
+    // raw value server-side (visible in Vercel function logs) instead of
+    // relying on a generic message, since a prior version of this catch
+    // silently swallowed the real reason behind a static fallback string.
+    console.error("send-email-hook: Resend send failed:", err);
+    const message =
+      err && typeof err === "object" && "message" in err
+        ? String((err as { message: unknown }).message)
+        : "Could not send the email.";
     return NextResponse.json(
-      {
-        error: {
-          http_code: 500,
-          message: err instanceof Error ? err.message : "Could not send the email.",
-        },
-      },
+      { error: { http_code: 500, message } },
       { status: 500 },
     );
   }
