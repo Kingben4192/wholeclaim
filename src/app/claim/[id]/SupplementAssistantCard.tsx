@@ -22,7 +22,7 @@ export function SupplementAssistantCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -33,6 +33,7 @@ export function SupplementAssistantCard({ claimId }: { claimId: string }) {
       description="Compare the carrier's estimate to your contractor's — find the gaps, draft the request."
       runLabel="Find gaps and draft request"
       canRun={carrierEstimate.trim().length > 0 || contractorEstimate.trim().length > 0}
+      claimId={claimId}
       onRun={run}
     >
       <div className="flex flex-col gap-2">

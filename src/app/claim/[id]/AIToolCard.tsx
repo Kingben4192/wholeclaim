@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2, Copy, Check } from "lucide-react";
+import { UpgradeOptions } from "./UpgradeOptions";
 
 interface AIToolCardProps {
   title: string;
   description: string;
   runLabel?: string;
   canRun?: boolean;
-  onRun: () => Promise<{ output?: string; error?: string }>;
+  claimId: string;
+  onRun: () => Promise<{ output?: string; error?: string; isGateRejection?: boolean }>;
   children?: React.ReactNode;
 }
 
@@ -18,11 +20,21 @@ interface AIToolCardProps {
 // once, not per-tool, so every tool gets the same safety discipline
 // automatically. Copy matters most for LB — the whole point of a letter is
 // the user copying it out to send themselves (never sends anything).
+//
+// isGateRejection (AIToolCard Upgrade Flow Fix, 2026-07-23): every caller's
+// run() sets this from `res.status === 429` — the one status code
+// checkAiAccess/requireProAiAccess-driven rejections use across every AI
+// route (verified against all five route.ts files, not assumed), never
+// reused for network/timeout/Anthropic/unexpected-server errors. That
+// makes it a reliable signal for "show the upgrade path here" without
+// pattern-matching on error text, which would break the moment any of
+// this copy changes.
 export function AIToolCard({
   title,
   description,
   runLabel = "Run analysis",
   canRun = true,
+  claimId,
   onRun,
   children,
 }: AIToolCardProps) {
@@ -30,15 +42,18 @@ export function AIToolCard({
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isGateRejection, setIsGateRejection] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function handleRun() {
     setLoading(true);
     setError(null);
+    setIsGateRejection(false);
     const res = await onRun();
     setLoading(false);
     if (res.error) {
       setError(res.error);
+      setIsGateRejection(Boolean(res.isGateRejection));
     } else {
       setOutput(res.output ?? null);
     }
@@ -77,6 +92,11 @@ export function AIToolCard({
                 {loading ? "Analyzing…" : runLabel}
               </button>
               {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+              {error && isGateRejection && (
+                <div className="mt-3">
+                  <UpgradeOptions claimId={claimId} />
+                </div>
+              )}
             </>
           )}
 

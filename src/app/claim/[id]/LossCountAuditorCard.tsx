@@ -14,7 +14,7 @@ export function LossCountAuditorCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -25,6 +25,7 @@ export function LossCountAuditorCard({ claimId }: { claimId: string }) {
       description="Checks whether a supplemental payment could be getting counted as a separate occurrence."
       runLabel="Audit my occurrence count"
       canRun={input.trim().length > 0}
+      claimId={claimId}
       onRun={run}
     >
       <textarea

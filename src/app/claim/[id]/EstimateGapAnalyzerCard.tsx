@@ -14,7 +14,7 @@ export function EstimateGapAnalyzerCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -25,6 +25,7 @@ export function EstimateGapAnalyzerCard({ claimId }: { claimId: string }) {
       description="Contractor-grade scrutiny of the carrier's scope — likely missing trades and underpaid items."
       runLabel="Audit the estimate"
       canRun={input.trim().length > 0}
+      claimId={claimId}
       onRun={run}
     >
       <textarea

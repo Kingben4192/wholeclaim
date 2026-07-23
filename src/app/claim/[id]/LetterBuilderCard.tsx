@@ -22,7 +22,7 @@ export function LetterBuilderCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -32,6 +32,7 @@ export function LetterBuilderCard({ claimId }: { claimId: string }) {
       title="Letter Builder"
       description="A professional draft for you to review, edit, and send yourself — WholeClaim never sends anything."
       runLabel="Draft the letter"
+      claimId={claimId}
       onRun={run}
     >
       <div className="flex flex-col gap-2">

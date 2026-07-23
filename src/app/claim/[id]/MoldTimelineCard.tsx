@@ -17,7 +17,7 @@ export function MoldTimelineCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -28,6 +28,7 @@ export function MoldTimelineCard({ claimId }: { claimId: string }) {
       description="Builds a timeline from your date of loss and logged entries — why timing matters and what to document now."
       runLabel="Build my timeline"
       canRun={true}
+      claimId={claimId}
       onRun={run}
     />
   );

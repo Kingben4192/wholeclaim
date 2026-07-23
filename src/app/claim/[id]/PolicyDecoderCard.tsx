@@ -14,7 +14,7 @@ export function PolicyDecoderCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -25,6 +25,7 @@ export function PolicyDecoderCard({ claimId }: { claimId: string }) {
       description="Paste your policy language — coverage, exclusions, deadlines, in plain English."
       runLabel="Decode my policy"
       canRun={input.trim().length > 0}
+      claimId={claimId}
       onRun={run}
     >
       <textarea

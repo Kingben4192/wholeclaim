@@ -17,7 +17,7 @@ export function DecisionAssistantCard({ claimId }: { claimId: string }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { error: data.error ?? "Something went wrong. Try again." };
+      return { error: data.error ?? "Something went wrong. Try again.", isGateRejection: res.status === 429 };
     }
     return { output: data.output as string };
   }
@@ -28,6 +28,7 @@ export function DecisionAssistantCard({ claimId }: { claimId: string }) {
       description="A sign-or-accept framework for evaluating a settlement offer — the decision is always yours."
       runLabel="Build my decision framework"
       canRun={offer.trim().length > 0 && estimate.trim().length > 0}
+      claimId={claimId}
       onRun={run}
     >
       <div className="flex flex-col gap-2">
