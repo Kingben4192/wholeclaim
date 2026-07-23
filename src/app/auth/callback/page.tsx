@@ -35,7 +35,7 @@ export default function AuthCallbackPage() {
           refresh_token,
         });
         if (setSessionError) {
-          setError("This link has expired or already been used. Request a new one.");
+          setError("This sign-in link has expired. Enter the code from your email or request a new link.");
           return;
         }
         window.location.assign(next);
@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
-          setError("This link has expired or already been used. Request a new one.");
+          setError("This sign-in link has expired. Enter the code from your email or request a new link.");
           return;
         }
         window.location.assign(next);
@@ -65,7 +65,7 @@ export default function AuthCallbackPage() {
       const hashError = hashParams.get("error_code") || hashParams.get("error");
       if (hashError) {
         if (hashError === "otp_expired") {
-          setError("This link has expired or already been used. Request a new one.");
+          setError("This sign-in link has expired. Enter the code from your email or request a new link.");
         } else {
           setError("This sign-in link is invalid or incomplete.");
         }
