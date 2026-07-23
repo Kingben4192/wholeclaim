@@ -46,17 +46,10 @@ function paymentIntentId(
 async function handleCheckoutSessionCompletedSubscription(
   supabase: SupabaseClient,
   session: Stripe.Checkout.Session,
+  stripe: Stripe,
 ) {
-  // $19/month purchase. DB change: profiles.plan -> 'pro' (kept in sync as
-  // a cached/derived field even though every Pro tool gate now reads
-  // isPro() instead, as of Billing Build Order Step 5), stripe_customer_id,
+  // $19/month purchase. DB change: profiles.plan -> 'pro', stripe_customer_id,
   // stripe_subscription_id.
-  // subscription_status / subscription_current_period_end are NOT set
-  // here — they aren't reliably present on the Checkout Session payload
-  // without an extra API call, and land moments later via
-  // customer.subscription.created, which carries the full Subscription
-  // object for free. That event's handler is the single place those two
-  // fields get written.
   const userId = session.metadata?.user_id ?? session.client_reference_id ?? null;
   if (!userId) {
     console.error(
@@ -78,6 +71,35 @@ async function handleCheckoutSessionCompletedSubscription(
     .eq("id", userId);
   if (error) {
     console.error("webhook checkout.session.completed (subscription): profiles update failed:", error.message);
+    return;
+  }
+
+  // subscription_status / subscription_current_period_end aren't present
+  // on the Checkout Session payload and normally land moments later via
+  // customer.subscription.created — but Stripe doesn't guarantee delivery
+  // order, and that event can arrive first, before stripe_customer_id
+  // above was ever written. When that happens, handleSubscriptionSync's
+  // lookup-by-customer-id matches zero rows and subscription_status is
+  // left null until some later event self-heals it (confirmed live during
+  // Pro payment E2E validation, 2026-07-22). Fetching and syncing the
+  // subscription right here — after stripe_customer_id is already
+  // committed above — makes activation deterministic regardless of
+  // delivery order. The real customer.subscription.created/updated event
+  // still arrives and still runs handleSubscriptionSync on its own; this
+  // is just an idempotent head start, not a replacement.
+  if (!subscriptionId) return;
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    await handleSubscriptionSync(supabase, subscription);
+  } catch (err) {
+    // Non-fatal: the real customer.subscription.created/updated event is
+    // still coming and will complete the sync on its own. Logged so a
+    // persistent failure here (vs. this event's normal self-healing path)
+    // is visible, not silently swallowed.
+    console.error(
+      "webhook checkout.session.completed (subscription): proactive subscription fetch/sync failed, relying on customer.subscription.created to self-heal:",
+      err instanceof Error ? err.message : err,
+    );
   }
 }
 
@@ -123,9 +145,10 @@ async function handleCheckoutSessionCompletedPayment(
 export async function handleCheckoutSessionCompleted(
   supabase: SupabaseClient,
   session: Stripe.Checkout.Session,
+  stripe: Stripe,
 ) {
   if (session.mode === "subscription") {
-    return handleCheckoutSessionCompletedSubscription(supabase, session);
+    return handleCheckoutSessionCompletedSubscription(supabase, session, stripe);
   }
   if (session.mode === "payment") {
     return handleCheckoutSessionCompletedPayment(supabase, session);
@@ -332,7 +355,7 @@ export async function handleChargeDisputeCreated(
 export async function processStripeEvent(supabase: SupabaseClient, stripe: Stripe, event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed":
-      return handleCheckoutSessionCompleted(supabase, event.data.object as Stripe.Checkout.Session);
+      return handleCheckoutSessionCompleted(supabase, event.data.object as Stripe.Checkout.Session, stripe);
     case "customer.subscription.created":
     case "customer.subscription.updated":
       return handleSubscriptionSync(supabase, event.data.object as Stripe.Subscription);
