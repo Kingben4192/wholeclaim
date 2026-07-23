@@ -90,9 +90,11 @@ async function sendResultsEmail(args: {
     .map(([cat, pts]) => `${cat}: ${pts}/20`)
     .join(" · ");
 
-  // No domain is confirmed yet — Decision Log #17 (name clearance) is still
-  // Open. RESEND_FROM_EMAIL must be a domain verified in Resend before this
-  // can actually send; falls back to Resend's shared test sender otherwise.
+  // mail.getwholeclaim.com verified in Resend 2026-07-23 (independent of
+  // Decision Log #17's still-Open trademark/name clearance -- domain DNS
+  // verification only needed access to a domain already in live use).
+  // Falls back to Resend's shared test sender if RESEND_FROM_EMAIL is ever
+  // unset, which only delivers to Resend's own reserved testing addresses.
   const from = process.env.RESEND_FROM_EMAIL || "WholeClaim <onboarding@resend.dev>";
 
   await resend.emails.send({
