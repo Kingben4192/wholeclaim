@@ -159,6 +159,7 @@ function scoreChecklistCategory(
   items: DocumentationScoreEvidenceItem[],
   category: EvidenceCategory,
   max: number,
+  categoryLabel: string,
 ): CategoryResult {
   const tagged = items.filter((i) => i.category === category);
 
@@ -166,7 +167,10 @@ function scoreChecklistCategory(
     return {
       points: 0,
       max,
-      gaps: [{ description: "No checklist items tagged for this category yet", pointsRecoverable: max }],
+      gaps: [{
+        description: `Add and check off evidence checklist items to improve ${categoryLabel}`,
+        pointsRecoverable: max,
+      }],
     };
   }
 
@@ -204,7 +208,11 @@ function scoreTimelineIntegrity(
   const max = MAX.timelineIntegrity;
 
   if (entries.length === 0) {
-    return { points: 0, max, gaps: [{ description: "No claim activity logged yet", pointsRecoverable: max }] };
+    return {
+      points: 0,
+      max,
+      gaps: [{ description: "Log a claim timeline entry to improve Timeline Integrity", pointsRecoverable: max }],
+    };
   }
 
   const points_in_time = [
@@ -257,7 +265,14 @@ function scoreEvidenceQualityOrganization(
   const labeledMax = 5;
 
   if (files.length === 0 && items.length === 0) {
-    return { points: 0, max, gaps: [{ description: "No files or checklist items yet", pointsRecoverable: max }] };
+    return {
+      points: 0,
+      max,
+      gaps: [{
+        description: "Upload evidence or check off a checklist item to improve Evidence Quality & Organization",
+        pointsRecoverable: max,
+      }],
+    };
   }
 
   const linkedFileIds = new Set(items.map((i) => i.file_id).filter((id): id is string => Boolean(id)));
@@ -297,7 +312,11 @@ function scoreDeadlineReadiness(
   const max = MAX.deadlineReadiness;
 
   if (deadlines.length === 0) {
-    return { points: 0, max, gaps: [{ description: "No deadlines tracked yet", pointsRecoverable: max }] };
+    return {
+      points: 0,
+      max,
+      gaps: [{ description: "Track a deadline to improve Deadline Readiness", pointsRecoverable: max }],
+    };
   }
 
   const entryTimes = entries.map((e) => new Date(e.created_at).getTime()).filter((t) => !Number.isNaN(t));
@@ -539,11 +558,17 @@ export function computeDocumentationScore(
 ): DocumentationScoreResult {
   const profile = claimTypeProfile(input.claim.damageCategory);
 
-  const evidenceCoverage = scoreChecklistCategory(input.evidenceItems, "evidence_coverage", MAX.evidenceCoverage);
+  const evidenceCoverage = scoreChecklistCategory(
+    input.evidenceItems,
+    "evidence_coverage",
+    MAX.evidenceCoverage,
+    CATEGORY_LABELS.evidenceCoverage,
+  );
   const documentationCompleteness = scoreChecklistCategory(
     input.evidenceItems,
     "documentation_completeness",
     MAX.documentationCompleteness,
+    CATEGORY_LABELS.documentationCompleteness,
   );
   const timelineIntegrity = scoreTimelineIntegrity(input.claim, input.entries);
   const evidenceQualityOrganization = scoreEvidenceQualityOrganization(input.evidenceItems, input.files);
