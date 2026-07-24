@@ -10,20 +10,20 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.111.0",
-    "@sentry/nextjs": "^10.67.0",
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@sentry/nextjs": "^10.68.0",
     "@supabase/ssr": "^0.12.3",
-    "@supabase/supabase-js": "^2.110.5",
+    "@supabase/supabase-js": "^2.110.8",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",
-    "lucide-react": "^1.24.0",
-    "next": "16.2.10",
+    "lucide-react": "^1.26.0",
+    "next": "16.2.11",
     "qrcode": "^1.5.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "resend": "^6.17.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "^6.18.0",
     "standardwebhooks": "^1.0.0",
-    "stripe": "^22.3.1",
+    "stripe": "^22.3.2",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
