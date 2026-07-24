@@ -67,7 +67,7 @@ export default async function AccountPage() {
       .maybeSingle(),
     supabase
       .from("claims")
-      .select("id, carrier, claim_number, damage_category, date_of_loss, offer_amount, created_at")
+      .select("id, carrier, claim_number, damage_category, claim_category, status, date_of_loss, offer_amount, created_at")
       .order("created_at", { ascending: false })
       .limit(RECENT_CLAIMS_LIMIT),
   ]);
@@ -222,8 +222,13 @@ export default async function AccountPage() {
                     {c.carrier || "Unnamed carrier"}
                     {c.claim_number ? ` — ${c.claim_number}` : ""}
                   </span>
-                  <span className="text-xs text-ink/50 font-mono">
+                  <span className="text-xs text-ink/50 font-mono flex items-center gap-1.5">
                     {c.damage_category || "damage type not set"}
+                    {c.status && c.status !== "active" && (
+                      <span className="px-1.5 py-0.5 rounded-sm bg-ink/10 text-ink/60 normal-case font-sans capitalize">
+                        {c.status}
+                      </span>
+                    )}
                   </span>
                 </Link>
               </li>

@@ -24,6 +24,8 @@ import { ensureGuaranteeSnapshot } from "@/lib/guarantee";
 import { computeOnboardingProgress } from "@/lib/onboarding/progress";
 import { OnboardingProgressCard } from "./OnboardingProgress";
 import { AccountMenu } from "@/app/AccountMenu";
+import { ClaimStatusControl } from "./ClaimStatusControl";
+import { isClaimStatus } from "@/lib/claimCategories";
 
 export default async function ClaimDetailPage({
   params,
@@ -177,6 +179,12 @@ export default async function ClaimDetailPage({
             💎 Included with your WholeClaim Pro lifetime claim access
           </p>
         )}
+        <div className="mt-3">
+          <ClaimStatusControl
+            claimId={id}
+            status={isClaimStatus(claim.status) ? claim.status : "active"}
+          />
+        </div>
       </header>
 
       <PendingPhotoUploader claimId={id} userEmail={user?.email ?? null} />

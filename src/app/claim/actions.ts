@@ -13,6 +13,8 @@ import {
 } from "@/lib/guarantee";
 import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
 import { isAllowedUpload } from "@/lib/uploadValidation";
+import { checkClaimCategoryAccess, getCategoryClaimState, type ClaimCategoryGateResult } from "@/lib/claimCategoryGate";
+import { isClaimCategory, isClaimStatus, type ClaimCategory } from "@/lib/claimCategories";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -36,6 +38,23 @@ export async function createClaim(formData: FormData) {
   const damage_desc = String(formData.get("damage_desc") ?? "").trim() || null;
   const us_state = String(formData.get("us_state") ?? "").trim() || null;
 
+  const claim_category_raw = String(formData.get("claim_category") ?? "").trim();
+  if (!isClaimCategory(claim_category_raw)) {
+    throw new Error("Choose a dispute category to continue.");
+  }
+  const claim_category: ClaimCategory = claim_category_raw;
+
+  // Free-plan claim limits, category-based (Decision #44). Re-checked here
+  // server-side regardless of any earlier client-side check the wizard
+  // already did — never trust a prior round trip, same discipline every
+  // other gate in this codebase follows (checkUploadAccess, checkUsageGate).
+  const gate = await checkClaimCategoryAccess(supabase, user.id, claim_category);
+  if (!gate.allowed) {
+    throw new Error(
+      "You already have a claim on file for this category. Upgrade to WholeClaim Pro to manage unlimited property documentation workflows, or continue your existing claim.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("claims")
     .insert({
@@ -48,6 +67,7 @@ export async function createClaim(formData: FormData) {
       damage_category,
       damage_desc,
       us_state,
+      claim_category,
     })
     .select("id")
     .single();
@@ -92,7 +112,68 @@ export async function createClaim(formData: FormData) {
     }
   }
 
-  redirect(`/claim/${data.id}`);
+  // Returns the id rather than calling redirect() here: ClaimWizard.tsx
+  // now invokes this directly from a client onSubmit handler (needed for
+  // the category-gate error/duplicate-prompt UX, Decision #44), and
+  // redirect()'s special throw doesn't compose safely with that call
+  // site's own try/catch (it would be caught and misreported as a
+  // failure). The client does the navigation instead. createClaim has no
+  // other caller — safe to change this contract.
+  return { id: data.id };
+}
+
+// Pre-flight check for ClaimWizard (Decision #44) — returns a plain JSON
+// value, deliberately NOT a thrown Error: the "only .message survives"
+// constraint (see checkUploadAccess's own comment) applies to thrown
+// Errors crossing the Server Action boundary, not normal return values,
+// and the wizard needs the full structured result to render the
+// duplicate-claim prompt or the upgrade path, not just a message string.
+// This is advisory only — createClaim always re-checks server-side before
+// ever inserting a row, so a stale/bypassed client check here can never
+// itself create an over-limit claim.
+export async function checkClaimCategoryAccessAction(
+  category: string,
+): Promise<
+  | { ok: false; error: string }
+  | { ok: true; gate: ClaimCategoryGateResult; activeClaimId: string | null }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Sign in required." };
+  if (!isClaimCategory(category)) return { ok: false, error: "Unknown category." };
+
+  const [gate, state] = await Promise.all([
+    checkClaimCategoryAccess(supabase, user.id, category),
+    getCategoryClaimState(supabase, user.id, category),
+  ]);
+
+  return { ok: true, gate, activeClaimId: state.activeClaimId };
+}
+
+// Claim lifecycle state (Decision #44). Deliberately unrestricted in
+// either direction — no state machine — matching the founder's own
+// "user-triggered, self-service" default for this proposed UI; the
+// category-limit consequences live entirely in claimCategoryGate.ts, not
+// here, so this action only ever needs to write the column.
+export async function updateClaimStatus(claimId: string, status: string) {
+  if (!isClaimStatus(status)) throw new Error("Unknown claim status.");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("claims")
+    .update({ status })
+    .eq("id", claimId)
+    .eq("user_id", user.id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/claim/${claimId}`);
 }
 
 export async function addEntry(claimId: string, formData: FormData) {

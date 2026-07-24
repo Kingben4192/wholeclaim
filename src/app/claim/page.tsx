@@ -24,7 +24,7 @@ export default async function ClaimListPage() {
   const supabase = await createClient();
   const { data: claims } = await supabase
     .from("claims")
-    .select("id, carrier, claim_number, damage_category, created_at")
+    .select("id, carrier, claim_number, damage_category, claim_category, status, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -45,8 +45,18 @@ export default async function ClaimListPage() {
                 <div className="font-semibold text-sm">
                   {c.carrier || "Unnamed carrier"} — {c.claim_number || "no claim #"}
                 </div>
-                <div className="text-xs text-ink/50 font-mono">
-                  {c.damage_category || "damage type not set"}
+                <div className="text-xs text-ink/50 font-mono flex items-center gap-2 flex-wrap">
+                  <span>{c.damage_category || "damage type not set"}</span>
+                  {c.claim_category && (
+                    <span className="px-1.5 py-0.5 rounded-sm bg-ledger/10 text-ledger normal-case font-sans">
+                      {c.claim_category}
+                    </span>
+                  )}
+                  {c.status && c.status !== "active" && (
+                    <span className="px-1.5 py-0.5 rounded-sm bg-ink/10 text-ink/60 normal-case font-sans capitalize">
+                      {c.status}
+                    </span>
+                  )}
                 </div>
               </Link>
             </li>

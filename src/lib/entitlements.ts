@@ -31,12 +31,16 @@ export const LIFETIME_ENTITLEMENT_TYPES = ["lifetime_claim_unlock"];
 // rather than duplicating this list and risking drift.
 export const SUBSCRIPTION_STATUSES_GRANTING_PRO = ["active", "past_due"];
 
-export async function isPro(
+// Account-level Pro only (branch A of isPro() below) — no claim in
+// context yet. Needed by the claim-category gate (claimCategoryGate.ts),
+// which must check Pro status BEFORE a claim exists (during claim
+// creation itself), unlike every other existing gate in this codebase.
+// Extracted from isPro() with no behavior change — isPro() calls this
+// internally, existing callers are unaffected.
+export async function isAccountPro(
   supabase: SupabaseClient,
-  claimId: string,
   userId: string,
 ): Promise<boolean> {
-  // A. Active (or past_due, per Decision #33) account subscription.
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("subscription_status")
@@ -44,18 +48,23 @@ export async function isPro(
     .maybeSingle();
 
   if (profileError) {
-    // Unlike checkUsageGate's cap check, a failure here doesn't mean "we
-    // can't tell, so deny everything" — it means "we can't tell via THIS
-    // path." The claim-level entitlement check below is independent and
-    // still runs; only the overall result stays fail-closed (false) if
-    // both branches fail or find nothing.
-    console.error("isPro: profiles query failed, falling through to entitlement check:", profileError.message);
-  } else if (
-    profile?.subscription_status &&
-    SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(profile.subscription_status)
-  ) {
-    return true;
+    console.error("isAccountPro: profiles query failed, denying:", profileError.message);
+    return false;
   }
+
+  return Boolean(
+    profile?.subscription_status &&
+      SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(profile.subscription_status),
+  );
+}
+
+export async function isPro(
+  supabase: SupabaseClient,
+  claimId: string,
+  userId: string,
+): Promise<boolean> {
+  // A. Active (or past_due, per Decision #33) account subscription.
+  if (await isAccountPro(supabase, userId)) return true;
 
   // B. Claim-level lifetime entitlement, scoped to this exact claim AND
   // this exact user — never leaks across users or across a user's other
