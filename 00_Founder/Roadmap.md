@@ -60,6 +60,22 @@ The underlying opportunity: many homeowner problems share the same documentation
 
 **Validation before expansion.** Before investing in any new category: user category selection, conversion rate by category, retention by category, most-requested workflows, most common missing documentation items. Expansion follows demonstrated demand, same standing principle as the rest of this roadmap.
 
+## Bulk Upload & Auto-Grading (Future Direction)
+
+*Strategic exploration, not an approved build plan — added 2026-07-24. Any engineering work stays tracked through the active roadmap and implementation plans above, not this section.*
+
+**Concept.** Let a homeowner upload an existing pile of claim-related documents and have WholeClaim automatically organize, classify, and grade the completeness of the resulting file — solving "I already have the documents, they're scattered, and I don't know what's missing." This would move WholeClaim from a tool the user manually builds into one that turns an existing document pile into an organized property record.
+
+**Why it's a new capability, not just another grading rubric.** Current workflows generally assume the user already knows what type of document they're uploading. This would require new AI capabilities not yet built: document classification, metadata extraction, date/event recognition, timeline generation, duplicate detection, evidence categorization, and missing-document analysis (e.g. `ClaimLetter.pdf` → insurance correspondence/denial letter, `MoistureReport.pdf` → inspection report).
+
+**Potential workflow.** Upload a folder or group of files → WholeClaim analyzes and classifies them → key dates/events are extracted → a timeline is generated → the evidence file is organized → a Documentation Grade is calculated → the user receives a missing-document checklist (e.g. "Missing original loss timeline," "No proof of payment uploaded").
+
+**Guardrails — same standing invariants as the rest of the product.** Evaluates organization, completeness, and documentation readiness only. Does not predict claim approval, determine legal rights, interpret coverage decisions as advice, or guarantee outcomes (matches Product Bible Never-list, Decisions #2/#25 — same guardrail language as the Documentation Intelligence idea above).
+
+**Strategic case.** Reduces the largest onboarding barrier — users don't want to manually organize hundreds of documents before seeing value. "Upload the mess → WholeClaim creates the organized file."
+
+**Dependencies.** A stable Evidence Vault, an AI document-processing pipeline, a file classification system, extraction workflows, testing across document types, and AI cost controls — none of which exist yet. Flagged as a high-priority post-launch candidate, contingent on MVP validation, not a current build target.
+
 ## Deprioritized / not in current scope
 
 - **Insurance companies (B2B/adjuster-facing)** — faster intake, standardized completeness checks considered; fraud/inconsistency flagging explicitly avoided, same reasoning as Phase 3.

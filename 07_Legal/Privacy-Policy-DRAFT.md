@@ -10,9 +10,10 @@
 > explicit instruction — this is now a required correction, not an open
 > flag.
 >
-> **STILL OPEN, gating publication:** support@wholeclaim.com's
-> deliverability has not yet been confirmed. Founder has said explicitly:
-> do not publish anything referencing this address until confirmed.
+> **RESOLVED 2026-07-24:** the support inbox is support@getwholeclaim.com
+> (not support@wholeclaim.com as earlier drafts had it), and the founder
+> has confirmed its deliverability. All references below use the
+> confirmed address.
 
 ---
 
@@ -70,7 +71,7 @@ We use the following third-party services to operate WholeClaim, each of which p
 
 ## 6. Data Retention
 
-We retain your information for as long as your account is active or as needed to provide the service. Billing and entitlement records (including refund and dispute history) are retained even after a claim is deleted, in order to maintain accurate financial and audit records. You may request deletion of your account and associated data, subject to the retention requirements described above and applicable law, by contacting support@wholeclaim.com.
+We retain your information for as long as your account is active or as needed to provide the service. Billing and entitlement records (including refund and dispute history) are retained even after a claim is deleted, in order to maintain accurate financial and audit records. You may request deletion of your account and associated data, subject to the retention requirements described above and applicable law, by contacting support@getwholeclaim.com.
 
 ## 7. Data Security
 
@@ -78,7 +79,7 @@ We use reasonable administrative, technical, and physical safeguards to protect 
 
 ## 8. Your Rights and Choices
 
-Depending on your location, you may have the right to access, correct, delete, or export your personal information. You may exercise these rights by contacting us at support@wholeclaim.com. You may cancel your subscription and delete your account at any time through your account settings.
+Depending on your location, you may have the right to access, correct, delete, or export your personal information. You may exercise these rights by contacting us at support@getwholeclaim.com. You may cancel your subscription and delete your account at any time through your account settings.
 
 ## 9. Children's Privacy
 
@@ -90,7 +91,7 @@ We may update this Privacy Policy from time to time. Material changes will be co
 
 ## 11. Contact
 
-Questions about this Privacy Policy or your data: support@wholeclaim.com
+Questions about this Privacy Policy or your data: support@getwholeclaim.com
 
 > **FACT-CHECK NOTE:** this inbox's deliverability has not been confirmed as of this draft. Do not publish any document referencing it until confirmed working (founder's own gate, 2026-07-18).
 

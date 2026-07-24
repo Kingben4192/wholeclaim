@@ -68,7 +68,7 @@ These requirements are the same for every user and are not customized per claim.
 
 ### 3.5 How to Request a Refund Under the Guarantee
 
-If you believe you are eligible, contact us at support@wholeclaim.com with your claim reference. We will review your checklist completion and grade history and respond within 5 business days. Refunds approved under this guarantee are processed to your original payment method.
+If you believe you are eligible, contact us at support@getwholeclaim.com with your claim reference. We will review your checklist completion and grade history and respond within 5 business days. Refunds approved under this guarantee are processed to your original payment method.
 
 ### 3.6 One Guarantee Claim Per Purchase
 
@@ -86,9 +86,9 @@ Approved refunds are issued to your original payment method through Stripe, our 
 
 ## 6. Questions
 
-Questions about this policy: support@wholeclaim.com
+Questions about this policy: support@getwholeclaim.com
 
-> **FACT-CHECK NOTE:** this inbox's deliverability has not been confirmed as of this draft. Do not publish any document referencing it until confirmed working (founder's own gate, 2026-07-18).
+> **RESOLVED 2026-07-24:** the correct inbox is support@getwholeclaim.com (not support@wholeclaim.com as this draft originally had it); the founder has confirmed its deliverability. This does not change the document-level gate above — the Refund Policy still may not be published or linked until explicitly approved.
 
 ---
 

@@ -12,6 +12,7 @@ import {
   finalizeGuaranteeIfComplete,
 } from "@/lib/guarantee";
 import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
+import { isAllowedUpload } from "@/lib/uploadValidation";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -232,6 +233,9 @@ export async function uploadFile(
   }
   if (file.size > MAX_FILE_BYTES) {
     throw new Error("That file is larger than 15MB.");
+  }
+  if (!isAllowedUpload(file)) {
+    throw new Error("That file type isn't supported. Upload a photo, PDF, or common document file.");
   }
 
   const kind = kindForFile(file);

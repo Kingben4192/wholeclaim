@@ -113,9 +113,9 @@ We may update these Terms from time to time. Material changes will be communicat
 
 ## 14. Contact
 
-Questions about these Terms: support@wholeclaim.com
+Questions about these Terms: support@getwholeclaim.com
 
-> **FACT-CHECK NOTE:** this inbox's deliverability has not been confirmed as of this draft. Do not publish any document referencing it until confirmed working (founder's own gate, 2026-07-18).
+> **RESOLVED 2026-07-24:** the correct inbox is support@getwholeclaim.com (not support@wholeclaim.com as this draft originally had it); the founder has confirmed its deliverability.
 
 ---
 

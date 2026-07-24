@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isPro } from "../entitlements";
+import { getAdminClient, isServiceRoleConfigured } from "../supabase/admin";
 
 const PRO_DAILY_CAP = 30;
 const IP_HOURLY_CAP = 20;
@@ -102,8 +103,19 @@ export async function checkUsageGate(
     }
   }
 
+  // ai_ip_calls: security review finding (2026-07-24) — this table must not
+  // be readable by regular authenticated users (it's a cross-account IP
+  // log). RLS now denies authenticated SELECT/INSERT entirely, so this
+  // table is reached only through the service-role client, never the
+  // caller's own session client used everywhere else in this function.
+  if (!isServiceRoleConfigured()) {
+    console.error("checkUsageGate: service role not configured, denying (ai_ip_calls requires it)");
+    return FAIL_CLOSED;
+  }
+  const admin = getAdminClient();
+
   const ipSince = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { count: ipCount, error: ipError } = await supabase
+  const { count: ipCount, error: ipError } = await admin
     .from("ai_ip_calls")
     .select("id", { count: "exact", head: true })
     .eq("ip", ip)
@@ -119,7 +131,7 @@ export async function checkUsageGate(
     };
   }
 
-  const { error: insertError } = await supabase.from("ai_ip_calls").insert({ ip });
+  const { error: insertError } = await admin.from("ai_ip_calls").insert({ ip });
   if (insertError) {
     console.error("checkUsageGate: ai_ip_calls insert failed, denying:", insertError.message);
     return FAIL_CLOSED;

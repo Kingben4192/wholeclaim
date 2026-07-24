@@ -1,9 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isServiceRoleConfigured, getAdminClient } from "@/lib/supabase/admin";
 import { isResendConfigured, getResendClient } from "@/lib/resend";
 import { scoreGrader, type GraderAnswers } from "@/lib/grader/rubric";
+import { checkLeadRateLimit } from "@/lib/leadRateLimit";
 
 export type SubmitGradeInput = {
   answers: GraderAnswers;
@@ -26,6 +28,10 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
   if (!email.includes("@")) return { ok: false, error: "Enter a valid email." };
   // Product Bible, Claim Grade: "Never emails without consent."
   if (!input.consent) return { ok: false, error: "Consent is required to send your results." };
+
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const gate = await checkLeadRateLimit(ip);
+  if (!gate.allowed) return { ok: false, error: gate.reason! };
 
   const { scores, total, band } = scoreGrader(input.answers);
 
