@@ -7,16 +7,38 @@ enabled Dependabot alerts. The push to `master` immediately surfaced:
 
 **12 Dependabot vulnerabilities: 6 high, 6 moderate.** (github.com/Kingben4192/wholeclaim/security/dependabot)
 
-- [ ] Review each of the 12 findings individually
-- [ ] For each: determine exploitable vs non-exploitable in this app's actual usage
-- [ ] For each: identify the upgrade path and assess breaking-change risk
-- [ ] Patch in a controlled, deliberate update — do not blindly run a bulk dependency
-      upgrade right before or during active beta testing
-- [ ] Sequence this *after* the current production deploy is confirmed stable, not before
+- [x] Review each finding individually — done; `npm audit` actually showed 13
+      distinct GHSA advisories (7 high, 6 moderate) across 3 packages, not 12
+      — GitHub's Dependabot indexing was slightly behind npm's own advisory feed
+- [x] For each: determine exploitable vs non-exploitable in this app's actual
+      usage — documented against real codebase usage (Turbopack, Server Actions,
+      no custom server, no `rewrites()`, no edge runtime, no `next/image` import)
+- [x] For each: identify the upgrade path and assess breaking-change risk —
+      all 13 resolved via one patch-level bump, `next` 16.2.10 → 16.2.11
+- [x] Patch in a controlled, deliberate update — done (commit `eb04c67`),
+      full regression + live functional verification (auth, claim creation,
+      evidence upload, AI tool wiring) before deploy
+- [x] Sequenced after the prior production deploy was confirmed stable
+
+**Remaining, tracked separately (approved as a deliberate scope decision —
+not bundled into the patch release to avoid unnecessary risk immediately
+before beta):**
+
+- [ ] 4 advisories (postcss, sharp) remain — both are *vendored, nested*
+      dependencies of `next@16.2.11` itself, pinned internally below the
+      patched threshold (`postcss@8.4.31`, `sharp@^0.34.5`). Not fixable via
+      this app's own `package.json` without an `overrides` entry.
+- [ ] Monitor for the next Next.js patch release that updates its own
+      vendored postcss/sharp versions — likely resolves this with zero
+      app-side changes needed, same as this round.
+- [ ] If no upstream fix lands in a reasonable timeframe, evaluate a
+      separately-scoped `overrides` implementation with its own full
+      regression pass before adopting it — do not fold this into a future
+      unrelated change.
 
 Dependabot's own version-update PRs (`.github/dependabot.yml`, weekly, npm +
-GitHub Actions) will keep opening on their own regardless — this task is about
-the *existing* 12 findings specifically, not the ongoing automated PRs.
+GitHub Actions) will keep opening on their own regardless — this task was
+about the *existing* findings specifically, not the ongoing automated PRs.
 
 ## Observability gaps (not urgent — log for next incident)
 
