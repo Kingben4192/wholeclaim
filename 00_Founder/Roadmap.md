@@ -44,6 +44,22 @@ WholeClaim evolves into a platform for every participant in the property claims 
 3. **Public Adjuster** (future) — collaborate with clients, review claim files, streamline documentation.
 4. **Attorney** (future) — receive a well-organized, searchable claim package: timelines, communications, evidence.
 
+## Property-Problem Category Expansion (Future Direction)
+
+*Strategic exploration, not an approved build plan — added 2026-07-24. Any engineering work stays tracked through the active roadmap and implementation plans above, not this section.*
+
+WholeClaim may eventually expand from an insurance-claim workspace into a broader property documentation system covering multiple homeowner problems. Potential future categories: Insurance Claim, Water / Utility Dispute, Contractor / Renovation Dispute, Property Damage Record, Other Property Issue.
+
+The underlying opportunity: many homeowner problems share the same documentation challenges — organizing evidence, maintaining timelines, preserving records, communicating clearly with third parties.
+
+**Current thinking.** Category awareness could let WholeClaim learn where homeowner demand exists and which property problems warrant dedicated workflows: category-specific templates, evidence checklists, documentation scoring, and educational resources — all driven by validated user behavior and market signals, not assumed up front. The only category-related engineering considered separately from a specific expansion decision is foundational architecture that keeps future expansion possible (e.g. schema-level category support, forward-compatible scoring interfaces) — not the categories themselves.
+
+**Relationship to the persona-based roadmap above.** This category lens and the existing persona-based Phase 2/3 roadmap are two different views of the same future growth, not competing plans. Persona asks *who* uses WholeClaim (homeowners, contractors, property professionals, other stakeholders); category asks *what problem* they're solving (claims, disputes, documentation, property history). Future product decisions should weigh both together.
+
+**Long-term opportunity: Documentation Intelligence.** A future advantage could come from understanding documentation patterns across property problems — never predicting outcomes, only helping users see what documentation is commonly needed, what records are missing, and how complete their property file is. Same guardrails as everywhere else in this product: never guarantees claim outcomes, never provides legal advice, never acts as a public adjuster, never recommends litigation strategies (matches Product Bible Never-list, Decisions #2/#25).
+
+**Validation before expansion.** Before investing in any new category: user category selection, conversion rate by category, retention by category, most-requested workflows, most common missing documentation items. Expansion follows demonstrated demand, same standing principle as the rest of this roadmap.
+
 ## Deprioritized / not in current scope
 
 - **Insurance companies (B2B/adjuster-facing)** — faster intake, standardized completeness checks considered; fraud/inconsistency flagging explicitly avoided, same reasoning as Phase 3.
