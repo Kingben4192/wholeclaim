@@ -6,6 +6,7 @@ import { computeDocumentationScore, toClientView } from "@/lib/scoring/documenta
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
 import { WelcomeFlow } from "./WelcomeFlow";
+import { SignupIntentForm } from "./SignupIntentForm";
 import { AccountMenu } from "../AccountMenu";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 
@@ -62,7 +63,7 @@ export default async function AccountPage() {
   const [{ data: profile }, { data: claims }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("name, stripe_customer_id, created_at, onboarding_seen_at, subscription_status")
+      .select("name, stripe_customer_id, created_at, onboarding_seen_at, subscription_status, signup_category")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -71,6 +72,24 @@ export default async function AccountPage() {
       .order("created_at", { ascending: false })
       .limit(RECENT_CLAIMS_LIMIT),
   ]);
+
+  // Signup Category + Acquisition Source Tracking (Decision #45) — a new,
+  // earlier gate than WelcomeFlow's, deliberately decoupled from claim
+  // count so it also catches Path A (grader-converted) users, who skip
+  // WelcomeFlow's own zero-claims gate below entirely since they always
+  // already have >=1 claim by their first /account visit. Reuses
+  // onboarding_seen_at as the "is this an existing, pre-feature user"
+  // grandfather signal: nothing else ever sets it besides dismissWelcome,
+  // so anyone who's already been through (or dismissed) onboarding is
+  // correctly excluded from this new, required question.
+  if (!profile?.onboarding_seen_at && !profile?.signup_category) {
+    return (
+      <main className="max-w-2xl mx-auto px-6 py-16">
+        <AccountMenu />
+        <SignupIntentForm />
+      </main>
+    );
+  }
 
   // Welcome Flow (Onboarding Step 3) — first-time direct-signup users only.
   // Path A (grader-converted) users never hit this: /claim/from-grade
