@@ -74,3 +74,13 @@ Neither blocks anything today. The point of logging them is narrower: the
 next time something gets reported without a reproducible timestamp/error/
 affected-user, there should be an actual log trail to check instead of
 reconstructing from memory or re-deriving root cause from first principles.
+
+## Code cleanup (not urgent)
+
+- [ ] **Centralize the `isAdmin(email)` gate.** Duplicated inline in three
+      places now: `src/app/library/actions.ts`, `src/app/library/page.tsx`,
+      and `src/app/admin/page.tsx` (added 2026-07-24 for the beta monitoring
+      page). Same 4-line function in each. Not a live risk today — all three
+      copies are identical — but a future edit to the `ADMIN_EMAIL` check in
+      one place and not the others would create a real gating inconsistency.
+      Extract to a shared `src/lib/admin.ts` when convenient.
