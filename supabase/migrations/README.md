@@ -60,3 +60,27 @@ section once Supabase responds to the ticket; if they confirm queue
 exhaustion is the real mechanism, the reload step may need to change (e.g.
 to something that also drains the queue), not just gain a diagnostic
 alongside it.
+
+## After applying any migration — a short manual checklist
+
+`leads`' anon-insert policy alone has now silently failed to hold in
+production three separate times (`0008`, then again around `0013`, then
+again around `0020`) with no drift-detection catching it until a real user
+hit the broken path live. Until there's an automated way to verify this,
+run through this checklist by hand every time a migration is applied:
+
+1. Check the SQL Editor's own result output for errors before moving on —
+   don't assume "no exception shown" means every statement in a multi-statement
+   file actually ran.
+2. For any migration that adds or changes an RLS policy or a grant, run a
+   one-line confirmation query against the live database, e.g.
+   `select * from pg_policies where tablename = '<table>';`, and check the
+   policy actually exists exactly as written — not just that the migration
+   "ran."
+3. For any anon-facing write path specifically, do one real end-to-end test
+   of that path (not just the query above) before considering the migration
+   done — this is the step that would have caught all three `leads`
+   incidents immediately instead of after a real user hit them.
+
+This is a manual checklist, not automation or a CI step — matching how
+every migration in this repo is applied today.
