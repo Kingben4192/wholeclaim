@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { addEntry, addDeadline, addEvidenceItem } from "../actions";
 import { EvidenceRow } from "./EvidenceRow";
 import { FileRow } from "./FileRow";
+import { AddEntryForm } from "./AddEntryForm";
 import CameraCapture from "./CameraCapture";
 import { PendingPhotoUploader } from "./PendingPhotoUploader";
 import BeforeAfterGrade from "./BeforeAfterGrade";
@@ -70,7 +71,7 @@ export default async function ClaimDetailPage({
       supabase.from("claims").select("*").eq("id", id).single(),
       supabase
         .from("entries")
-        .select("id, date, type, contact, summary, created_at")
+        .select("id, date, type, contact, summary, contact_time, contact_company, contact_method, commitments, follow_up_date, created_at")
         .eq("claim_id", id)
         .order("date", { ascending: false }),
       supabase
@@ -85,7 +86,7 @@ export default async function ClaimDetailPage({
         .order("created_at", { ascending: true }),
       supabase
         .from("files")
-        .select("id, kind, original_name, uploaded_at, storage_path")
+        .select("id, kind, original_name, uploaded_at, storage_path, evidence_stage")
         .eq("claim_id", id)
         .order("uploaded_at", { ascending: false }),
       supabase
@@ -306,6 +307,18 @@ export default async function ClaimDetailPage({
                   </span>
                 </div>
                 <p>{e.summary}</p>
+                {(e.contact_time || e.contact_company || e.contact_method || e.commitments || e.follow_up_date) && (
+                  <div className="mt-1 text-xs text-ink/50 flex flex-col gap-0.5">
+                    {(e.contact_time || e.contact_company) && (
+                      <p>
+                        {[e.contact_time, e.contact_company].filter(Boolean).join(" — ")}
+                      </p>
+                    )}
+                    {e.contact_method && <p>{e.contact_method}</p>}
+                    {e.commitments && <p>Commitments: {e.commitments}</p>}
+                    {e.follow_up_date && <p>Follow up: {e.follow_up_date}</p>}
+                  </div>
+                )}
               </div>
             ))
           ) : (
@@ -314,38 +327,7 @@ export default async function ClaimDetailPage({
             </p>
           )}
         </div>
-        <form action={boundAddEntry} className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <select
-              name="type"
-              defaultValue="call"
-              className="text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
-            >
-              <option value="call">Call</option>
-              <option value="email">Email</option>
-              <option value="visit">Visit</option>
-              <option value="photo">Photo</option>
-              <option value="letter">Letter</option>
-              <option value="payment">Payment</option>
-              <option value="note">Note</option>
-            </select>
-            <input
-              name="contact"
-              placeholder="Who"
-              className="flex-1 text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
-            />
-          </div>
-          <textarea
-            name="summary"
-            required
-            placeholder="What happened"
-            rows={2}
-            className="text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
-          />
-          <button className="self-start bg-ledger text-paper px-4 py-2 rounded-sm font-semibold text-sm">
-            Log entry
-          </button>
-        </form>
+        <AddEntryForm action={boundAddEntry} />
       </section>
 
       {/* Evidence checklist */}

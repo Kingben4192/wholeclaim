@@ -15,6 +15,7 @@ import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
 import { isAllowedUpload } from "@/lib/uploadValidation";
 import { checkClaimCategoryAccess, getCategoryClaimState, type ClaimCategoryGateResult } from "@/lib/claimCategoryGate";
 import { isClaimCategory, isClaimStatus, type ClaimCategory } from "@/lib/claimCategories";
+import { isEvidenceStage } from "@/lib/evidenceStage";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -188,12 +189,29 @@ export async function addEntry(claimId: string, formData: FormData) {
   const summary = String(formData.get("summary") ?? "").trim();
   if (!summary) throw new Error("Entry needs a summary.");
 
+  // Structured Communication Log (Documentation Coverage Gaps, 2026-07-25)
+  // -- five optional fields, populated only when the new structured entry
+  // types (Phone Call/Email/Text/Inspection/Voicemail) are used. The
+  // original freeform types (call/visit/photo/letter/payment/note) submit
+  // none of these and behave exactly as before.
+  const contactTime = String(formData.get("contact_time") ?? "").trim() || null;
+  const contactCompany = String(formData.get("contact_company") ?? "").trim() || null;
+  const contactMethod = String(formData.get("contact_method") ?? "").trim() || null;
+  const commitments = String(formData.get("commitments") ?? "").trim() || null;
+  const followUpDateRaw = String(formData.get("follow_up_date") ?? "").trim();
+  const followUpDate = followUpDateRaw || null;
+
   const { error } = await supabase.from("entries").insert({
     claim_id: claimId,
     user_id: user.id,
     type,
     contact,
     summary,
+    contact_time: contactTime,
+    contact_company: contactCompany,
+    contact_method: contactMethod,
+    commitments,
+    follow_up_date: followUpDate,
   });
   if (error) throw new Error(error.message);
 
@@ -320,6 +338,19 @@ export async function uploadFile(
   }
 
   const kind = kindForFile(file);
+
+  // Before/After Photo Tags (Documentation Coverage Gaps, 2026-07-25) --
+  // optional. Absent/empty stays untagged, exactly today's behavior. A
+  // present-but-invalid value throws rather than silently dropping it --
+  // defense in depth against a tampered form field, same pattern as
+  // isClaimCategory elsewhere in this file.
+  const evidenceStageRaw = formData.get("evidence_stage");
+  let evidenceStage: string | null = null;
+  if (typeof evidenceStageRaw === "string" && evidenceStageRaw.trim().length > 0) {
+    if (!isEvidenceStage(evidenceStageRaw)) throw new Error("Invalid evidence stage.");
+    evidenceStage = evidenceStageRaw;
+  }
+
   const storagePath = `${user.id}/${claimId}/${crypto.randomUUID()}-${file.name}`;
 
   const { error: uploadError } = await supabase.storage
@@ -337,6 +368,7 @@ export async function uploadFile(
       storage_path: storagePath,
       kind,
       original_name: file.name,
+      evidence_stage: evidenceStage,
     })
     .select("id")
     .single();

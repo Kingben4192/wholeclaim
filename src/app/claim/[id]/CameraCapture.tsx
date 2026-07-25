@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Camera, FolderOpen, X, Loader2 } from "lucide-react";
 import { uploadFile } from "@/app/claim/actions";
+import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface PendingCapture {
   id: string;
@@ -20,6 +21,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
   const [pending, setPending] = useState<PendingCapture[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [evidenceStage, setEvidenceStage] = useState("");
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +51,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
       for (const item of pending) {
         const formData = new FormData();
         formData.append("file", item.file);
+        if (evidenceStage) formData.append("evidence_stage", evidenceStage);
         await uploadFile(claimId, evidenceItemId ?? null, formData);
       }
       pending.forEach((p) => URL.revokeObjectURL(p.previewUrl));
@@ -122,6 +125,23 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
               </div>
             ))}
           </div>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold text-ink/60">
+              Evidence stage (optional)
+            </span>
+            <select
+              value={evidenceStage}
+              onChange={(e) => setEvidenceStage(e.target.value)}
+              className="text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
+            >
+              <option value="">Not tagged</option>
+              {EVIDENCE_STAGES.map((stage) => (
+                <option key={stage} value={stage}>
+                  {stage}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             onClick={uploadAll}

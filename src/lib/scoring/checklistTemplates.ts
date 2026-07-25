@@ -29,6 +29,10 @@ const BASELINE_DOCUMENTATION_COMPLETENESS: ChecklistTemplateItem[] = [
   { label: "Receipts for out-of-pocket expenses", category: "documentation_completeness" },
   { label: "Correspondence log with the carrier", category: "documentation_completeness" },
   { label: "Inspection report (carrier or independent)", category: "documentation_completeness" },
+  {
+    label: "Insurer approval documented before disposal of damaged materials (or emergency mitigation necessity noted)",
+    category: "documentation_completeness",
+  },
 ];
 
 const PROFILE_ADDITIONS: Record<ClaimTypeProfile, ChecklistTemplateItem[]> = {

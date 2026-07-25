@@ -22,6 +22,7 @@ export function FileRow({
     uploaded_at: string;
     storage_path: string;
     url: string | null;
+    evidence_stage?: string | null;
   };
 }) {
   const [pending, startTransition] = useTransition();
@@ -41,6 +42,11 @@ export function FileRow({
         </a>
       ) : (
         <span className="flex-1 truncate text-ink/60">{file.original_name}</span>
+      )}
+      {file.evidence_stage && (
+        <span className="px-1.5 py-0.5 rounded-sm bg-ink/10 text-ink/60 text-xs font-mono shrink-0">
+          {file.evidence_stage}
+        </span>
       )}
       <span className="text-xs font-mono text-ink/50">
         {new Date(file.uploaded_at).toLocaleDateString()}
