@@ -32,11 +32,11 @@ If a lifetime purchase is refunded or successfully disputed through your card is
 
 ### 3.1 What the Guarantee Promises
 
-If you purchase Pro access (either plan) for a claim, complete **all five** of the required Guarantee Checklist steps below, and your **WholeClaim Claim Grade does not improve by at least one letter grade**, you may be eligible for a refund of your Pro purchase.
+If you purchase Pro access (either plan) for a claim, complete **all five** of the required Guarantee Checklist steps below, and your **WholeClaim Documentation Score does not improve by at least one letter grade**, you may be eligible for a refund of your Pro purchase.
 
 ### 3.2 What the Guarantee Does NOT Promise
 
-**The Success Guarantee applies only to your WholeClaim Claim Grade — WholeClaim's own internal documentation and organization score.**
+**The Success Guarantee applies only to your WholeClaim Documentation Score — WholeClaim's own internal, file-based documentation and organization score. It has nothing to do with the free Claim Grade self-assessment available at getwholeclaim.com/grade, which is a separate, user-answered quiz that plays no part in this guarantee.**
 
 The Success Guarantee does **not** promise, guarantee, or imply:
 - That your insurance claim will be approved
@@ -60,10 +60,10 @@ These requirements are the same for every user and are not customized per claim.
 
 ### 3.4 How Eligibility Is Determined
 
-- Your Claim Grade is recorded at the time you purchase Pro access for the claim.
-- Once you have completed all five checklist items, your Claim Grade is recorded again.
+- Your WholeClaim Documentation Score is recorded at the time you purchase Pro access for the claim.
+- Once you have completed all five checklist items, your WholeClaim Documentation Score is recorded again.
 - If your grade did not improve by at least one letter (for example, C to B or better), you may be eligible for a refund.
-- If your Claim Grade was already an "A" at the time of purchase, the Success Guarantee does not apply, since a one-letter improvement above "A" is not possible.
+- If your WholeClaim Documentation Score was already an "A" at the time of purchase, the Success Guarantee does not apply, since a one-letter improvement above "A" is not possible.
 - If you have not completed all five checklist items, you are not yet eligible to request a refund under this guarantee.
 
 ### 3.5 How to Request a Refund Under the Guarantee

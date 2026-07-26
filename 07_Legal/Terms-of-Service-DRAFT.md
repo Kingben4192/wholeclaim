@@ -72,7 +72,7 @@ Refunds are governed by our separate **Refund Policy**, including the terms of t
 
 ## 6. The Success Guarantee — Important Limitations
 
-WholeClaim offers a Success Guarantee under specific conditions described in our Refund Policy. **The Success Guarantee applies only to WholeClaim's own internal Claim Grade / documentation scoring system.** It does not guarantee, promise, or imply:
+WholeClaim offers a Success Guarantee under specific conditions described in our Refund Policy. **The Success Guarantee applies only to the WholeClaim Documentation Score — WholeClaim's internal, file-based documentation and organization score. The free Claim Grade self-assessment is a separate quiz and plays no part in this guarantee.** It does not guarantee, promise, or imply:
 
 - Insurance coverage
 - Claim approval

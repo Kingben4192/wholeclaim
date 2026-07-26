@@ -141,7 +141,7 @@ This is the highest priority item.
 WholeClaim includes a planned Success Guarantee feature.
 
 The guarantee is based only on:
-- WholeClaim's internal documentation score ("Claim Grade")
+- WholeClaim's internal WholeClaim Documentation Score (a separate, free "Claim Grade" self-assessment quiz also exists at /grade and plays no part in this guarantee)
 - completion of a defined documentation checklist
 
 It does not guarantee:
@@ -158,7 +158,7 @@ Please advise:
 
 > **FACT-CHECK NOTE:** I read the actual guarantee-eligibility code
 > (`src/lib/guarantee.ts`). It confirms the description above precisely —
-> eligibility is computed only from a before/after Claim Grade comparison
+> eligibility is computed only from a before/after WholeClaim Documentation Score comparison
 > and five fixed checklist items, with no reference anywhere to coverage,
 > settlement, or insurer decisions. A full draft Refund Policy exists at
 > `07_Legal/Refund-Policy-DRAFT.md`, Section 3, and is marked as the
