@@ -75,6 +75,31 @@ next time something gets reported without a reproducible timestamp/error/
 affected-user, there should be an actual log trail to check instead of
 reconstructing from memory or re-deriving root cause from first principles.
 
+## Open investigation — unexplained delete-account Sentry event
+
+Sentry event `d369c4e1`, 2026-07-26 00:43:02 UTC, `javascript-nextjs` /
+`vercel-production`: a real user (Cammie) deleted her account, then a
+second action (breadcrumbs show a click matching `AccountMenu`'s "Log out"
+button, `POST /account`, HTTP 200) resulted in an unparseable RSC response
+reaching the client — "An unexpected response was received from the
+server."
+
+Ruled out: `signOut()` itself throwing for a session whose underlying
+account was just hard-deleted — tested directly against a real throwaway
+account (create session → hard-delete the user → call `signOut()` with the
+now-stale session), it returns cleanly with no error and does not throw.
+The theory that this was the cause is disconfirmed.
+
+Also confirmed unrelated to `/login`/magic-link sending — the original
+report was misattributed to that flow; the actual event's `url` tag and
+breadcrumbs are specific to `/account`, not `/login`.
+
+**Not being chased further right now** — logging it so it isn't quietly
+forgotten. `Sentry.setUser()` is now wired (every event should show which
+user was affected going forward, previously always "Users: 0"), so if this
+recurs, it should be traceable to a specific account next time instead of
+anonymous. Revisit if it happens again.
+
 ## Code cleanup (not urgent)
 
 - [ ] **Centralize the `isAdmin(email)` gate.** Duplicated inline in three
