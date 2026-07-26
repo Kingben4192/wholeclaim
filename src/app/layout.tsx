@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Bricolage_Grotesque, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./ServiceWorkerRegister";
+import { SentryUserSync } from "./SentryUserSync";
 
 const archivo = Archivo({
   variable: "--font-archivo",
@@ -59,6 +60,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         {children}
         <ServiceWorkerRegister />
+        <SentryUserSync />
       </body>
     </html>
   );
