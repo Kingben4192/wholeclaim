@@ -285,8 +285,17 @@ function scoreEvidenceQualityOrganization(
   // organized file (2026-07-26: previously `files.length > 0 ? ... : 1`
   // let an all-checked, zero-file claim score 15/15 here).
   const linkedFraction = files.length > 0 ? files.filter((f) => linkedFileIds.has(f.id)).length / files.length : 0;
+
+  // Scoped to file-linked items only, not every seeded checklist item --
+  // untouched-but-well-copywritten template items always pass this check
+  // trivially, so scoring over the full list masks real mislabeled uploads
+  // behind however many items nobody has touched yet (2026-07-26, folded
+  // into Decision #47).
+  const linkedItems = items.filter((i) => Boolean(i.file_id));
   const labeledFraction =
-    items.length > 0 ? items.filter((i) => !AUTO_GENERATED_LABEL_PATTERN.test(i.label)).length / items.length : 1;
+    linkedItems.length > 0
+      ? linkedItems.filter((i) => !AUTO_GENERATED_LABEL_PATTERN.test(i.label)).length / linkedItems.length
+      : 0;
 
   const linkedPoints = linkedMax * linkedFraction;
   const labeledPoints = labeledMax * labeledFraction;
@@ -301,7 +310,7 @@ function scoreEvidenceQualityOrganization(
       pointsRecoverable: linkedMax - linkedPoints,
     });
   }
-  if (items.length > 0 && labeledFraction < 1) {
+  if (linkedItems.length > 0 && labeledFraction < 1) {
     gaps.push({
       description: "Some checklist items still use the default upload label — add a real description",
       pointsRecoverable: labeledMax - labeledPoints,
