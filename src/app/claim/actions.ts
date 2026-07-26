@@ -409,7 +409,7 @@ export async function uploadFile(
       claim_id: claimId,
       user_id: user.id,
       label: `${KIND_LABEL[kind]} — ${file.name}`,
-      checked: true,
+      checked: false,
       file_id: fileRow.id,
     });
     if (createError) throw new Error(createError.message);
