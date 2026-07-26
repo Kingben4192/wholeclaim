@@ -182,10 +182,14 @@ function scoreChecklistCategory(
     if (item.file_id) {
       points += perItem;
     } else if (item.checked) {
-      points += perItem * 0.5;
+      // 2026-07-26: reduced from 0.5 -- a checked-but-unfiled item should
+      // count for meaningfully less than half credit; self-attestation
+      // without a file is a weaker signal than the fallback previously
+      // treated it as.
+      points += perItem * 0.25;
       gaps.push({
         description: `"${item.label}" is checked but has no file attached`,
-        pointsRecoverable: perItem * 0.5,
+        pointsRecoverable: perItem * 0.75,
       });
     } else {
       gaps.push({ description: `Missing: ${item.label}`, pointsRecoverable: perItem });

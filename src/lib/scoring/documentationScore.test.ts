@@ -76,7 +76,7 @@ describe("Evidence Coverage / Documentation Completeness (checklist categories)"
     expect(result.categories.evidenceCoverage.gaps).toHaveLength(0);
   });
 
-  it("gives half credit for checked-but-unfiled items, zero for untouched", () => {
+  it("gives quarter credit for checked-but-unfiled items, zero for untouched", () => {
     const result = computeDocumentationScore(
       baseInput({
         evidenceItems: [
@@ -86,8 +86,8 @@ describe("Evidence Coverage / Documentation Completeness (checklist categories)"
       }),
       NOW,
     );
-    // 2 items, perItem = 10; one at 0, one at half (5) -> round(5) = 5
-    expect(result.categories.documentationCompleteness.points).toBe(5);
+    // 2 items, perItem = 10; one at 0, one at quarter credit (2.5) -> round(2.5) = 3
+    expect(result.categories.documentationCompleteness.points).toBe(3);
     expect(result.categories.documentationCompleteness.gaps).toHaveLength(2);
   });
 
