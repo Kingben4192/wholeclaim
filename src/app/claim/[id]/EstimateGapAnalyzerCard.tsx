@@ -31,10 +31,13 @@ export function EstimateGapAnalyzerCard({ claimId }: { claimId: string }) {
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Describe the carrier's estimate and the actual damage — trades covered, line items, scope..."
+        placeholder="Paste or describe the carrier's estimate and the actual damage — trades covered, line items, scope..."
         rows={5}
         className="w-full text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
       />
+      <p className="text-xs text-ink/50 mt-1">
+        This tool analyzes what you type above — it doesn&apos;t read uploaded files or photos.
+      </p>
     </AIToolCard>
   );
 }
