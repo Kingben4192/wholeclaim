@@ -36,6 +36,25 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
   const { scores, total, band } = scoreGrader(input.answers);
 
   const supabase = await createClient();
+
+  // P0 (2026-07-26): `leads` exists purely as the anonymous-to-account
+  // funnel (Decision #29) and its only INSERT policy is scoped to the
+  // `anon` role. A signed-in visitor's session cookie makes this same
+  // request authenticate as `authenticated` instead -- which has no
+  // INSERT policy on `leads` at all -- so every signed-in submission was
+  // silently rejected with an RLS error rather than that ever being a
+  // real product path. A signed-in user has already converted; there's
+  // nothing left to fund the lead-capture/results-email mechanism for.
+  // Skip it entirely and just show the grade -- no authenticated INSERT
+  // policy added, no claim auto-created.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    return { ok: true, grade: band.g, score: total, scores, line: band.line, emailed: false };
+  }
+
   // No .select() here: anon has an INSERT policy on `leads` but deliberately
   // no SELECT policy (leads are owner-by-email or admin readable only), and
   // .insert().select() requires RETURNING to pass RLS too — chaining it
