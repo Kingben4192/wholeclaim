@@ -121,9 +121,9 @@ export const QUESTIONS: GraderQuestion[] = [
 
 export const GRADE_BANDS = [
   { min: 88, g: "A", tone: "green", line: "Exhibit-ready. You're running this claim like a case file." },
-  { min: 75, g: "B", tone: "green", line: "Strong file with a few gaps a carrier could exploit." },
-  { min: 60, g: "C", tone: "amber", line: "Average — which is exactly what carriers price for." },
-  { min: 45, g: "D", tone: "red", line: "The carrier knows more about your claim than your file does." },
+  { min: 75, g: "B", tone: "green", line: "Strong file with a few gaps worth closing." },
+  { min: 60, g: "C", tone: "amber", line: "Average — your file has real gaps." },
+  { min: 45, g: "D", tone: "red", line: "Your file doesn't have what a claim like this needs yet." },
   { min: 0, g: "F", tone: "red", line: "Right now this claim runs on memory and trust. Fixable — fast." },
 ] as const;
 

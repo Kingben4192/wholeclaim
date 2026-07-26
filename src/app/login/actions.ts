@@ -48,7 +48,8 @@ export async function sendMagicLink(formData: FormData) {
         };
       }
 
-      return { error: error.message };
+      console.error("sendMagicLink: signInWithOtp failed:", error.message);
+      return { error: "Couldn't send the sign-in link. Please try again in a moment." };
     }
     return { sent: true };
   } catch {
