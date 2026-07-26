@@ -62,13 +62,13 @@ These requirements are the same for every user and are not customized per claim.
 
 - Your WholeClaim Documentation Score is recorded at the time you purchase Pro access for the claim.
 - Once you have completed all five checklist items, your WholeClaim Documentation Score is recorded again.
-- If your grade did not improve by at least one letter (for example, C to B or better), you may be eligible for a refund.
+- If your WholeClaim Documentation Score did not improve by at least one letter (for example, C to B or better), you may be eligible for a refund.
 - If your WholeClaim Documentation Score was already an "A" at the time of purchase, the Success Guarantee does not apply, since a one-letter improvement above "A" is not possible.
 - If you have not completed all five checklist items, you are not yet eligible to request a refund under this guarantee.
 
 ### 3.5 How to Request a Refund Under the Guarantee
 
-If you believe you are eligible, contact us at support@getwholeclaim.com with your claim reference. We will review your checklist completion and grade history and respond within 5 business days. Refunds approved under this guarantee are processed to your original payment method.
+If you believe you are eligible, contact us at support@getwholeclaim.com with your claim reference. We will review your checklist completion and WholeClaim Documentation Score history and respond within 5 business days. Refunds approved under this guarantee are processed to your original payment method.
 
 ### 3.6 One Guarantee Claim Per Purchase
 
