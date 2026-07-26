@@ -28,6 +28,8 @@ import { AccountMenu } from "@/app/AccountMenu";
 import { ClaimStatusControl } from "./ClaimStatusControl";
 import { isClaimStatus } from "@/lib/claimCategories";
 import { PromisedDocumentTracker } from "./PromisedDocumentTracker";
+import { DeadlineBadge } from "../DeadlineBadge";
+import { UploadHelp } from "./UploadHelp";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 
 export default async function ClaimDetailPage({
@@ -257,8 +259,11 @@ export default async function ClaimDetailPage({
                 className="flex items-center justify-between px-3 py-2.5 text-sm border-t border-ink/10 first:border-t-0"
               >
                 <span>{d.title}</span>
-                <span className="font-mono text-xs text-ink/60">
-                  {d.due_date}
+                <span className="flex flex-col items-end gap-0.5">
+                  <span className="font-mono text-xs text-ink/60">
+                    {d.due_date}
+                  </span>
+                  <DeadlineBadge dueDate={d.due_date} className="text-[10px] uppercase tracking-wide" />
                 </span>
               </div>
             ))
@@ -389,6 +394,7 @@ export default async function ClaimDetailPage({
         <p className="text-xs text-ink/40 mt-2">
           Photos and PDFs, up to 15MB. Stored privately — only you can view them.
         </p>
+        <UploadHelp />
       </section>
     </main>
   );

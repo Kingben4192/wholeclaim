@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { AccountMenu } from "../AccountMenu";
+import { DeadlineBadge } from "./DeadlineBadge";
 
 export default async function ClaimListPage() {
   if (!isSupabaseConfigured()) {
@@ -26,6 +27,25 @@ export default async function ClaimListPage() {
     .from("claims")
     .select("id, carrier, claim_number, damage_category, claim_category, status, created_at")
     .order("created_at", { ascending: false });
+
+  // Next-deadline strip: one extra query, reduced client-side to the
+  // soonest due_date per claim (ordering by due_date ascending means an
+  // overdue deadline -- chronologically earliest -- naturally sorts first,
+  // exactly the "what needs attention" semantics wanted here).
+  const claimIds = (claims ?? []).map((c) => c.id);
+  const nextDeadlineByClaim = new Map<string, string>();
+  if (claimIds.length > 0) {
+    const { data: deadlines } = await supabase
+      .from("deadlines")
+      .select("claim_id, due_date")
+      .in("claim_id", claimIds)
+      .order("due_date", { ascending: true });
+    for (const d of deadlines ?? []) {
+      if (!nextDeadlineByClaim.has(d.claim_id)) {
+        nextDeadlineByClaim.set(d.claim_id, d.due_date);
+      }
+    }
+  }
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-16">
@@ -57,6 +77,9 @@ export default async function ClaimListPage() {
                       {c.status}
                     </span>
                   )}
+                </div>
+                <div className="mt-2 pt-2 border-t border-ink/10 text-[10px] uppercase tracking-wide">
+                  <DeadlineBadge dueDate={nextDeadlineByClaim.get(c.id) ?? null} />
                 </div>
               </Link>
             </li>

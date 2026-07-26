@@ -10,6 +10,7 @@ import { SignupIntentForm } from "./SignupIntentForm";
 import { AccountMenu } from "../AccountMenu";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 import { filesForScoring } from "@/lib/scoringFileFilter";
+import { bucketLabel, relativeAge, BUCKET_ORDER, type DateBucket } from "@/lib/relativeTime";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -185,6 +186,16 @@ export default async function AccountPage() {
       .slice(0, RECENT_ACTIVITY_LIMIT);
   }
 
+  // Grouped by day-bucket, preserving BUCKET_ORDER; empty buckets are
+  // simply absent from the map, not rendered as empty sections.
+  const activityByBucket = new Map<DateBucket, ActivityItem[]>();
+  for (const item of activity) {
+    const bucket = bucketLabel(item.at);
+    const existing = activityByBucket.get(bucket);
+    if (existing) existing.push(item);
+    else activityByBucket.set(bucket, [item]);
+  }
+
   return (
     <main className="max-w-2xl mx-auto px-6 py-16 flex flex-col gap-12">
       <AccountMenu />
@@ -295,21 +306,30 @@ export default async function AccountPage() {
           Recent Activity
         </h2>
         {activity.length > 0 ? (
-          <ul className="border border-ink/15 rounded-sm divide-y divide-ink/10">
-            {activity.map((item, i) => (
-              <li key={i} className="px-4 py-2.5 text-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="truncate">{item.label}</span>
-                  <span className="text-xs font-mono text-ink/50 shrink-0">
-                    {new Date(item.at).toLocaleDateString()}
-                  </span>
-                </div>
-                <Link href={`/claim/${item.claimId}`} className="text-xs text-ledger">
-                  {item.claimLabel}
-                </Link>
-              </li>
+          <div className="flex flex-col gap-4">
+            {BUCKET_ORDER.filter((bucket) => activityByBucket.has(bucket)).map((bucket) => (
+              <div key={bucket}>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 mb-1.5">
+                  {bucket}
+                </p>
+                <ul className="border border-ink/15 rounded-sm divide-y divide-ink/10">
+                  {activityByBucket.get(bucket)!.map((item, i) => (
+                    <li key={i} className="px-4 py-2.5 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="truncate">{item.label}</span>
+                        <span className="text-xs font-mono text-ink/50 shrink-0">
+                          {relativeAge(item.at)}
+                        </span>
+                      </div>
+                      <Link href={`/claim/${item.claimId}`} className="text-xs text-ledger">
+                        {item.claimLabel}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
           <div className="border border-ink/15 rounded-sm px-4 py-4 text-sm text-ink/50">
             Nothing logged yet.

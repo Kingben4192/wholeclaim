@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { UPLOAD_HELP_ITEMS } from "@/lib/uploadHelpCopy";
 
 export const metadata: Metadata = { title: "Help & Support | WholeClaim" };
 
@@ -36,6 +37,7 @@ const FAQS: { q: string; a: string }[] = [
     q: "Can I export my claim file?",
     a: "Yes. WholeClaim is designed to help you maintain an organized record that can be exported and shared.",
   },
+  ...UPLOAD_HELP_ITEMS,
 ];
 
 const GUIDES: { title: string; steps?: string[]; body?: string }[] = [
