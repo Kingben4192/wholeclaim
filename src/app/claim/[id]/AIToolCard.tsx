@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2, Copy, Check } from "lucide-react";
 import { UpgradeOptions } from "./UpgradeOptions";
+import { DerivedValueNote } from "./DerivedValueNote";
 
 interface AIToolCardProps {
   title: string;
@@ -105,6 +106,7 @@ export function AIToolCard({
               <div className="border border-ink/15 rounded-sm p-4 bg-white whitespace-pre-wrap text-sm leading-relaxed">
                 {output}
               </div>
+              <DerivedValueNote source="ai-read" className="mt-2" />
               <p className="text-xs text-ink/40 italic mt-3">
                 WholeClaim is a self-help documentation tool, not legal or
                 insurance advice. A documented individual result — results

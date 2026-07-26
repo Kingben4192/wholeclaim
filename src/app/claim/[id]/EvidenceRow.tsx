@@ -35,7 +35,7 @@ export function EvidenceRow({
             {item.label}
           </span>
           {safetyNote && (
-            <span className="block text-xs text-amber-700 mt-0.5">{safetyNote}</span>
+            <span className="block text-xs text-brass mt-0.5">{safetyNote}</span>
           )}
         </span>
       </label>

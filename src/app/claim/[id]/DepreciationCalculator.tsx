@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { DerivedValueNote } from "./DerivedValueNote";
 
 // Free tier, Phase 1 (Roadmap). Pure deterministic math + static
 // educational copy — no AI call, no rate limit, no cap, matching the
@@ -94,10 +95,14 @@ export function DepreciationCalculator() {
               <p className="text-xs text-ink/60 mt-2">
                 This is RCV minus the payment already received — the amount
                 you can typically request once repairs are complete and
-                documented. Exact requirements (deadlines, required proof,
-                whether your policy pays RCV at all) vary by policy — verify
-                yours before relying on this figure.
+                documented.
               </p>
+              <DerivedValueNote source="computed">
+                Calculated from what you entered above, not read from your
+                policy. Exact requirements — deadlines, required proof,
+                whether your policy pays RCV at all — vary by policy. Verify
+                yours before relying on this figure.
+              </DerivedValueNote>
             </div>
           )}
 

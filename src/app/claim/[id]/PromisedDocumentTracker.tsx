@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { addPromisedItem, deletePromisedItem } from "../actions";
 import { EvidenceUpload } from "./EvidenceUpload";
 import { statusForPromisedItem, type PromisedItemStatus } from "@/lib/promisedItems";
+import { DerivedValueNote } from "./DerivedValueNote";
 
 type PromisedItem = {
   id: string;
@@ -70,9 +71,14 @@ export function PromisedDocumentTracker({ claimId, items }: { claimId: string; i
 
   return (
     <section>
-      <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
+      <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-1">
         Promised Documents
       </h2>
+      <DerivedValueNote source="computed" className="mb-3">
+        Status below is calculated from the dates you enter, not read from
+        any document. Update a date if it changes — the status recalculates
+        automatically.
+      </DerivedValueNote>
       <div className="border border-ink/15 rounded-sm mb-4">
         {items.length > 0 ? (
           items.map((item) => <Row key={item.id} claimId={claimId} item={item} />)
