@@ -53,5 +53,5 @@ export async function POST(request: NextRequest) {
     // either way and the client will treat it as signed out.
   }
 
-  return NextResponse.redirect(`${origin}/?deleted=1`);
+  return NextResponse.redirect(`${origin}/deleted`);
 }
