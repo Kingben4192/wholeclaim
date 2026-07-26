@@ -197,6 +197,41 @@ describe("Evidence Quality & Organization", () => {
     expect(result.categories.evidenceQualityOrganization.points).toBe(0);
     expect(result.categories.evidenceQualityOrganization.gaps.length).toBeGreaterThan(0);
   });
+
+  // Regression coverage for the real bug found and fixed 2026-07-26: checking
+  // off every checklist item with zero files uploaded read as 15/15 (full
+  // credit) here, because linkedFraction's zero-files branch vacuously
+  // returned 1 instead of 0. Zero linked evidence must score zero linked
+  // points, not full linked points.
+  it("checking every item with zero files uploaded does not earn full linked credit", () => {
+    const result = computeDocumentationScore(
+      baseInput({
+        files: [],
+        evidenceItems: [
+          {
+            label: "Wide shot of each affected room or area",
+            checked: true,
+            file_id: null,
+            category: "evidence_coverage",
+            created_at: "2026-07-01",
+          },
+          {
+            label: "Full insurance policy (declarations, forms, endorsements)",
+            checked: true,
+            file_id: null,
+            category: "documentation_completeness",
+            created_at: "2026-07-01",
+          },
+        ],
+      }),
+      NOW,
+    );
+    // labeledFraction is 1 (real, non-auto-generated labels) so labeledMax
+    // (5) is still earned; linkedFraction must be 0 (no files at all), so
+    // linkedMax (10) is not -- total should be 5, never the full 15.
+    expect(result.categories.evidenceQualityOrganization.points).toBe(5);
+    expect(result.categories.evidenceQualityOrganization.points).not.toBe(15);
+  });
 });
 
 describe("Deadline Readiness — decay and recovery", () => {

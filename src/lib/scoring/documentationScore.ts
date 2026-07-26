@@ -276,7 +276,11 @@ function scoreEvidenceQualityOrganization(
   }
 
   const linkedFileIds = new Set(items.map((i) => i.file_id).filter((id): id is string => Boolean(id)));
-  const linkedFraction = files.length > 0 ? files.filter((f) => linkedFileIds.has(f.id)).length / files.length : 1;
+  // Zero files is zero linked evidence, not vacuously-fully-linked evidence
+  // -- checked-but-unfiled checklist items don't count as an uploaded,
+  // organized file (2026-07-26: previously `files.length > 0 ? ... : 1`
+  // let an all-checked, zero-file claim score 15/15 here).
+  const linkedFraction = files.length > 0 ? files.filter((f) => linkedFileIds.has(f.id)).length / files.length : 0;
   const labeledFraction =
     items.length > 0 ? items.filter((i) => !AUTO_GENERATED_LABEL_PATTERN.test(i.label)).length / items.length : 1;
 
@@ -284,9 +288,12 @@ function scoreEvidenceQualityOrganization(
   const labeledPoints = labeledMax * labeledFraction;
 
   const gaps: Gap[] = [];
-  if (files.length > 0 && linkedFraction < 1) {
+  if (linkedFraction < 1) {
     gaps.push({
-      description: "Some uploaded files aren't linked to a checklist item",
+      description:
+        files.length > 0
+          ? "Some uploaded files aren't linked to a checklist item"
+          : "No files uploaded yet — checked items alone don't earn Evidence Quality & Organization credit",
       pointsRecoverable: linkedMax - linkedPoints,
     });
   }

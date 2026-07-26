@@ -269,7 +269,8 @@ export async function toggleEvidenceItem(
   const { error } = await supabase
     .from("evidence_items")
     .update({ checked })
-    .eq("id", itemId);
+    .eq("id", itemId)
+    .eq("claim_id", claimId);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/claim/${claimId}`);
