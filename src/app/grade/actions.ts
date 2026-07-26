@@ -74,7 +74,8 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
   });
 
   if (insertError) {
-    return { ok: false, error: insertError.message };
+    console.error("submitGrade: leads insert failed:", insertError.message);
+    return { ok: false, error: "Something went wrong saving your results. Please try again in a moment." };
   }
 
   let emailed = false;
