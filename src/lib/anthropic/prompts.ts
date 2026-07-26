@@ -14,7 +14,16 @@
 //
 // v2-golden-04: added SU (supplement), the Supplement Assistant (Roadmap
 // Phase 1, Pro). New tool. Not yet Production; requires Test Run 02.
-export const PROMPT_VERSION = "claim-binder-v2-golden-04";
+//
+// v2-golden-05 (2026-07-26): Policy Decoder ("policy" tool) — added an
+// explicit date-handling instruction. Golden Test Run 02 confirmed the
+// prompt was computing and stating a specific calendar deadline from a
+// stated day-count and the claim's date of loss (e.g. "That calculates to
+// a hard deadline of August 15, 2026") rather than naming the period and
+// directing the user to calculate/confirm it themselves -- the exact
+// calendar-arithmetic-by-the-model risk Decision #56's derived-value
+// audit flagged. Requires Golden Test Run 03 before Production status.
+export const PROMPT_VERSION = "claim-binder-v2-golden-05";
 
 const FORMAT_RULES =
   "Respond in plain text only. Use ALL-CAPS section headings on their own lines. No markdown symbols, no asterisks, no numbered markdown lists. Be specific and concrete. This is educational self-help documentation support, not legal advice.";
@@ -26,7 +35,7 @@ const ANALYZE_PROMPTS: Record<
   (input: string, ctx: string, lib: string, signals: string) => string
 > = {
   policy: (input, ctx, lib) =>
-    `You are a homeowners-insurance policy analysis assistant inside a self-help claim documentation app. The user is a policyholder reviewing their own policy.\n\n${ctx}\n\n${lib}\n\nPOLICY LANGUAGE AND SITUATION FROM USER:\n${input}\n\nAnalyze under these headings: COVERAGE THAT LIKELY APPLIES / EXCLUSIONS AND LIMITATIONS TO WATCH / DEADLINES AND CONDITIONS FOUND / QUESTIONS TO PUT TO THE CARRIER IN WRITING. Where the excerpt is silent, name the standard HO-3 section to go check. ${FORMAT_RULES}`,
+    `You are a homeowners-insurance policy analysis assistant inside a self-help claim documentation app. The user is a policyholder reviewing their own policy.\n\n${ctx}\n\n${lib}\n\nPOLICY LANGUAGE AND SITUATION FROM USER:\n${input}\n\nAnalyze under these headings: COVERAGE THAT LIKELY APPLIES / EXCLUSIONS AND LIMITATIONS TO WATCH / DEADLINES AND CONDITIONS FOUND / QUESTIONS TO PUT TO THE CARRIER IN WRITING. Where the excerpt is silent, name the standard HO-3 section to go check. Under DEADLINES AND CONDITIONS FOUND: quote or closely paraphrase the specific policy language a deadline or condition comes from, and state the period exactly as written (e.g. "the excerpt states proof of loss is due within 60 days of the carrier's request"). Do not calculate or state a specific calendar date — name the triggering event and the length of the window as given in the text, and tell the user to calculate and calendar the exact date themselves. If the excerpt does not state a specific number of days, say so plainly rather than estimating one. ${FORMAT_RULES}`,
   gap: (input, ctx, lib) =>
     `You are a repair-scope audit assistant inside a self-help claim documentation app, with general-contractor-level knowledge of trades and building code.\n\n${ctx}\n\n${lib}\n\nCARRIER ESTIMATE AND ACTUAL DAMAGE FROM USER:\n${input}\n\nAnalyze under these headings: LIKELY MISSING TRADES AND LINE ITEMS / CODE-REQUIRED ITEMS TO VERIFY / COMMONLY UNDERPAID ITEMS FOR THIS DAMAGE TYPE / HOW TO DOCUMENT THE GAP / QUESTIONS FOR THE ADJUSTER. ${FORMAT_RULES}`,
   loss: (input, ctx, lib, signals) =>
