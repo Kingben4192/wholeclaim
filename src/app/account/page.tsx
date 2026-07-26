@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { computeDocumentationScore, toClientView } from "@/lib/scoring/documentationScore";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
+import { ExportDataButton } from "./ExportDataButton";
 import { WelcomeFlow } from "./WelcomeFlow";
 import { SignupIntentForm } from "./SignupIntentForm";
 import { AccountMenu } from "../AccountMenu";
@@ -351,12 +351,7 @@ export default async function AccountPage() {
               Every claim, entry, deadline, and evidence item as JSON, plus every
               uploaded photo and PDF, in one zip.
             </p>
-            <a
-              href="/api/account/export"
-              className="inline-flex items-center gap-2 bg-ledger text-paper px-4 py-2 rounded-sm font-semibold text-sm"
-            >
-              <Download size={16} /> Download my data
-            </a>
+            <ExportDataButton />
           </div>
 
           <div className="border-t border-red-700/20 pt-8">
