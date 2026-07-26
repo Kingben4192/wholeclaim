@@ -20,8 +20,8 @@ export default function AIDisclaimerPage() {
         How AI is used in this product
       </h2>
       <p>
-        Every score and grade WholeClaim shows you — including the Claim
-        Health Score and Claim Grade — is computed deterministically by fixed
+        Every score and grade WholeClaim shows you — including the WholeClaim
+        Documentation Score and Claim Grade — is computed deterministically by fixed
         rules, not by AI. The same inputs always produce the same score, and
         every component is explained with its points and maximum. AI is used
         only to write plain-English explanations, letter drafts, and

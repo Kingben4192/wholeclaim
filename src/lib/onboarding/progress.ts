@@ -25,6 +25,7 @@ export type OnboardingProgressEvidenceItem = {
   label: string;
   checked: boolean;
   category: string | null;
+  file_id: string | null;
 };
 
 export type OnboardingMilestone = {
@@ -45,9 +46,9 @@ export function computeOnboardingProgress(
 ): OnboardingProgress {
   const hasLossDate = claim.date_of_loss !== null;
   const hasDamageCategory = claim.damage_category !== null;
-  const hasPolicy = evidenceItems.some((i) => i.label === POLICY_DOCUMENT_LABEL && i.checked);
-  const hasPhotos = evidenceItems.some((i) => i.category === "evidence_coverage" && i.checked);
-  const hasEstimate = evidenceItems.some((i) => i.label === REPAIR_ESTIMATE_LABEL && i.checked);
+  const hasPolicy = evidenceItems.some((i) => i.label === POLICY_DOCUMENT_LABEL && Boolean(i.file_id));
+  const hasPhotos = evidenceItems.some((i) => i.category === "evidence_coverage" && Boolean(i.file_id));
+  const hasEstimate = evidenceItems.some((i) => i.label === REPAIR_ESTIMATE_LABEL && Boolean(i.file_id));
   const reviewed = hasLossDate && hasDamageCategory && hasPolicy && hasPhotos && hasEstimate;
 
   const milestones: OnboardingMilestone[] = [

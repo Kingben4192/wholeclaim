@@ -19,25 +19,45 @@ describe("computeOnboardingProgress", () => {
     expect(done).toEqual(["claim_created", "loss_date_added", "damage_category_selected"]);
   });
 
-  it("credits policy/photos/estimates only when the matching item is checked", () => {
+  // Regression coverage for the real bug found and fixed 2026-07-27: a
+  // checked-but-unfiled item previously satisfied policy_uploaded/
+  // photos_added/estimates_added on its own -- self-attestation alone,
+  // same vacuous-truth class as the Evidence Quality & Organization fixes
+  // (Decision #47/#56). A milestone must now require a real linked file.
+  it("does NOT credit a checked item with no file attached", () => {
     const result = computeOnboardingProgress(
       { date_of_loss: null, damage_category: null },
       [
-        { label: "Full insurance policy (declarations, forms, endorsements)", checked: false, category: "documentation_completeness" },
-        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness" },
-        { label: "Wide shot of each affected room or area", checked: true, category: "evidence_coverage" },
+        { label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "documentation_completeness", file_id: null },
+        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness", file_id: null },
+        { label: "Wide shot of each affected room or area", checked: true, category: "evidence_coverage", file_id: null },
+      ],
+    );
+    const doneKeys = result.milestones.filter((m) => m.done).map((m) => m.key);
+    expect(doneKeys).not.toContain("policy_uploaded");
+    expect(doneKeys).not.toContain("photos_added");
+    expect(doneKeys).not.toContain("estimates_added");
+  });
+
+  it("credits policy/photos/estimates only when the matching item has a file attached", () => {
+    const result = computeOnboardingProgress(
+      { date_of_loss: null, damage_category: null },
+      [
+        { label: "Full insurance policy (declarations, forms, endorsements)", checked: false, category: "documentation_completeness", file_id: null },
+        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness", file_id: "f1" },
+        { label: "Wide shot of each affected room or area", checked: true, category: "evidence_coverage", file_id: "f2" },
       ],
     );
     const doneKeys = result.milestones.filter((m) => m.done).map((m) => m.key);
     expect(doneKeys).toContain("estimates_added");
     expect(doneKeys).toContain("photos_added");
-    expect(doneKeys).not.toContain("policy_uploaded"); // unchecked
+    expect(doneKeys).not.toContain("policy_uploaded"); // no file_id
   });
 
-  it("credits photos from ANY checked evidence_coverage item, not just a specific label", () => {
+  it("credits photos from ANY file-linked evidence_coverage item, not just a specific label", () => {
     const result = computeOnboardingProgress(
       { date_of_loss: null, damage_category: null },
-      [{ label: "Some custom photo item the user typed themselves", checked: true, category: "evidence_coverage" }],
+      [{ label: "Some custom photo item the user typed themselves", checked: true, category: "evidence_coverage", file_id: "f1" }],
     );
     expect(result.milestones.find((m) => m.key === "photos_added")?.done).toBe(true);
   });
@@ -45,7 +65,7 @@ describe("computeOnboardingProgress", () => {
   it("matches the policy milestone by label alone, regardless of category", () => {
     const result = computeOnboardingProgress(
       { date_of_loss: null, damage_category: null },
-      [{ label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "evidence_coverage" }],
+      [{ label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "evidence_coverage", file_id: "f1" }],
     );
     // Intentional: the policy check is label-only, unlike the photos
     // check (which deliberately matches ANY evidence_coverage item).
@@ -60,22 +80,22 @@ describe("computeOnboardingProgress", () => {
     const result = computeOnboardingProgress(
       { date_of_loss: "2026-06-01", damage_category: "Fire" },
       [
-        { label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "documentation_completeness" },
-        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness" },
-        // no evidence_coverage item checked -- photos missing
+        { label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "documentation_completeness", file_id: "f1" },
+        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness", file_id: "f2" },
+        // no evidence_coverage item filed -- photos missing
       ],
     );
     expect(result.milestones.find((m) => m.key === "documentation_reviewed")?.done).toBe(false);
     expect(result.complete).toBe(false);
   });
 
-  it("reaches 100% complete only when every milestone is satisfied", () => {
+  it("reaches 100% complete only when every milestone is satisfied with real files", () => {
     const result = computeOnboardingProgress(
       { date_of_loss: "2026-06-01", damage_category: "Fire" },
       [
-        { label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "documentation_completeness" },
-        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness" },
-        { label: "Any photo item", checked: true, category: "evidence_coverage" },
+        { label: "Full insurance policy (declarations, forms, endorsements)", checked: true, category: "documentation_completeness", file_id: "f1" },
+        { label: "Contractor or repair estimate", checked: true, category: "documentation_completeness", file_id: "f2" },
+        { label: "Any photo item", checked: true, category: "evidence_coverage", file_id: "f3" },
       ],
     );
     expect(result.complete).toBe(true);
@@ -91,7 +111,7 @@ describe("computeOnboardingProgress", () => {
 
   it("is a pure function -- identical input produces identical output", () => {
     const claim = { date_of_loss: "2026-06-01", damage_category: "Water / plumbing" };
-    const items = [{ label: "Contractor or repair estimate", checked: true, category: "documentation_completeness" }];
+    const items = [{ label: "Contractor or repair estimate", checked: true, category: "documentation_completeness", file_id: "f1" }];
     expect(computeOnboardingProgress(claim, items)).toEqual(computeOnboardingProgress(claim, items));
   });
 });

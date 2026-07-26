@@ -115,7 +115,7 @@ export default function BeforeAfterGrade({
       <p className="text-xs font-medium uppercase text-neutral-500 mb-3">Your Progress</p>
       <div className="flex items-center justify-between">
         <div className="text-center flex-1">
-          <p className="text-xs text-neutral-400 mb-1">Started {startedDate}</p>
+          <p className="text-xs text-neutral-400 mb-1">Claim Grade — started {startedDate}</p>
           {hasBaseline && beforeLetter !== null && beforeTotal !== null ? (
             <>
               <p className={`text-4xl font-bold ${gradeColor(beforeLetter)}`}>{beforeLetter}</p>
@@ -134,11 +134,15 @@ export default function BeforeAfterGrade({
           </svg>
         </div>
         <div className="text-center flex-1">
-          <p className="text-xs text-neutral-400 mb-1">Today</p>
+          <p className="text-xs text-neutral-400 mb-1">WholeClaim Documentation Score — today</p>
           <p className={`text-4xl font-bold ${gradeColor(afterLetter)}`}>{afterLetter}</p>
           <p className="text-xs text-neutral-500">{current.total}/100</p>
         </div>
       </div>
+
+      <p className="text-[11px] text-neutral-400 text-center mt-2">
+        Two different measurements. Only the WholeClaim Documentation Score (right) counts toward the Success Guarantee.
+      </p>
 
       {progress.kind === 'no_baseline' && (
         <div className="mt-4 rounded-lg bg-neutral-100 px-3 py-2 text-center">

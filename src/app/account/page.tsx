@@ -115,8 +115,10 @@ export default async function AccountPage() {
     return c ? c.carrier || "Unnamed carrier" : "a claim";
   };
 
-  // Claim Grade summary — real computed grade per claim shown, same
-  // deterministic scoring every other grade display in the app uses.
+  // WholeClaim Documentation Score summary — real computed score per claim
+  // shown, same deterministic scoring every other score display in the
+  // app uses. Not the public Claim Grade quiz (Decision #59) -- this is
+  // the file-based Documentation Score engine.
   // Scoped to the same small preview list as "My Claims" (not every claim
   // the user has ever created) to keep this one page's query count bounded.
   // toClientView() strips weights/maxes/raw points before anything here is
@@ -277,11 +279,11 @@ export default async function AccountPage() {
         )}
       </section>
 
-      {/* Claim Grade summary */}
+      {/* WholeClaim Documentation Score summary */}
       {grades.length > 0 && (
         <section>
           <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-3">
-            Claim Grade Summary
+            WholeClaim Documentation Score Summary
           </h2>
           <div className="border border-ink/15 rounded-sm divide-y divide-ink/10">
             {grades.map(({ claimId, view }) => (
