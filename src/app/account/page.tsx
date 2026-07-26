@@ -9,6 +9,7 @@ import { WelcomeFlow } from "./WelcomeFlow";
 import { SignupIntentForm } from "./SignupIntentForm";
 import { AccountMenu } from "../AccountMenu";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
+import { filesForScoring } from "@/lib/scoringFileFilter";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -121,7 +122,7 @@ export default async function AccountPage() {
   // rendered — this page never holds the full DocumentationScoreResult.
   const grades = await Promise.all(
     (claims ?? []).map(async (claim) => {
-      const [{ data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }] = await Promise.all([
+      const [{ data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }, { data: promisedItems }] = await Promise.all([
         supabase.from("entries").select("type, date, created_at").eq("claim_id", claim.id),
         supabase.from("deadlines").select("title, due_date, created_at").eq("claim_id", claim.id),
         supabase
@@ -129,6 +130,7 @@ export default async function AccountPage() {
           .select("label, checked, file_id, category, created_at")
           .eq("claim_id", claim.id),
         supabase.from("files").select("id, kind, original_name, uploaded_at").eq("claim_id", claim.id),
+        supabase.from("promised_items").select("file_id").eq("claim_id", claim.id),
       ]);
       const score = computeDocumentationScore({
         claim: {
@@ -139,7 +141,7 @@ export default async function AccountPage() {
         entries: entries ?? [],
         deadlines: deadlines ?? [],
         evidenceItems: evidenceItems ?? [],
-        files: files ?? [],
+        files: filesForScoring(files ?? [], evidenceItems ?? [], promisedItems ?? []),
       });
       return { claimId: claim.id, view: toClientView(score) };
     }),

@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeDocumentationScore, gradeForScore } from "./scoring/documentationScore";
 import { getAdminClient } from "./supabase/admin";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "./entitlements";
+import { filesForScoring } from "./scoringFileFilter";
 
 // Success Guarantee — eligibility foundation only (Decision #36, Billing
 // Build Order Step 7). Explicitly NOT here: refund issuance, automatic
@@ -205,7 +206,7 @@ export async function finalizeGuaranteeIfComplete(
   const allComplete = GUARANTEE_CHECKLIST_ITEMS.every((item) => guarantee[item.key]);
   if (!allComplete) return guarantee;
 
-  const [{ data: claim }, { data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }] =
+  const [{ data: claim }, { data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }, { data: promisedItems }] =
     await Promise.all([
       userClient.from("claims").select("date_of_loss, damage_category, offer_amount").eq("id", claimId).single(),
       userClient.from("entries").select("type, date, created_at").eq("claim_id", claimId),
@@ -215,6 +216,7 @@ export async function finalizeGuaranteeIfComplete(
         .select("label, checked, file_id, category, created_at")
         .eq("claim_id", claimId),
       userClient.from("files").select("id, kind, original_name, uploaded_at").eq("claim_id", claimId),
+      userClient.from("promised_items").select("file_id").eq("claim_id", claimId),
     ]);
 
   const score = computeDocumentationScore({
@@ -226,7 +228,7 @@ export async function finalizeGuaranteeIfComplete(
     entries: entries ?? [],
     deadlines: deadlines ?? [],
     evidenceItems: evidenceItems ?? [],
-    files: files ?? [],
+    files: filesForScoring(files ?? [], evidenceItems ?? [], promisedItems ?? []),
   });
 
   const finalGrade = score.grade;

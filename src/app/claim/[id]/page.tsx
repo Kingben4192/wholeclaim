@@ -27,6 +27,8 @@ import { OnboardingProgressCard } from "./OnboardingProgress";
 import { AccountMenu } from "@/app/AccountMenu";
 import { ClaimStatusControl } from "./ClaimStatusControl";
 import { isClaimStatus } from "@/lib/claimCategories";
+import { PromisedDocumentTracker } from "./PromisedDocumentTracker";
+import { filesForScoring } from "@/lib/scoringFileFilter";
 
 export default async function ClaimDetailPage({
   params,
@@ -63,6 +65,7 @@ export default async function ClaimDetailPage({
     { data: evidenceItems },
     { data: files },
     { data: lossOfUseExpenses },
+    { data: promisedItems },
     {
       data: { user },
     },
@@ -94,6 +97,11 @@ export default async function ClaimDetailPage({
         .select("id, date, category, amount, description")
         .eq("claim_id", id)
         .order("date", { ascending: false }),
+      supabase
+        .from("promised_items")
+        .select("id, description, promised_by, promised_date, target_date, file_id")
+        .eq("claim_id", id)
+        .order("created_at", { ascending: false }),
       supabase.auth.getUser(),
     ]);
 
@@ -118,7 +126,7 @@ export default async function ClaimDetailPage({
     entries: entries ?? [],
     deadlines: deadlines ?? [],
     evidenceItems: evidenceItems ?? [],
-    files: files ?? [],
+    files: filesForScoring(files ?? [], evidenceItems ?? [], promisedItems ?? []),
   });
 
   // Claim Completion Progress System (Onboarding Step 5) — purely derived,
@@ -358,6 +366,8 @@ export default async function ClaimDetailPage({
           </button>
         </form>
       </section>
+
+      <PromisedDocumentTracker claimId={id} items={promisedItems ?? []} />
 
       {/* Evidence Vault */}
       <section>

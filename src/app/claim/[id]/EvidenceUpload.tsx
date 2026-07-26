@@ -8,6 +8,9 @@ import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 interface EvidenceUploadProps {
   claimId: string;
   evidenceItemId?: string;
+  // Promised-Document Tracker (2026-07-26) -- mutually exclusive with
+  // evidenceItemId; marks a promised item received on successful upload.
+  promisedItemId?: string;
   onUploadComplete?: () => void;
   // "inline" is the small per-row "Attach" pill; "block" is the larger
   // file picker used by the general (not linked to a checklist item) vault
@@ -22,6 +25,7 @@ const MAX_FILE_BYTES = 15 * 1024 * 1024;
 export function EvidenceUpload({
   claimId,
   evidenceItemId,
+  promisedItemId,
   onUploadComplete,
   variant = "inline",
 }: EvidenceUploadProps) {
@@ -43,7 +47,7 @@ export function EvidenceUpload({
         const formData = new FormData();
         formData.append("file", file);
         if (evidenceStage) formData.append("evidence_stage", evidenceStage);
-        await uploadFile(claimId, evidenceItemId ?? null, formData);
+        await uploadFile(claimId, evidenceItemId ?? null, formData, promisedItemId ?? null);
         onUploadComplete?.();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed.");
@@ -51,7 +55,7 @@ export function EvidenceUpload({
         setUploading(false);
       }
     },
-    [claimId, evidenceItemId, evidenceStage, onUploadComplete],
+    [claimId, evidenceItemId, promisedItemId, evidenceStage, onUploadComplete],
   );
 
   const inputProps = {

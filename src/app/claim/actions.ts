@@ -293,6 +293,7 @@ export async function uploadFile(
   claimId: string,
   evidenceItemId: string | null,
   formData: FormData,
+  promisedItemId: string | null = null,
 ) {
   const supabase = await createClient();
   const {
@@ -377,7 +378,18 @@ export async function uploadFile(
     throw new Error(insertError?.message ?? "Could not save the upload.");
   }
 
-  if (evidenceItemId) {
+  if (promisedItemId) {
+    // Promised-Document Tracker (2026-07-26) -- mutually exclusive with
+    // evidenceItemId. Marks the promise received; statusForPromisedItem()
+    // (src/lib/promisedItems.ts) derives "received" purely from file_id
+    // being set, same derived-status philosophy as evidence_items.
+    const { error: linkError } = await supabase
+      .from("promised_items")
+      .update({ file_id: fileRow.id })
+      .eq("id", promisedItemId)
+      .eq("claim_id", claimId);
+    if (linkError) throw new Error(linkError.message);
+  } else if (evidenceItemId) {
     const { error: linkError } = await supabase
       .from("evidence_items")
       .update({ file_id: fileRow.id, checked: true })
@@ -471,6 +483,52 @@ export async function deleteLossOfUseExpense(claimId: string, expenseId: string)
     .from("loss_of_use_expenses")
     .delete()
     .eq("id", expenseId)
+    .eq("claim_id", claimId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/claim/${claimId}`);
+}
+
+// Promised-Document Tracker (founder audit, 2026-07-26) -- tracks a
+// carrier-side commitment ("they said the denial letter was coming") as
+// distinct from evidence_items. No "mark received" action without a file:
+// deliberately consistent with the rest of the app's evidence-backed-status
+// philosophy (received means a file is actually attached, not just claimed).
+export async function addPromisedItem(claimId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const description = String(formData.get("description") ?? "").trim();
+  const promisedBy = String(formData.get("promised_by") ?? "").trim() || null;
+  const targetDate = String(formData.get("target_date") ?? "").trim() || null;
+  if (!description) throw new Error("Say what was promised.");
+
+  const { error } = await supabase.from("promised_items").insert({
+    claim_id: claimId,
+    user_id: user.id,
+    description,
+    promised_by: promisedBy,
+    target_date: targetDate,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/claim/${claimId}`);
+}
+
+export async function deletePromisedItem(claimId: string, itemId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("promised_items")
+    .delete()
+    .eq("id", itemId)
     .eq("claim_id", claimId);
   if (error) throw new Error(error.message);
 
