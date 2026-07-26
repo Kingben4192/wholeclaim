@@ -7,7 +7,15 @@
 
 import { claimTypeProfile, type ClaimTypeProfile, type EvidenceCategory } from "./claimTypeProfile";
 
-export type ChecklistTemplateItem = { label: string; category: EvidenceCategory };
+export type ChecklistTemplateItem = { label: string; category: EvidenceCategory; safetyNote?: string };
+
+// Verbatim guardrail text (founder-specified, 2026-07-26) -- applied only
+// to the one item that currently carries a real physical-access risk
+// (roof photos). Not rewritten per-item; reused exactly as given even
+// though some of its clauses (heavy appliances, utilities) are written
+// broadly rather than roof-specific.
+const SAFETY_NOTE_ACCESS_RISK =
+  "Photograph identifying labels only if they are readily accessible. Do not move heavy appliances, disconnect utilities, or attempt to access areas that require specialized tools or create a safety hazard.";
 
 // Exported so other consumers (e.g. onboarding progress) can identify
 // these specific baseline items without duplicating the label text —
@@ -42,7 +50,11 @@ const PROFILE_ADDITIONS: Record<ClaimTypeProfile, ChecklistTemplateItem[]> = {
     { label: "Date-stamped photos taken within 24-48 hrs of discovery", category: "evidence_coverage" },
   ],
   WindHail: [
-    { label: "Exterior/roof elevation photos (all sides)", category: "evidence_coverage" },
+    {
+      label: "Exterior/roof elevation photos (all sides)",
+      category: "evidence_coverage",
+      safetyNote: SAFETY_NOTE_ACCESS_RISK,
+    },
     { label: "Weather-event documentation (storm report, NOAA data)", category: "documentation_completeness" },
     { label: "Estimate line items matched to damage photos", category: "documentation_completeness" },
   ],
@@ -68,4 +80,20 @@ const PROFILE_ADDITIONS: Record<ClaimTypeProfile, ChecklistTemplateItem[]> = {
 export function checklistTemplateFor(damageCategory: string | null): ChecklistTemplateItem[] {
   const profile = claimTypeProfile(damageCategory);
   return [...BASELINE_EVIDENCE_COVERAGE, ...BASELINE_DOCUMENTATION_COMPLETENESS, ...PROFILE_ADDITIONS[profile]];
+}
+
+// evidence_items only ever stores label + category at seed time (see
+// createClaim, src/app/claim/actions.ts) -- safetyNote isn't a column
+// there, so it's looked up by exact label match at render time instead.
+// No schema change; matches every profile's items, not just the seeding
+// claim's own damage category, since a label is unique across the
+// template set today.
+const ALL_TEMPLATE_ITEMS: ChecklistTemplateItem[] = [
+  ...BASELINE_EVIDENCE_COVERAGE,
+  ...BASELINE_DOCUMENTATION_COMPLETENESS,
+  ...Object.values(PROFILE_ADDITIONS).flat(),
+];
+
+export function safetyNoteForLabel(label: string): string | undefined {
+  return ALL_TEMPLATE_ITEMS.find((item) => item.label === label)?.safetyNote;
 }
