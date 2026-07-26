@@ -71,3 +71,36 @@ export async function saveSignupIntent(formData: FormData) {
 
   redirect("/account");
 }
+
+export type AccountDeletionSummary = {
+  claims: number;
+  files: number;
+  entries: number;
+  deadlines: number;
+};
+
+// Pre-delete dialog (2026-07-26) -- names exactly what will be lost before
+// the irreversible action, rather than a generic warning. RLS-scoped counts
+// only (the normal session client, not admin) -- this is the user's own
+// data, same access they already have everywhere else in the app.
+export async function getAccountDeletionSummary(): Promise<AccountDeletionSummary> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const [{ count: claims }, { count: files }, { count: entries }, { count: deadlines }] = await Promise.all([
+    supabase.from("claims").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("files").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("deadlines").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
+
+  return {
+    claims: claims ?? 0,
+    files: files ?? 0,
+    entries: entries ?? 0,
+    deadlines: deadlines ?? 0,
+  };
+}
