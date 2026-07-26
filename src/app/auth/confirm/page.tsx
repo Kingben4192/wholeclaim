@@ -19,9 +19,13 @@ import { useCallback, useRef, useSyncExternalStore } from "react";
 // (browser-simulated clicks from a rendering/screenshot scanner would be
 // the one residual gap — not addressed here, flagged as a known limit).
 //
-// Requires a matching change to the Supabase Auth email template (Magic
-// Link) to point here instead of directly at {{ .ConfirmationURL }} — not
-// yet applied; this page does nothing until that template change ships.
+// Both callers that generate a Supabase verify link already wrap it
+// through here: the Send Email Hook (src/app/api/auth/send-email-hook/
+// route.ts:77, login magic link) and the Claim Grade results email
+// (src/app/grade/actions.ts, sendResultsEmail) — Supabase's own SMTP/
+// template system is bypassed entirely for auth email (Decision #41/#43),
+// so there's no separate "Magic Link" email template to point at
+// {{ .ConfirmationURL }} in the first place. No further wiring needed.
 // /auth/callback itself is unchanged — once the user clicks through, the
 // flow proceeds exactly as it does today.
 //

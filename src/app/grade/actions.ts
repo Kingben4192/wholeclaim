@@ -116,6 +116,16 @@ async function sendResultsEmail(args: {
     .map(([cat, pts]) => `${cat}: ${pts}/20`)
     .join(" · ");
 
+  // Same fragment-wrapped scanner defense as send-email-hook/route.ts:77
+  // -- the raw action_link is the exact shape (.supabase.co/auth/v1/verify
+  // ?token=...) an automated link scanner will prefetch and burn before
+  // the real click. Wrapping it in a fragment (never sent in an HTTP
+  // request) and routing through /auth/confirm's click-required
+  // interstitial closes the same gap here that generateLink() bypasses
+  // (this call never goes through the Send Email Hook at all).
+  const wrappedLink =
+    `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm#link=${encodeURIComponent(data.properties.action_link)}`;
+
   // mail.getwholeclaim.com verified in Resend 2026-07-23 (independent of
   // Decision Log #17's still-Open trademark/name clearance -- domain DNS
   // verification only needed access to a domain already in live use).
@@ -133,7 +143,7 @@ ${args.line}
 
 ${breakdown}
 
-Create your claim file — pre-filled from what you already told us: ${data.properties.action_link}
+Create your claim file — pre-filled from what you already told us: ${wrappedLink}
 
 WholeClaim is a self-help documentation tool, not legal or insurance advice.`,
   });
