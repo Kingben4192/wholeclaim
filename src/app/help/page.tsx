@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Help & Support | WholeClaim" };
 
@@ -68,7 +70,22 @@ const GUIDES: { title: string; steps?: string[]; body?: string }[] = [
   },
 ];
 
-export default function HelpPage() {
+export default async function HelpPage() {
+  // Public page, no route protection (src/lib/supabase/middleware.ts
+  // PROTECTED_PREFIXES doesn't include /help) -- but a signed-in user
+  // landing here (e.g. via the Help Center link inside /account) had no
+  // way back without re-authenticating, since this header always showed
+  // "Log in" regardless of session state. Auth check is best-effort only:
+  // it never gates the page, just which link the header shows.
+  let isSignedIn = false;
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isSignedIn = Boolean(user);
+  }
+
   return (
     <main className="min-h-screen flex flex-col">
       <header className="px-6 py-4 flex items-center justify-between border-b border-ink/10">
@@ -78,9 +95,15 @@ export default function HelpPage() {
         >
           Whole<span className="text-ledger">Claim</span>
         </Link>
-        <Link href="/login" className="text-sm font-semibold text-ledger">
-          Log in
-        </Link>
+        {isSignedIn ? (
+          <Link href="/account" className="text-sm font-semibold text-ledger">
+            Account
+          </Link>
+        ) : (
+          <Link href="/login" className="text-sm font-semibold text-ledger">
+            Log in
+          </Link>
+        )}
       </header>
 
       <div className="max-w-3xl w-full mx-auto px-6 py-16">
