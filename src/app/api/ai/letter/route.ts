@@ -5,6 +5,7 @@ import { isAnthropicConfigured, callClaude } from "@/lib/anthropic/client";
 import { checkAiAccess, logAiRun } from "@/lib/anthropic/rateLimit";
 import { buildClaimContext, buildLibraryContext } from "@/lib/anthropic/context";
 import { letterPrompt, PROMPT_VERSION, type LetterType } from "@/lib/anthropic/prompts";
+import { applyOutputFilter } from "@/lib/anthropic/outputFilter";
 
 const VALID_TYPES: LetterType[] = ["supplement", "delay", "doi", "nonrenewal"];
 
@@ -60,6 +61,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // BRAND_VOICE.md addendum, Section B -- Tier 1 hard binding. ai_runs
+  // logs the model's actual output verbatim (Decision #26 traceability);
+  // the filtered text is what the client sees.
+  const filtered = applyOutputFilter(result.text, `letter:${type}`);
+
   await logAiRun(supabase, {
     userId: user.id,
     claimId,
@@ -70,5 +76,5 @@ export async function POST(request: NextRequest) {
     tokensOut: result.usage.output_tokens,
   });
 
-  return NextResponse.json({ output: result.text });
+  return NextResponse.json({ output: filtered.text });
 }

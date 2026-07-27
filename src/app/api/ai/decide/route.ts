@@ -10,6 +10,7 @@ import {
   formatEscalationSignals,
 } from "@/lib/anthropic/context";
 import { decidePrompt, PROMPT_VERSION } from "@/lib/anthropic/prompts";
+import { applyOutputFilter } from "@/lib/anthropic/outputFilter";
 
 export async function POST(request: NextRequest) {
   if (!isSupabaseConfigured() || !isAnthropicConfigured()) {
@@ -63,6 +64,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // BRAND_VOICE.md addendum, Section B -- Tier 1 hard binding. ai_runs
+  // logs the model's actual output verbatim (Decision #26 traceability);
+  // the filtered text is what the client sees.
+  const filtered = applyOutputFilter(result.text, "decide");
+
   await logAiRun(supabase, {
     userId: user.id,
     claimId,
@@ -73,5 +79,5 @@ export async function POST(request: NextRequest) {
     tokensOut: result.usage.output_tokens,
   });
 
-  return NextResponse.json({ output: result.text });
+  return NextResponse.json({ output: filtered.text });
 }

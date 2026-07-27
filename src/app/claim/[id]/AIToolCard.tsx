@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2, Copy, Check } from "lucide-react";
 import { UpgradeOptions } from "./UpgradeOptions";
 import { DerivedValueNote } from "./DerivedValueNote";
+import { UNIVERSAL_DISCLAIMER } from "@/lib/anthropic/outputFilter";
 
 interface AIToolCardProps {
   title: string;
@@ -108,9 +109,7 @@ export function AIToolCard({
               </div>
               <DerivedValueNote source="ai-read" className="mt-2" />
               <p className="text-xs text-ink/40 italic mt-3">
-                WholeClaim is a self-help documentation tool, not legal or
-                insurance advice. A documented individual result — results
-                vary by case; verify specifics for your situation.
+                {UNIVERSAL_DISCLAIMER}
               </p>
               <div className="flex gap-4 mt-3">
                 <button
