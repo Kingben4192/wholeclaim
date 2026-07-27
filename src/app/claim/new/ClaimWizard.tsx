@@ -28,6 +28,13 @@ import { UpgradeOptions } from "../[id]/UpgradeOptions";
 // step. These were never removed from createClaim's own formData
 // handling, so this is purely a UI addition.
 //
+// Step 5 — Claim label (Decision #75) — a short, required, user-authored
+// label ("Kitchen Water Leak"), IS its own required step, unlike carrier/
+// claim number above. It exists specifically to disambiguate two claims a
+// user could otherwise leave looking identical (carrier/claim number are
+// both optional) — see claimCategoryGate.ts's "Create separate claim"
+// path, which already allows a second active claim in the same category.
+//
 // Step 1 (Decision #44, free-plan claim limits) — dispute category, a
 // DIFFERENT axis from Step 4's "Claim type" (damage_category, a loss-cause
 // taxonomy feeding Documentation Score checklist seeding). Placed first,
@@ -63,6 +70,7 @@ type WizardData = {
   date_of_loss: string;
   date_discovered: string;
   damage_category: string;
+  label: string;
   carrier: string;
   claim_number: string;
   policy_number: string;
@@ -74,6 +82,7 @@ const STEP_LABELS = [
   "What happened",
   "When it happened",
   "Claim type",
+  "Claim label",
   "Available documentation",
 ];
 const LAST_STEP = STEP_LABELS.length;
@@ -94,6 +103,7 @@ export function ClaimWizard() {
     date_of_loss: "",
     date_discovered: "",
     damage_category: "",
+    label: "",
     carrier: "",
     claim_number: "",
     policy_number: "",
@@ -131,6 +141,9 @@ export function ClaimWizard() {
     }
     if (n === 4 && data.damage_category.trim().length === 0) {
       return "Select a claim type before continuing.";
+    }
+    if (n === 5 && data.label.trim().length === 0) {
+      return "Give this claim a short label before continuing.";
     }
     return null;
   }
@@ -319,8 +332,34 @@ export function ClaimWizard() {
           <input type="hidden" name="damage_category" value={data.damage_category} />
         )}
 
-        {/* Step 5 — Available documentation */}
-        {step === 5 && (
+        {/* Step 5 — Claim label (Decision #75) */}
+        {step === 5 ? (
+          <label className="block">
+            <span className="block text-xs font-semibold uppercase tracking-wider mb-1 text-ink/60">
+              Claim label
+            </span>
+            <p className="text-xs text-ink/50 mb-2">
+              A short name to tell this claim apart from any others —
+              carrier and claim number are optional, so this is what shows
+              first everywhere you see this claim.
+            </p>
+            <input
+              name="label"
+              type="text"
+              required
+              maxLength={60}
+              value={data.label}
+              onChange={(e) => update("label", e.target.value)}
+              placeholder="e.g. Kitchen Water Leak"
+              className="w-full text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
+            />
+          </label>
+        ) : (
+          <input type="hidden" name="label" value={data.label} />
+        )}
+
+        {/* Step 6 — Available documentation */}
+        {step === 6 && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider mb-1 text-ink/60">
               What do you already have?

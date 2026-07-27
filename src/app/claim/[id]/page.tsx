@@ -33,6 +33,7 @@ import { UploadHelp } from "./UploadHelp";
 import { ClaimContextBar } from "./ClaimContextBar";
 import { BottomNav } from "@/app/BottomNav";
 import { filesForScoring } from "@/lib/scoringFileFilter";
+import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 
 export default async function ClaimDetailPage({
   params,
@@ -176,16 +177,20 @@ export default async function ClaimDetailPage({
     <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16 flex flex-col gap-12">
       <AccountMenu />
       <ClaimContextBar
+        claimId={id}
+        label={claim.label}
+        createdAt={claim.created_at}
         carrier={claim.carrier}
         claimNumber={claim.claim_number}
         damageCategory={claim.damage_category}
       />
       <header>
         <h1 className="font-display text-2xl font-extrabold mb-1">
-          {claim.carrier || "Unnamed carrier"}
+          {getClaimDisplayTitle(claim)}
         </h1>
         <p className="text-sm text-ink/60 font-mono">
-          {claim.claim_number || "no claim #"} · {claim.damage_category || "damage type not set"}
+          {claim.carrier || "Unnamed carrier"}
+          {claim.claim_number && ` · ${claim.claim_number}`} · {claim.damage_category || "damage type not set"}
         </p>
         {proSource === "subscription" && (
           <p className="text-xs font-semibold text-ledger mt-2">

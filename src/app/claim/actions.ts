@@ -39,6 +39,14 @@ export async function createClaim(formData: FormData) {
   const damage_desc = String(formData.get("damage_desc") ?? "").trim() || null;
   const us_state = String(formData.get("us_state") ?? "").trim() || null;
 
+  // Decision #75 -- required going forward, re-validated here regardless of
+  // ClaimWizard.tsx's own client-side check, same discipline every other
+  // gate in this file follows.
+  const label = String(formData.get("label") ?? "").trim();
+  if (!label) {
+    throw new Error("Give this claim a short label before continuing.");
+  }
+
   const claim_category_raw = String(formData.get("claim_category") ?? "").trim();
   if (!isClaimCategory(claim_category_raw)) {
     throw new Error("Choose a dispute category to continue.");
@@ -69,6 +77,7 @@ export async function createClaim(formData: FormData) {
       damage_desc,
       us_state,
       claim_category,
+      label,
     })
     .select("id")
     .single();
@@ -175,6 +184,32 @@ export async function updateClaimStatus(claimId: string, status: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath(`/claim/${claimId}`);
+}
+
+// Decision #75. The only path to setting/changing a claim's label after
+// creation -- covers both a normal edit and a pre-#75 claim's first-ever
+// label (those have label = NULL and show the created_at fallback, per the
+// same table entry, until this is used).
+export async function updateClaimLabel(claimId: string, label: string) {
+  const trimmed = label.trim();
+  if (!trimmed) throw new Error("Label can't be empty.");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("claims")
+    .update({ label: trimmed })
+    .eq("id", claimId)
+    .eq("user_id", user.id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/claim/${claimId}`);
+  revalidatePath("/claim");
+  revalidatePath("/account");
 }
 
 export async function addEntry(claimId: string, formData: FormData) {

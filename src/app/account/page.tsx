@@ -12,6 +12,7 @@ import { BottomNav } from "../BottomNav";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 import { bucketLabel, relativeAge, BUCKET_ORDER, type DateBucket } from "@/lib/relativeTime";
+import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 
 // Authenticated dashboard (Part 2 of the homepage/dashboard split,
 // 2026-07-20) — the primary landing page after magic-link sign-in
@@ -71,7 +72,7 @@ export default async function AccountPage() {
       .maybeSingle(),
     supabase
       .from("claims")
-      .select("id, carrier, claim_number, damage_category, claim_category, status, date_of_loss, offer_amount, created_at")
+      .select("id, label, carrier, claim_number, damage_category, claim_category, status, date_of_loss, offer_amount, created_at")
       .order("created_at", { ascending: false })
       .limit(RECENT_CLAIMS_LIMIT),
   ]);
@@ -115,7 +116,7 @@ export default async function AccountPage() {
   const claimIds = (claims ?? []).map((c) => c.id);
   const claimLabel = (id: string) => {
     const c = claims?.find((cl) => cl.id === id);
-    return c ? c.carrier || "Unnamed carrier" : "a claim";
+    return c ? getClaimDisplayTitle(c) : "a claim";
   };
 
   // WholeClaim Documentation Score summary — real computed score per claim
@@ -254,11 +255,14 @@ export default async function AccountPage() {
             href={`/claim/${claims[0].id}`}
             className="flex items-center justify-between border-2 border-ledger bg-ledger/5 rounded-sm px-4 py-3.5 hover:bg-ledger/10"
           >
-            <span className="text-sm font-semibold">
-              {claims[0].carrier || "Unnamed carrier"}
-              {claims[0].claim_number ? ` — ${claims[0].claim_number}` : ""}
+            <span className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold truncate">{getClaimDisplayTitle(claims[0])}</span>
+              <span className="text-xs text-ink/50 font-mono truncate">
+                {claims[0].carrier || "Unnamed carrier"}
+                {claims[0].claim_number && ` · ${claims[0].claim_number}`}
+              </span>
             </span>
-            <span className="text-xs font-semibold text-ledger">Resume &rarr;</span>
+            <span className="text-xs font-semibold text-ledger shrink-0 ml-3">Resume &rarr;</span>
           </Link>
         </section>
       )}
@@ -281,11 +285,14 @@ export default async function AccountPage() {
                   href={`/claim/${c.id}`}
                   className="flex items-center justify-between px-4 py-3 text-sm hover:bg-ledger/5"
                 >
-                  <span>
-                    {c.carrier || "Unnamed carrier"}
-                    {c.claim_number ? ` — ${c.claim_number}` : ""}
+                  <span className="flex flex-col min-w-0">
+                    <span className="truncate">{getClaimDisplayTitle(c)}</span>
+                    <span className="text-xs text-ink/50 font-mono truncate">
+                      {c.carrier || "Unnamed carrier"}
+                      {c.claim_number && ` · ${c.claim_number}`}
+                    </span>
                   </span>
-                  <span className="text-xs text-ink/50 font-mono flex items-center gap-1.5">
+                  <span className="text-xs text-ink/50 font-mono flex items-center gap-1.5 shrink-0 ml-3">
                     {c.damage_category || "damage type not set"}
                     {c.status && c.status !== "active" && (
                       <span className="px-1.5 py-0.5 rounded-sm bg-ink/10 text-ink/60 normal-case font-sans capitalize">

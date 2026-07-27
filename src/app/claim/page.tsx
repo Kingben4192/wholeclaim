@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { AccountMenu } from "../AccountMenu";
 import { BottomNav } from "../BottomNav";
 import { DeadlineBadge } from "./DeadlineBadge";
+import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 
 export default async function ClaimListPage() {
   if (!isSupabaseConfigured()) {
@@ -26,7 +27,7 @@ export default async function ClaimListPage() {
   const supabase = await createClient();
   const { data: claims } = await supabase
     .from("claims")
-    .select("id, carrier, claim_number, damage_category, claim_category, status, created_at")
+    .select("id, label, carrier, claim_number, damage_category, claim_category, status, created_at")
     .order("created_at", { ascending: false });
 
   // Next-deadline strip: one extra query, reduced client-side to the
@@ -64,10 +65,12 @@ export default async function ClaimListPage() {
                 href={`/claim/${c.id}`}
                 className="block border border-ink/15 rounded-sm px-4 py-3 hover:bg-ledger/5"
               >
-                <div className="font-semibold text-sm">
-                  {c.carrier || "Unnamed carrier"} — {c.claim_number || "no claim #"}
-                </div>
+                <div className="font-semibold text-sm">{getClaimDisplayTitle(c)}</div>
                 <div className="text-xs text-ink/50 font-mono flex items-center gap-2 flex-wrap">
+                  <span>
+                    {c.carrier || "Unnamed carrier"}
+                    {c.claim_number && ` · ${c.claim_number}`}
+                  </span>
                   <span>{c.damage_category || "damage type not set"}</span>
                   {c.claim_category && (
                     <span className="px-1.5 py-0.5 rounded-sm bg-ledger/10 text-ledger normal-case font-sans">
