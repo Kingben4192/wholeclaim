@@ -8,6 +8,7 @@ import { ExportDataButton } from "./ExportDataButton";
 import { WelcomeFlow } from "./WelcomeFlow";
 import { SignupIntentForm } from "./SignupIntentForm";
 import { AccountMenu } from "../AccountMenu";
+import { BottomNav } from "../BottomNav";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 import { bucketLabel, relativeAge, BUCKET_ORDER, type DateBucket } from "@/lib/relativeTime";
@@ -86,9 +87,10 @@ export default async function AccountPage() {
   // correctly excluded from this new, required question.
   if (!profile?.onboarding_seen_at && !profile?.signup_category) {
     return (
-      <main className="max-w-2xl mx-auto px-6 py-16">
+      <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16">
         <AccountMenu />
         <SignupIntentForm />
+        <BottomNav />
       </main>
     );
   }
@@ -102,9 +104,10 @@ export default async function AccountPage() {
   // with zero claims.
   if (!profile?.onboarding_seen_at && (!claims || claims.length === 0)) {
     return (
-      <main className="max-w-2xl mx-auto px-6 py-16">
+      <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16">
         <AccountMenu />
         <WelcomeFlow />
+        <BottomNav />
       </main>
     );
   }
@@ -199,8 +202,9 @@ export default async function AccountPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16 flex flex-col gap-12">
+    <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16 flex flex-col gap-12">
       <AccountMenu />
+      <BottomNav />
       <div>
         <h1 className="font-display text-2xl font-extrabold">Your dashboard</h1>
         <p className="text-sm text-ink/60 mt-1">{user.email}</p>
@@ -233,6 +237,31 @@ export default async function AccountPage() {
           )}
         </div>
       </section>
+
+      {/* Decision #69 -- "Continue Your Claim" resume card. Uses the same
+          created_at DESC ordering "My Claims" below already queries with
+          (claims[0] is the same row as that list's first entry) as a
+          proxy for "most recently active" -- no last_viewed_at/updated_at
+          tracking exists on claims, and adding one is a migration
+          (founder-applied, out of scope here). Category filter chips
+          deferred per the spec's own explicit priority call. */}
+      {claims && claims.length > 0 && (
+        <section>
+          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-3">
+            Continue Your Claim
+          </h2>
+          <Link
+            href={`/claim/${claims[0].id}`}
+            className="flex items-center justify-between border-2 border-ledger bg-ledger/5 rounded-sm px-4 py-3.5 hover:bg-ledger/10"
+          >
+            <span className="text-sm font-semibold">
+              {claims[0].carrier || "Unnamed carrier"}
+              {claims[0].claim_number ? ` — ${claims[0].claim_number}` : ""}
+            </span>
+            <span className="text-xs font-semibold text-ledger">Resume &rarr;</span>
+          </Link>
+        </section>
+      )}
 
       {/* My Claims */}
       <section>

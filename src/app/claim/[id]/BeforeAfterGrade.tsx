@@ -11,6 +11,14 @@ interface BeforeAfterProps {
   current: DocumentationScoreClientView;
   baselineGrade?: string | null;
   claimCreatedAt: string;
+  // Decision #71 — a real, currently-computable documentation-progress
+  // metric (evidence items with a file attached vs. total checklist
+  // items). Not a "since baseline" delta — no snapshot of the initial
+  // checklist state is stored anywhere, so a true "N gaps closed" count
+  // isn't buildable without new schema. This is today's state, not a
+  // change-over-time count.
+  evidenceOnFileCount: number;
+  evidenceTotalCount: number;
 }
 
 function gradeColor(letter: string): string {
@@ -101,6 +109,8 @@ export default function BeforeAfterGrade({
   current,
   baselineGrade,
   claimCreatedAt,
+  evidenceOnFileCount,
+  evidenceTotalCount,
 }: BeforeAfterProps) {
   const hasBaseline = Boolean(baselineGrade);
   const beforeLetter = baselineGrade ? baselineGrade.toUpperCase() : null;
@@ -143,6 +153,12 @@ export default function BeforeAfterGrade({
       <p className="text-[11px] text-neutral-400 text-center mt-2">
         Two different measurements. Only the WholeClaim Documentation Score (right) counts toward the Success Guarantee.
       </p>
+
+      {evidenceTotalCount > 0 && (
+        <p className="text-xs text-neutral-500 text-center mt-3">
+          {evidenceOnFileCount} of {evidenceTotalCount} evidence items on file
+        </p>
+      )}
 
       {progress.kind === 'no_baseline' && (
         <div className="mt-4 rounded-lg bg-neutral-100 px-3 py-2 text-center">

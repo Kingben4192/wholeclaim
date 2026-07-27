@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { AccountMenu } from "../AccountMenu";
+import { BottomNav } from "../BottomNav";
 import { DeadlineBadge } from "./DeadlineBadge";
 
 export default async function ClaimListPage() {
@@ -48,8 +49,9 @@ export default async function ClaimListPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16">
+    <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16">
       <AccountMenu />
+      <BottomNav />
       <div className="flex items-center justify-between mb-10">
         <h1 className="font-display text-2xl font-extrabold">Your claims</h1>
       </div>

@@ -30,6 +30,8 @@ import { isClaimStatus } from "@/lib/claimCategories";
 import { PromisedDocumentTracker } from "./PromisedDocumentTracker";
 import { DeadlineBadge } from "../DeadlineBadge";
 import { UploadHelp } from "./UploadHelp";
+import { ClaimContextBar } from "./ClaimContextBar";
+import { BottomNav } from "@/app/BottomNav";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 
 export default async function ClaimDetailPage({
@@ -171,8 +173,13 @@ export default async function ClaimDetailPage({
   const boundAddEvidenceItem = addEvidenceItem.bind(null, id);
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16 flex flex-col gap-12">
+    <main className="max-w-2xl mx-auto px-6 py-16 pb-24 sm:pb-16 flex flex-col gap-12">
       <AccountMenu />
+      <ClaimContextBar
+        carrier={claim.carrier}
+        claimNumber={claim.claim_number}
+        damageCategory={claim.damage_category}
+      />
       <header>
         <h1 className="font-display text-2xl font-extrabold mb-1">
           {claim.carrier || "Unnamed carrier"}
@@ -214,6 +221,8 @@ export default async function ClaimDetailPage({
         current={toClientView(documentationScore)}
         baselineGrade={claim.baseline_grade}
         claimCreatedAt={claim.created_at}
+        evidenceOnFileCount={(evidenceItems ?? []).filter((i) => i.file_id).length}
+        evidenceTotalCount={(evidenceItems ?? []).length}
       />
 
       {/* Claim Education — free tier, no AI cost */}
@@ -396,6 +405,7 @@ export default async function ClaimDetailPage({
         </p>
         <UploadHelp />
       </section>
+      <BottomNav />
     </main>
   );
 }

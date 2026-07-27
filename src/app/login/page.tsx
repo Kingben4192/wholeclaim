@@ -37,8 +37,14 @@ export default function LoginPage() {
         <h1 className="font-display text-2xl font-extrabold mb-2 text-center">
           Back to the file
         </h1>
-        <p className="text-sm text-ink/60 mb-8 text-center">
+        <p className="text-sm text-ink/60 mb-4 text-center">
           Email me a sign-in link
+        </p>
+
+        {/* Decision #68 -- free user conversion banner. Copy as specified:
+            value is preservation/organization, never an outcome claim. */}
+        <p className="text-xs text-ink/60 text-center border border-ink/10 rounded-sm px-4 py-2.5 mb-6">
+          Save your Claim Grade results, track deadlines, and keep your evidence organized.
         </p>
 
         {sendState.sent ? (
