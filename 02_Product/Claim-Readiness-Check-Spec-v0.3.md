@@ -1,9 +1,9 @@
-# Claim Readiness Check — Product Spec (v0.2 — Frozen)
+# Claim Readiness Check — Product Spec (v0.3 — Frozen)
 
 **Status:** Reviewed and frozen. Approved for build AFTER homeowner MVP launches — not before.
 **Author:** Drafted for Benjamin, WholeClaim
 **Date:** 2026-07-27
-**Changelog:** v0.2 — naming locked (Decision #66), v1 ships without uploads, EVIDENCE scoring reworked to binary self-attested for v1 (0.25 multiplier reserved for v2), "Not sure" option added to EVIDENCE questions, results disclaimer made mandatory, weights and scoring versioned.
+**Changelog:** v0.3 — §8.2 resolved: the check runs fully anonymous, account only required to save results. v0.2 — naming locked (Decision #66), v1 ships without uploads, EVIDENCE scoring reworked to binary self-attested for v1 (0.25 multiplier reserved for v2), "Not sure" option added to EVIDENCE questions, results disclaimer made mandatory, weights and scoring versioned.
 
 ---
 
@@ -218,7 +218,7 @@ Consequence of this resolution: v1 EVIDENCE scoring is binary self-attested (§5
 
 The v2 path, if completion rates justify it, is **(b): a dedicated pre-claim container** with its own security model that converts into a claim's vault when the user files. Option (c) — requiring a claim record to upload — remains rejected: it misrepresents what the user is doing and pollutes the claims table.
 
-**8.2 Does the check require an account? — OPEN (Benjamin).** Recommendation: no. Let it run anonymously, then gate *saving* the result behind a magic link — the same pattern as the grader-first onboarding flow that is already the established front door.
+**8.2 Does the check require an account? — RESOLVED: no.** The check runs fully anonymous — no sign-in, no account, no gate on taking it or seeing the result. An account is required only to *save* the result, behind a magic link — the same pattern as the grader-first onboarding flow that is already the established front door.
 
 **8.3 What is the final name? — RESOLVED.** Decision #66 (Invariant), §2. Claude Code must log the entry in Decisions.md at build time.
 
