@@ -46,6 +46,15 @@
 
 **Sunday founder review, 30 minutes, every week:** leads → grades → activation → conversion → letters → AI cost. One decision per review, logged in `00_Founder/Decisions.md`. A metric that hasn't driven a decision in 8 weeks gets demoted or deleted — dashboards are for deciding, not admiring.
 
+## Beta interview probes
+
+No existing interview/feedback question section was found anywhere in the repo — this is a new one, placed here since it feeds the same weekly founder review the metrics above do. Two questions to ask directly in Phase 1 beta interviews/feedback, alongside whatever else is already being asked:
+
+- **Where did data entry or uploading feel slow or tedious?**
+- **Did any limit or paywall surprise you — did you know it existed before you hit it?**
+
+These target the two most common failure modes in review data for documentation apps: entry friction and surprise walls.
+
 ## The three viability tests (launch verdicts, not dashboards)
 
 1. **Grader converts:** ≥25% completion and holding lead capture — or the top of funnel is wrong.

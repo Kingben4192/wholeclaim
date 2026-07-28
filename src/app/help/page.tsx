@@ -217,10 +217,11 @@ export default async function HelpPage() {
                 {SUPPORT_EMAIL}
               </a>
             </p>
-            <p>
+            <p className="mb-2">
               Support can help with account issues, billing questions, technical problems, or
               feature feedback.
             </p>
+            <p className="text-ink/50">We respond within 1 business day.</p>
           </div>
         </section>
 
