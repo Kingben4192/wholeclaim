@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Loader2, RefreshCw } from "lucide-react";
 import { QUESTIONS, CATEGORIES, type GraderAnswers } from "@/lib/grader/rubric";
 import { submitGrade, type SubmitGradeResult } from "./actions";
 import { FirstPhotoCapture } from "./FirstPhotoCapture";
+import { captureFirstTouch, getStoredAttribution } from "@/lib/attribution";
 
 type Phase = "intro" | "quiz" | "gate" | "results";
 
@@ -20,6 +21,13 @@ export function GraderQuiz() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitGradeResult | null>(null);
 
+  // Source Attribution (Phase 1 beta instrumentation) -- capture ?p= on
+  // first mount, first-touch-wins (a later visit without the param, or
+  // with a different one, never overwrites what's already stored).
+  useEffect(() => {
+    captureFirstTouch();
+  }, []);
+
   function pick(i: number) {
     const q = QUESTIONS[step];
     const next = { ...answers, [q.id]: i };
@@ -34,7 +42,16 @@ export function GraderQuiz() {
   async function submit() {
     setError(null);
     setSubmitting(true);
-    const res = await submitGrade({ answers, name, email, usState, consent });
+    const attribution = getStoredAttribution();
+    const res = await submitGrade({
+      answers,
+      name,
+      email,
+      usState,
+      consent,
+      partnerSlug: attribution?.partnerSlug,
+      firstTouchAt: attribution?.firstTouchAt,
+    });
     setSubmitting(false);
     if (!res.ok) {
       setError(res.error);

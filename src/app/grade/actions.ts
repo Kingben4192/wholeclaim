@@ -13,6 +13,11 @@ export type SubmitGradeInput = {
   email: string;
   usState: string;
   consent: boolean;
+  // Source Attribution (Phase 1 beta instrumentation, Option A) -- read
+  // client-side from localStorage via src/lib/attribution.ts, first-touch
+  // wins. Both optional: most submissions carry no ?p= at all.
+  partnerSlug?: string | null;
+  firstTouchAt?: string | null;
 };
 
 export type SubmitGradeResult =
@@ -71,6 +76,8 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
     // persisted. Consent is meaningless as a control if it isn't stored;
     // this is the actual fix (2026-07-19).
     consent: input.consent,
+    attribution_partner_slug: input.partnerSlug || null,
+    attribution_first_touch_at: input.firstTouchAt || null,
   });
 
   if (insertError) {

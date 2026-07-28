@@ -27,7 +27,9 @@ export async function GET(request: NextRequest) {
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("id, us_state, grade, answers, claim_id, claim_prefilled_at")
+    .select(
+      "id, us_state, grade, answers, claim_id, claim_prefilled_at, attribution_source, attribution_partner_slug",
+    )
     .eq("email", user.email.toLowerCase())
     .order("created_at", { ascending: false })
     .limit(1)
@@ -55,6 +57,8 @@ export async function GET(request: NextRequest) {
       us_state: lead.us_state,
       damage_category: damageCategory,
       baseline_grade: lead.grade,
+      attribution_source: lead.attribution_source,
+      attribution_partner_slug: lead.attribution_partner_slug,
     })
     .select("id")
     .single();
