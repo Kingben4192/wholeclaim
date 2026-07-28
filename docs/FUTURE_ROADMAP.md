@@ -64,3 +64,57 @@ exemption. Recorded as an open conflict. Not resolved, not implemented.
    clearing.
 
 **No build tasks from this document. Priority order is unchanged.**
+
+---
+
+## 2026-07-28 — Renovation Grade + pre-loss-to-claim transfer (PARKED)
+
+**Concept.** Renovation Grade for pre-loss home documentation. Helps
+homeowners maintain complete renovation records before any insurance
+claim exists. If a loss later occurs, selected documentation can be
+associated with the resulting claim.
+
+**Why it's interesting.** Reaches homeowners at a non-episodic moment
+(new purchase, active remodel) rather than waiting for a disaster, and
+the transfer path is the property-vault retention thesis running in
+reverse — vault as acquisition, claim as the event.
+
+**Scoring constraint (hard).** Measures documentation completeness only.
+Does NOT evaluate construction quality, code compliance, workmanship, or
+predict claim outcomes. Code-compliance assessment is licensed-inspector
+territory in Georgia and is out of scope permanently, not just for v1.
+
+**Capability constraint.** No vision or OCR exists anywhere in the
+product — buildClaimContext passes labels and metadata only, never file
+contents. Any photo-grading variant of this concept requires a vision
+build first and must be costed as such. A defensible middle version
+exists if vision is ever added: grade the photo's usefulness as evidence
+(focus, wide + detail shot, date, scale reference) without judging the
+work depicted.
+
+**Scoring-system boundary.** This would be a FOURTH scoring system
+alongside WholeClaim Documentation Score, Claim Grade, and Readiness
+Score/Band. Decision #59 exists specifically to keep those separated.
+Any build must resolve which of the existing systems this reuses versus
+introduces new, before a single string is written.
+
+**Open design questions — all must be answered before build:**
+1. What entity owns renovation records? Claims are temporary events;
+renovations are long-lived property records. They do not naturally
+belong to the same object.
+2. How do storage quotas and pricing work? Current limits are
+deliberately claim-scoped (500MB/claim free, 25 active files/claim,
+2GB account ceiling — Decisions #51-55). Permanent pre-claim records
+break that accounting and change the free-tier cost profile.
+3. How does transfer into a claim behave? Copy or move? Does transferred
+documentation re-score under the claim engine? Does it count against
+the 25-file cap on arrival? What happens if a free user is blocked
+mid-transfer?
+4. What new security, legal, export, and deletion requirements does a
+new top-level object introduce? New RLS surface, new authorization
+rules, new privacy and legal copy, new deletion semantics.
+
+**Sequencing.** Strictly after Phase 1 founder beta. Trigger to revisit:
+beta users independently asking to organize records before a claim
+exists, OR renovation/maintenance content pillars measurably
+outperforming claims content. Absent either, it stays parked.

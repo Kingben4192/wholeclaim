@@ -92,7 +92,7 @@ const TRUST_ITEMS = [
   {
     Icon: Lock,
     title: "Secure evidence storage",
-    body: "Photos and PDFs stored privately — only you can view them.",
+    body: "Photos and PDFs are private to your account — visible only to you.",
   },
   {
     Icon: FolderOpen,
@@ -211,7 +211,7 @@ export default function Page() {
               Pricing
             </span>
             <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
-              Free to start. Two ways to go Pro.
+              Two ways to go Pro.
             </h2>
           </div>
 
@@ -281,6 +281,9 @@ export default function Page() {
                 </div>
               ))}
             </div>
+            <p className="text-center text-xs text-hp-ink-soft mt-3">
+              Individual file uploads are limited to 15MB.
+            </p>
           </div>
         </div>
       </section>
@@ -466,9 +469,8 @@ export default function Page() {
             ))}
           </div>
           <p className="max-w-lg mx-auto text-center font-mono text-xs leading-relaxed text-[#A9C2AF] border-t border-white/15 pt-6">
-            WholeClaim helps organize claim documentation. It is an educational tool — not
-            legal, insurance, or financial advice, and it does not guarantee insurance
-            outcomes.
+            WholeClaim helps organize documentation. It does not provide insurance advice,
+            guarantee claim approval, or determine claim outcomes.
           </p>
         </div>
       </section>
@@ -479,7 +481,7 @@ export default function Page() {
           Start here
         </span>
         <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight max-w-xs mx-auto mb-3.5">
-          Build your claim file before you need it.
+          Start where you are.
         </h2>
         <p className="text-hp-ink-soft max-w-md mx-auto mb-7">
           A homeowner dealing with damage shouldn&apos;t have to figure out what to do next.
@@ -490,7 +492,7 @@ export default function Page() {
             href="/grade"
             className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
-            Take the 60-Second Claim Grade
+            Check Your Claim Grade
           </Link>
         </div>
         <p className="text-sm text-hp-ink-soft">
@@ -508,8 +510,9 @@ export default function Page() {
             Whole<span className="text-ledger">Claim</span>
           </span>
           <small className="font-mono text-xs text-hp-ink-soft leading-relaxed max-w-xl">
-            getwholeclaim.com · WholeClaim helps organize claim documentation. It does not
-            provide legal advice or guarantee insurance outcomes. © 2026 WholeClaim.
+            getwholeclaim.com · WholeClaim helps organize documentation. It does not provide
+            insurance advice, guarantee claim approval, or determine claim outcomes. © 2026
+            WholeClaim.
             <span className="mx-1" />
             {FOOTER_LINKS.map(([label, href], i) => (
               <span key={label}>
