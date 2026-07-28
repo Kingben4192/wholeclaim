@@ -29,8 +29,8 @@ const STEPS = [
     body: "Keep every important event organized.",
   },
   {
-    title: "Share your claim file",
-    body: "Give contractors, adjusters, or professionals one organized record.",
+    title: "Maintain one complete record",
+    body: "Update your claim file as things happen — everything stays organized and easy to find.",
   },
 ] as const;
 
