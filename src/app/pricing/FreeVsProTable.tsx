@@ -31,6 +31,9 @@ export function FreeVsProTable() {
           </div>
         ))}
       </div>
+      <p className="text-center text-xs text-ink/50 mt-3">
+        Individual file uploads are limited to 15MB.
+      </p>
     </div>
   );
 }
