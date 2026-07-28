@@ -35,6 +35,8 @@ import { BottomNav } from "@/app/BottomNav";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 import { CategoryRequiredGate } from "./CategoryRequiredGate";
+import { getFreeAiUsageCount, FREE_CLAIM_CAP } from "@/lib/anthropic/rateLimit";
+import { FreeAiUsageBadge } from "./FreeAiUsageBadge";
 
 export default async function ClaimDetailPage({
   params,
@@ -131,6 +133,11 @@ export default async function ClaimDetailPage({
   // this only fixes what the page displays to match reality.
   const isPro = user ? await resolveIsPro(supabase, id, user.id) : false;
   const proSource = user && isPro ? await resolveProAccessSource(supabase, id, user.id) : null;
+
+  // AI usage counter -- same source checkAiAccess/checkUsageGate enforce
+  // against (getFreeAiUsageCount), not a derived count. null for Pro, so
+  // FreeAiUsageBadge renders nothing at all in that case.
+  const freeAiUsageCount = user && !isPro ? await getFreeAiUsageCount(supabase, user.id, id) : null;
 
   const documentationScore = computeDocumentationScore({
     claim: {
@@ -256,6 +263,7 @@ export default async function ClaimDetailPage({
         <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
           Analysis
         </h2>
+        <FreeAiUsageBadge count={freeAiUsageCount} max={FREE_CLAIM_CAP} />
         <div className="flex flex-col gap-3">
           <PolicyDecoderCard claimId={id} />
           <MoldTimelineCard claimId={id} />

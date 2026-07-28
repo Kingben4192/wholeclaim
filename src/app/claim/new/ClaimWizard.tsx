@@ -7,6 +7,7 @@ import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
 import { CLAIM_CATEGORIES } from "@/lib/claimCategories";
 import { DuplicateClaimPrompt } from "./DuplicateClaimPrompt";
 import { UpgradeOptions } from "../[id]/UpgradeOptions";
+import { FREE_CLAIM_LIMIT_PER_CATEGORY } from "@/lib/claimCategoryGate";
 
 // Claim Creation Wizard (Onboarding Step 4). Single client component,
 // internal step state, no additional routes — /claim/new's page.tsx just
@@ -427,6 +428,7 @@ export function ClaimWizard() {
         {blockedGate && (
           <div className="border border-red-200 bg-red-50 rounded-sm p-4 text-sm flex flex-col gap-3">
             <p className="text-red-800 font-semibold">
+              Free plan includes {FREE_CLAIM_LIMIT_PER_CATEGORY} active claim per dispute category.{" "}
               {blockedGate.reason === "ACTIVE_CLAIM_EXISTS_IN_CATEGORY"
                 ? "You already have an active claim in this category."
                 : "You've already used your free claim for this category."}

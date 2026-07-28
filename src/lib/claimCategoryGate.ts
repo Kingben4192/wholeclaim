@@ -8,6 +8,12 @@ import type { ClaimCategory } from "./claimCategories";
 // rather than throwing (Server Actions translate a block into a thrown
 // Error at the call site, matching uploadFile()'s pattern).
 
+// Exported for copy (blocked-state messages, pricing/help disclosure) so
+// the displayed number can never drift from what checkClaimCategoryAccess
+// actually enforces below -- same pattern as FREE_UPLOAD_LIMIT_PER_CLAIM
+// and FREE_CLAIM_CAP.
+export const FREE_CLAIM_LIMIT_PER_CATEGORY = 1;
+
 export type CategoryClaimState = {
   activeClaimId: string | null;
   // Every non-deleted claim id in this category, any status — used for

@@ -36,16 +36,29 @@ export const PRO_LIFETIME = {
 //   - Evidence upload cap: src/lib/uploadLimits.ts,
 //     FREE_UPLOAD_LIMIT_PER_CLAIM = 25 (Decision, Billing Build Order
 //     Step 6)
+//   - Active claims: src/lib/claimCategoryGate.ts,
+//     FREE_CLAIM_LIMIT_PER_CATEGORY = 1 (Decision #44)
+//
+// Storage (500MB/claim, 2GB/account) deliberately NOT listed here --
+// policy-only, not enforced anywhere in code (src/lib/uploadLimits.ts's
+// own comment confirms no byte-sum check exists). Do not add a storage
+// row until enforcement actually ships (STORAGE_ENFORCEMENT_BRIEF.md) --
+// see the Decision logging this.
 export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[] = [
   { feature: "The Binder & Claim Grade", free: "Included", pro: "Included" },
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },
   { feature: "Deadline Tracker", free: "Included", pro: "Included" },
   {
     feature: "AI analysis (Policy Decoder, Loss-Count Auditor, Estimate Gap Analyzer, Decision Assistant, Letter Builder)",
-    free: "3 analyses per claim",
+    free: "3 analyses per claim (not resettable)",
     pro: "Unlimited (fair use)",
   },
   { feature: "Mold Coverage Timeline", free: "Not included", pro: "Included" },
   { feature: "Supplement Assistant", free: "Not included", pro: "Included" },
   { feature: "Loss-of-Use Tracker", free: "Not included", pro: "Included" },
+  {
+    feature: "Active claims",
+    free: "1 per dispute category",
+    pro: "Unlimited",
+  },
 ] as const;

@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UpgradeOptions } from "../claim/[id]/UpgradeOptions";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO, LIFETIME_ENTITLEMENT_TYPES } from "@/lib/entitlements";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
+import { FreeVsProTable } from "./FreeVsProTable";
 
 // Pre-Launch Prep: Pricing Connection (2026-07-19) — the monthly
 // subscription button creates a real Stripe TEST MODE checkout session
@@ -100,6 +101,8 @@ export default async function PricingPreviewPage() {
           Two ways to go Pro.
         </p>
       </header>
+
+      <FreeVsProTable />
 
       {signedIn ? (
         <div className="mb-16">

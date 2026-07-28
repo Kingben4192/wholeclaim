@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Loader2, Copy, Check } from "lucide-react";
 import { UpgradeOptions } from "./UpgradeOptions";
 import { DerivedValueNote } from "./DerivedValueNote";
@@ -46,6 +47,7 @@ export function AIToolCard({
   const [error, setError] = useState<string | null>(null);
   const [isGateRejection, setIsGateRejection] = useState(false);
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
 
   async function handleRun() {
     setLoading(true);
@@ -58,6 +60,10 @@ export function AIToolCard({
       setIsGateRejection(Boolean(res.isGateRejection));
     } else {
       setOutput(res.output ?? null);
+      // Re-run the page's server-side free-AI-usage count (FreeAiUsageBadge)
+      // so it reflects this run immediately -- no client-side counter to
+      // keep in sync, since there's nothing here but the real server value.
+      router.refresh();
     }
   }
 

@@ -10,7 +10,9 @@ const IP_HOURLY_CAP = 20;
 // Decision-#32 rule (1 lifetime call, counted globally across every claim
 // a user owns) — Decision #32 was recorded but this function was never
 // actually updated to match it until now.
-const FREE_CLAIM_CAP = 3;
+// Exported so FreeAiUsageBadge shows the same max the gate enforces,
+// rather than a second hardcoded "3" that could drift from this one.
+export const FREE_CLAIM_CAP = 3;
 
 // Plan gate (free = 3 analyses per claim per Decision #32, pro = 30/day
 // fair use — though Billing Build Order Step 5 has Pro bypass this
@@ -25,6 +27,27 @@ const FREE_CLAIM_CAP = 3;
 // and are outside Decision #32's scope (admin-only, not one of the
 // homeowner-facing Pro tools) — they keep the original global-per-user,
 // 1-lifetime-call behavior, unchanged, by passing claimId: null.
+// Decision (Phase 1 beta instrumentation, AI usage counter) -- the exact
+// query checkUsageGate's free+claimId branch runs, extracted so the UI
+// counter (FreeAiUsageBadge) reads the identical source the enforcement
+// check reads. Never duplicate this query elsewhere; both call this.
+export async function getFreeAiUsageCount(
+  supabase: SupabaseClient,
+  userId: string,
+  claimId: string,
+): Promise<number | null> {
+  const { count, error } = await supabase
+    .from("ai_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("claim_id", claimId);
+  if (error) {
+    console.error("getFreeAiUsageCount: ai_runs query failed:", error.message);
+    return null;
+  }
+  return count ?? 0;
+}
+
 export async function checkUsageGate(
   supabase: SupabaseClient,
   userId: string,
@@ -50,16 +73,11 @@ export async function checkUsageGate(
   };
 
   if (plan === "free" && claimId) {
-    const { count, error } = await supabase
-      .from("ai_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .eq("claim_id", claimId);
-    if (error) {
-      console.error("checkUsageGate: ai_runs query failed, denying:", error.message);
+    const count = await getFreeAiUsageCount(supabase, userId, claimId);
+    if (count === null) {
       return FAIL_CLOSED;
     }
-    if ((count ?? 0) >= FREE_CLAIM_CAP) {
+    if (count >= FREE_CLAIM_CAP) {
       return {
         allowed: false,
         reason:
