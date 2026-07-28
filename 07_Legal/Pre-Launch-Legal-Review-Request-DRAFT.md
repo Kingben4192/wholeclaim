@@ -53,6 +53,21 @@ A separate branding decision is also pending. WholeClaim may remain the product 
 
 ---
 
+## Georgia-Specific Questions — REQUIRES GEORGIA-LICENSED COUNSEL (not the trademark attorney, who is IN/TX-barred)
+
+The four questions below require an attorney licensed in Georgia. They are separate from the trademark clearance question referenced above, which is being handled by counsel licensed in Indiana/Texas — please do not route these to that attorney.
+
+1. **Does the product cross into unlicensed public adjusting under Georgia law?**
+   Related material elsewhere in this letter, none of it a direct answer: the intro's "WholeClaim does not act as a public adjuster" positioning; the Business Entity Structure section's Georgia-public-adjusting-law rationale for entity separation; the Terms of Service Review section's request to flag any language implying claims adjustment or representation; and question 3 below, which asks the parallel question for the Success Guarantee specifically. This question is the throughline connecting all of them, not resolved by any one of them individually.
+2. **Do AI-generated claim letters raise UPL concerns?**
+   Not addressed elsewhere in this letter. See the AI and Data Use Review section below for related but distinct disclosure questions about the underlying AI processing (those concern data/privacy disclosures, not the practice-of-law question this asks).
+3. **Is the Success Guarantee enforceable, and does it create advertising exposure under GA FBPA / FTC guidance?**
+   See also the Refund Policy and Success Guarantee section below, which asks a narrower, related question ("Could any wording be interpreted as acting as a public adjuster or promising an insurance result?"). This question adds the advertising/FBPA angle that section doesn't ask.
+4. **How can WholeClaim support contractors and restoration partners as documentation collaborators without becoming a public adjuster, claims negotiator, or settlement advocate under Georgia law?**
+   New topic, not addressed elsewhere in this letter. See Decision #84 in `00_Founder/Decisions.md` for the current contractor-channel positioning (documentation-collaborator framing, carrier-neutral language, referral-only near-term) this question is checking against Georgia law — framing only, no partner materials exist yet.
+
+---
+
 ## Business Entity Structure
 
 Please advise:
