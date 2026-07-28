@@ -34,6 +34,10 @@ export function FreeVsProTable() {
       <p className="text-center text-xs text-ink/50 mt-3">
         Individual file uploads are limited to 15MB.
       </p>
+      <p className="max-w-lg mx-auto text-center font-mono text-xs leading-relaxed text-ink/50 mt-3">
+        WholeClaim helps organize documentation. It does not provide insurance advice,
+        guarantee claim approval, or determine claim outcomes.
+      </p>
     </div>
   );
 }
