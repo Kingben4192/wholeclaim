@@ -49,7 +49,7 @@ I am currently running the platform as a free beta and plan to enable paid featu
 > this same letter). No real charge is currently possible under any
 > circumstance.
 
-A separate branding decision is also pending. WholeClaim may remain the product name, or I may transition to a different brand name. I am seeking advice on entity structure and operational setup rather than trademark clearance in this review.
+WholeClaim is the committed brand and product name. Trademark clearance for the mark is being handled separately by Indiana/Texas-licensed counsel and is not part of this review.
 
 ---
 
