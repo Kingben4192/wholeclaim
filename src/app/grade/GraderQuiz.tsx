@@ -82,9 +82,9 @@ export function GraderQuiz() {
         </h1>
         <p className="text-sm leading-relaxed text-ink mb-2">
           Your carrier already graded you. They know how organized you are, whether
-          you track deadlines, and whether anyone has checked their numbers. Eight
-          questions tell you what they see — and the three fixes that change it
-          this week.
+          you track deadlines, and whether anyone has checked their numbers.{" "}
+          {QUESTIONS.length} questions tell you what they see — and the three fixes
+          that change it this week.
         </p>
         <button
           onClick={() => setPhase("quiz")}

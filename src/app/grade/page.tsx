@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GraderQuiz } from "./GraderQuiz";
+import { QUESTIONS } from "@/lib/grader/rubric";
 
 export const metadata: Metadata = {
   title: "Claim Grade — Free 2-Minute Assessment | WholeClaim",
-  description:
-    "Eight questions tell you what your insurance carrier already sees in your claim file — and the fixes that change it this week.",
+  description: `${QUESTIONS.length} questions tell you what your insurance carrier already sees in your claim file — and the fixes that change it this week.`,
 };
 
 export default function GradePage() {
