@@ -162,6 +162,51 @@ export async function checkClaimCategoryAccessAction(
   return { ok: true, gate, activeClaimId: state.activeClaimId };
 }
 
+// Decision #86 -- closes the free-tier bypass: a grader-converted claim is
+// created with claim_category = null (from-grade/route.ts never asked the
+// question), which made it invisible to checkClaimCategoryAccess's
+// .eq("claim_category", category) filter. This is the one and only path
+// that ever sets claim_category on such a claim, and it re-runs the exact
+// same gate createClaim() enforces -- the moment a category is chosen is
+// the moment this claim becomes subject to the free-tier rule, same as
+// any wizard-created claim. .is("claim_category", null) in the update
+// scope is a second, defense-in-depth guard: this action can only ever
+// transition a claim from uncategorized, never silently recategorize an
+// already-categorized one.
+export async function setClaimCategory(
+  claimId: string,
+  category: string,
+): Promise<
+  | { ok: false; error: string }
+  | { ok: true }
+  | { ok: true; blocked: true; gate: Extract<ClaimCategoryGateResult, { allowed: false }> }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Sign in required." };
+  if (!isClaimCategory(category)) return { ok: false, error: "Unknown category." };
+
+  const gate = await checkClaimCategoryAccess(supabase, user.id, category);
+  if (!gate.allowed) {
+    return { ok: true, blocked: true, gate };
+  }
+
+  const { error, count } = await supabase
+    .from("claims")
+    .update({ claim_category: category }, { count: "exact" })
+    .eq("id", claimId)
+    .eq("user_id", user.id)
+    .is("claim_category", null);
+
+  if (error) return { ok: false, error: error.message };
+  if (!count) return { ok: false, error: "This claim already has a category, or you don't have access to it." };
+
+  revalidatePath(`/claim/${claimId}`);
+  return { ok: true };
+}
+
 // Claim lifecycle state (Decision #44). Deliberately unrestricted in
 // either direction — no state machine — matching the founder's own
 // "user-triggered, self-service" default for this proposed UI; the

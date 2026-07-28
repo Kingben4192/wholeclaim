@@ -34,6 +34,7 @@ import { ClaimContextBar } from "./ClaimContextBar";
 import { BottomNav } from "@/app/BottomNav";
 import { filesForScoring } from "@/lib/scoringFileFilter";
 import { getClaimDisplayTitle } from "@/lib/claimDisplay";
+import { CategoryRequiredGate } from "./CategoryRequiredGate";
 
 export default async function ClaimDetailPage({
   params,
@@ -111,6 +112,15 @@ export default async function ClaimDetailPage({
     ]);
 
   if (!claim) notFound();
+
+  // Decision #86 -- a grader-converted claim can exist with claim_category
+  // null (from-grade/route.ts never asks). Block everything else on this
+  // page until it's set -- this is also the moment the free-tier gate
+  // first applies to this claim, so it has to go through
+  // setClaimCategory(), never a direct update.
+  if (!claim.claim_category) {
+    return <CategoryRequiredGate claimId={id} />;
+  }
 
   // Billing Build Order Step 5: UI display now reflects the same
   // isPro(claimId, userId) resolver the server actions actually enforce —

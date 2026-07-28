@@ -47,71 +47,98 @@ export async function GET(request: NextRequest) {
   }
 
   const answers = (lead.answers ?? {}) as GraderAnswers;
-  const damageValue = answerValue("damage", answers);
-  const damageCategory = damageValue ? DAMAGE_CATEGORY_MAP[damageValue] ?? null : null;
 
-  const { data: claim, error: claimError } = await supabase
+  // Decision #86 -- one uncategorized (claim_category IS NULL) claim max
+  // per account. Without this, re-grading with the same email before ever
+  // picking a category on the first claim would create a second free
+  // claim, re-opening the exact free-tier bypass this decision closes:
+  // claim_category null is invisible to checkClaimCategoryAccess either
+  // way, so nothing would stop it from happening repeatedly.
+  const { data: existingUncategorized } = await supabase
     .from("claims")
-    .insert({
-      user_id: user.id,
-      us_state: lead.us_state,
-      damage_category: damageCategory,
-      baseline_grade: lead.grade,
-      attribution_source: lead.attribution_source,
-      attribution_partner_slug: lead.attribution_partner_slug,
-    })
     .select("id")
-    .single();
+    .eq("user_id", user.id)
+    .is("claim_category", null)
+    .limit(1)
+    .maybeSingle();
 
-  if (claimError || !claim) {
-    console.error("Grader claim prefill failed:", claimError);
-    return NextResponse.redirect(`${origin}/claim`);
-  }
+  let claimId: string;
+  let seed = "";
 
-  // Pre-checked evidence items — only for what the grader answer actually
-  // established, at the confidence level the answer supports. `category`
-  // tags match the same taxonomy checklistTemplateFor() seeds for direct
-  // signups (Decision #40) — these two items were previously inserted
-  // untagged, which silently excluded them from Documentation Score's
-  // Evidence Coverage / Documentation Completeness scoring entirely (both
-  // categories score 0 when nothing is tagged). Forward-only fix: existing
-  // rows already in the database keep their current NULL tag, matching the
-  // no-retroactive-backfill decision already made for checklist seeding.
-  const photosChoice = answers["photos"];
-  if (photosChoice !== undefined) {
-    await supabase.from("evidence_items").insert({
-      claim_id: claim.id,
-      user_id: user.id,
-      label: "Damage photos / video",
-      checked: photosChoice === 0,
-      category: "evidence_coverage",
-    });
-  }
-  const logChoice = answers["log"];
-  if (logChoice !== undefined) {
-    await supabase.from("evidence_items").insert({
-      claim_id: claim.id,
-      user_id: user.id,
-      label: "Written contact log (calls & emails)",
-      checked: logChoice === 0,
-      category: "documentation_completeness",
-    });
+  if (existingUncategorized) {
+    // Resolve to it instead of creating a second claim. Deliberately skip
+    // evidence-item seeding below -- this claim may already have its own
+    // state from the first grading, and re-seeding could duplicate or
+    // stomp on it.
+    claimId = existingUncategorized.id;
+  } else {
+    const damageValue = answerValue("damage", answers);
+    const damageCategory = damageValue ? DAMAGE_CATEGORY_MAP[damageValue] ?? null : null;
+
+    const { data: claim, error: claimError } = await supabase
+      .from("claims")
+      .insert({
+        user_id: user.id,
+        us_state: lead.us_state,
+        damage_category: damageCategory,
+        baseline_grade: lead.grade,
+        attribution_source: lead.attribution_source,
+        attribution_partner_slug: lead.attribution_partner_slug,
+      })
+      .select("id")
+      .single();
+
+    if (claimError || !claim) {
+      console.error("Grader claim prefill failed:", claimError);
+      return NextResponse.redirect(`${origin}/claim`);
+    }
+    claimId = claim.id;
+
+    // Pre-checked evidence items — only for what the grader answer actually
+    // established, at the confidence level the answer supports. `category`
+    // tags match the same taxonomy checklistTemplateFor() seeds for direct
+    // signups (Decision #40) — these two items were previously inserted
+    // untagged, which silently excluded them from Documentation Score's
+    // Evidence Coverage / Documentation Completeness scoring entirely (both
+    // categories score 0 when nothing is tagged). Forward-only fix: existing
+    // rows already in the database keep their current NULL tag, matching the
+    // no-retroactive-backfill decision already made for checklist seeding.
+    const photosChoice = answers["photos"];
+    if (photosChoice !== undefined) {
+      await supabase.from("evidence_items").insert({
+        claim_id: claimId,
+        user_id: user.id,
+        label: "Damage photos / video",
+        checked: photosChoice === 0,
+        category: "evidence_coverage",
+      });
+    }
+    const logChoice = answers["log"];
+    if (logChoice !== undefined) {
+      await supabase.from("evidence_items").insert({
+        claim_id: claimId,
+        user_id: user.id,
+        label: "Written contact log (calls & emails)",
+        checked: logChoice === 0,
+        category: "documentation_completeness",
+      });
+    }
+
+    // "Never heard of" the suit limitation clause: seed the deadline quick-add
+    // with a title only — the user picks the real date from their own policy,
+    // nothing computed or guessed gets persisted.
+    const suitChoice = answers["suit"];
+    seed = suitChoice === 2 ? "?seed=suit" : "";
   }
 
   await supabase
     .from("leads")
     .update({
-      claim_id: claim.id,
+      claim_id: claimId,
       claim_prefilled_at: new Date().toISOString(),
       account_created_at: new Date().toISOString(),
     })
     .eq("id", lead.id);
 
-  // "Never heard of" the suit limitation clause: seed the deadline quick-add
-  // with a title only — the user picks the real date from their own policy,
-  // nothing computed or guessed gets persisted.
-  const suitChoice = answers["suit"];
-  const seed = suitChoice === 2 ? "?seed=suit" : "";
-
-  return NextResponse.redirect(`${origin}/claim/${claim.id}${seed}`);
+  return NextResponse.redirect(`${origin}/claim/${claimId}${seed}`);
 }
