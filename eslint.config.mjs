@@ -21,6 +21,11 @@ const eslintConfig = defineConfig([
     // blocking on stale prototype code, not on anything real.
     "03_Design/**",
     "04_Engineering/**",
+    // Standalone Node build script for the First-72-Hours ebook PDF
+    // (01_Brand/Lead-Magnets/first-72-hours/) -- run directly via
+    // `node generate.js`, never imported by src/, no reason to hold it to
+    // the app's ESM/import-style rules.
+    "01_Brand/**",
   ]),
 ]);
 

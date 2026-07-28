@@ -150,20 +150,20 @@ export default function Page() {
         <p className="text-base md:text-lg text-hp-ink-soft max-w-md mx-auto mb-8">
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-3.5 mb-5">
-          <Link
-            href="/claim/new"
-            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
-          >
-            Start Free Claim Binder
-          </Link>
+        <div className="flex justify-center mb-5">
           <Link
             href="/grade"
-            className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
             Check Your Claim Grade
           </Link>
         </div>
+        <p className="text-sm text-hp-ink-soft mb-1.5">
+          Already know what you need?{" "}
+          <Link href="/claim/new" className="font-semibold text-hp-pine">
+            Start your claim file
+          </Link>
+        </p>
         <p className="text-sm text-hp-ink-soft">
           Already have an account?{" "}
           <Link href="/login" className="font-semibold text-hp-pine">
@@ -485,20 +485,20 @@ export default function Page() {
           A homeowner dealing with damage shouldn&apos;t have to figure out what to do next.
           WholeClaim gives you the next step — every step.
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-3.5">
-          <Link
-            href="/claim/new"
-            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
-          >
-            Start Free Claim Binder
-          </Link>
+        <div className="flex justify-center mb-1.5">
           <Link
             href="/grade"
-            className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
+            className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
             Take the 60-Second Claim Grade
           </Link>
         </div>
+        <p className="text-sm text-hp-ink-soft">
+          Already know what you need?{" "}
+          <Link href="/claim/new" className="font-semibold text-hp-pine">
+            Start your claim file
+          </Link>
+        </p>
       </section>
 
       {/* Footer */}
