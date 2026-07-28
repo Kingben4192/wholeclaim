@@ -78,3 +78,18 @@ One canonical disclaimer string, not five paraphrases (`UNIVERSAL_DISCLAIMER`, `
 > "WholeClaim helps organize documentation. It does not provide insurance advice, guarantee claim approval, or determine claim outcomes."
 
 This is the same string already used as `/help`'s own `DISCLAIMER` constant — unified to one source, not a new third variant. Two other pre-existing disclaimer strings remain deliberately untouched, since they're outside this addendum's named scope (not AI tools): `DepreciationCalculator.tsx` and `LossOfUseTracker.tsx` (deterministic, non-AI features, own contextually-appropriate wording), and the grader results email (`grade/actions.ts`) and drip-tip emails (`tips/copy.ts`) (the public Claim Grade quiz, a separate system per Decision #59, not one of the five AI analysis tools). The standalone `/ai-disclaimer` legal page also keeps its own longer-form wording — a full legal explainer, not the per-response inline disclaimer this section governs.
+
+---
+
+## Pre-Publish Check
+
+Run against every piece of external-facing copy before it goes out — marketing materials, partner/contractor sheets, investor materials, social posts, anything leaving the building. Six yes/no questions:
+
+1. Does this promise or imply an insurance outcome, approval, or payout?
+2. Does this frame WholeClaim or its output as legal advice or public adjusting (negotiating, representing, or advising on pressing a claim)?
+3. Does this claim a capability that isn't built yet?
+4. Does this recommend, rank, or refer any contractor, including A&K?
+5. Does this reference the founding story or Benjamin's litigation in a way that breaks carrier anonymity or violates the four founding-story rules above?
+6. Does this use a trademark symbol before clearance is confirmed?
+
+**Any "yes" answer means don't publish until fixed.**
