@@ -118,3 +118,53 @@ rules, new privacy and legal copy, new deletion semantics.
 beta users independently asking to organize records before a claim
 exists, OR renovation/maintenance content pillars measurably
 outperforming claims content. Absent either, it stays parked.
+
+---
+
+## 2026-07-29 — Lease Decoder (PARKED)
+
+**Concept.** Future counterpart to Policy Decoder — same AI
+infrastructure, different guardrails/UX. Distinct from the renter
+documentation workflow, which records facts (move-in condition,
+maintenance requests, communications, photos/video, receipts). Lease
+Decoder translates lease language into plain English.
+
+**Design law — descriptive, not prescriptive:**
+
+✅ "This clause says the tenant must notify the landlord in writing
+within 7 days."
+✅ "This appears to be a late-fee provision."
+✅ "This clause discusses responsibility for water damage."
+❌ "You should sue."
+❌ "This clause is unenforceable."
+❌ "You can legally withhold rent."
+❌ "Your landlord violated Georgia law."
+
+**Four layers:**
+
+1. **Plain-English Summary** — explain each lease section.
+2. **Clause Finder** — surface every paragraph matching a topic (pets,
+   maintenance, fees, water damage, mold, entry rights, security
+   deposits).
+3. **Risk Highlights** — flag unusual/noteworthy provisions (mandatory
+   arbitration, automatic renewal, high late fees, broad
+   indemnification) as noteworthy only, never enforceability
+   judgments. **HARD BINDING REQUIRED** — same tier as Decision
+   Assistant / Letter Builder (explicit NEVER list in system prompt +
+   output-side keyword filter returning a safe fallback and logging
+   the flag), not the soft binding Policy Decoder currently has. This
+   is the only layer making a judgment call rather than pointing at
+   existing text — concentrated UPL risk lives here.
+4. **Issue Linking** — a logged maintenance issue points to the
+   relevant lease section, no action advice. This layer is the
+   differentiator: layers 1-3 could be replicated by any generic AI
+   chatbot pasted a lease, but only a platform already holding the
+   renter's maintenance log and timeline can link a live issue to its
+   governing clause. Do not treat as low-priority polish relative to
+   the other three layers.
+
+**Sequencing.** Post-homeowner-MVP, deliberately not labeled with a
+phase number since Phase 2/3 already mean Contractor/Public Adjuster in
+the pricing ladder. Legal counsel must review implementation +
+disclaimers before launch (same UPL family as Anna question #2 on AI
+claim letters).
