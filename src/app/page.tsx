@@ -6,6 +6,8 @@ import {
   Download,
 } from "lucide-react";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME, FEATURE_COMPARISON } from "@/lib/pricing";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // Homepage v2 (docs/wholeclaim_spec_homepage_and_roadmap.md, Part 1 —
 // approved; docs/wholeclaim_homepage_mockup.html is the visual reference).
@@ -118,7 +120,16 @@ const FOOTER_LINKS: [string, string | null][] = [
   ["Help", "/help"],
 ];
 
-export default function Page() {
+export default async function Page() {
+  let isSignedIn = false;
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isSignedIn = !!user;
+  }
+
   return (
     <main className="flex flex-col bg-hp-paper text-hp-ink">
       {/* Header — left as-is per scope, only the Help pill is new */}
@@ -127,9 +138,15 @@ export default function Page() {
           Whole<span className="text-ledger">Claim</span>
         </span>
         <div className="flex items-center gap-5">
-          <Link href="/login" className="text-sm font-semibold text-ledger">
-            Log in
-          </Link>
+          {isSignedIn ? (
+            <Link href="/account" className="text-sm font-semibold text-ledger">
+              My account
+            </Link>
+          ) : (
+            <Link href="/login" className="text-sm font-semibold text-ledger">
+              Log in
+            </Link>
+          )}
           <Link
             href="/help"
             className="inline-flex items-center gap-1.5 text-xs font-mono border border-hp-line rounded-full px-3.5 py-1.5 bg-white hover:border-hp-pine hover:text-hp-pine transition-colors"
@@ -165,10 +182,21 @@ export default function Page() {
           </Link>
         </p>
         <p className="text-sm text-hp-ink-soft">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-hp-pine">
-            Log in
-          </Link>
+          {isSignedIn ? (
+            <>
+              Welcome back.{" "}
+              <Link href="/account" className="font-semibold text-hp-pine">
+                Go to your account
+              </Link>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <Link href="/login" className="font-semibold text-hp-pine">
+                Log in
+              </Link>
+            </>
+          )}
         </p>
       </section>
 
