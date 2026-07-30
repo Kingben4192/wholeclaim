@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { Webhook } from "standardwebhooks";
+import * as Sentry from "@sentry/nextjs";
 import { getResendClient, isResendConfigured } from "@/lib/resend";
 
 // Supabase Auth "Send Email" Hook (Decision #41, 2026-07-23) — replaces
@@ -35,6 +36,22 @@ export async function POST(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   if (!hookSecretRaw || !supabaseUrl || !appUrl || !isResendConfigured()) {
+    // 2026-07-30 -- diagnostic instrumentation for the ongoing intermittent
+    // magic-link send-failure investigation. Vercel's own log tooling (CLI
+    // history, CLI --follow) returned nothing for this route even against a
+    // guaranteed-good control request, so Sentry is the only channel proven
+    // reachable from outside this runtime. Booleans only -- never log the
+    // actual secret values.
+    Sentry.captureMessage("send-email-hook: missing required config", {
+      level: "error",
+      extra: {
+        hasHookSecret: Boolean(hookSecretRaw),
+        hasSupabaseUrl: Boolean(supabaseUrl),
+        hasAppUrl: Boolean(appUrl),
+        isResendConfigured: isResendConfigured(),
+      },
+    });
+    await Sentry.flush(2000);
     return NextResponse.json(
       { error: { http_code: 500, message: "Send email hook isn't fully configured." } },
       { status: 500 },
@@ -53,7 +70,15 @@ export async function POST(request: NextRequest) {
   let verified: SendEmailHookPayload;
   try {
     verified = wh.verify(payload, headers) as SendEmailHookPayload;
-  } catch {
+  } catch (err) {
+    // Distinguishes a genuine signature/secret mismatch from a timestamp
+    // tolerance issue or missing headers -- wh.verify()'s own thrown
+    // WebhookVerificationError carries which of those it was in .message,
+    // previously discarded by the bare `catch {}` this replaced.
+    Sentry.captureException(err, {
+      extra: { stage: "signature_verification" },
+    });
+    await Sentry.flush(2000);
     return NextResponse.json(
       { error: { http_code: 401, message: "Invalid webhook signature." } },
       { status: 401 },
@@ -111,6 +136,10 @@ export async function POST(request: NextRequest) {
     // relying on a generic message, since a prior version of this catch
     // silently swallowed the real reason behind a static fallback string.
     console.error("send-email-hook: Resend send failed:", err);
+    Sentry.captureException(err, {
+      extra: { stage: "resend_send", recipient: user.email },
+    });
+    await Sentry.flush(2000);
     const message =
       err && typeof err === "object" && "message" in err
         ? String((err as { message: unknown }).message)
