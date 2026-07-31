@@ -2,6 +2,14 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isServiceRoleConfigured, getAdminClient } from "@/lib/supabase/admin";
+import { computeConversionStats, computeAiExhaustionStats, computeRetentionRate, median } from "@/lib/betaMetrics";
+import { FREE_CLAIM_CAP } from "@/lib/anthropic/rateLimit";
+import {
+  FREE_STORAGE_LIMIT_PER_ACCOUNT_BYTES,
+  PRO_STORAGE_LIMIT_PER_ACCOUNT_BYTES,
+  PRO_STORAGE_BUFFER_BYTES,
+} from "@/lib/uploadLimits";
+import { SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
 
 // Same admin-email gate already used for the Knowledge Library
 // (src/app/library/actions.ts, src/app/library/page.tsx) — duplicated
@@ -46,12 +54,15 @@ export default async function AdminPage() {
   // perPage: 1000 is a beta-scale simplification (5-10 real users per the
   // founder's own brief) — fine for now, would need real pagination if
   // this ever needs to cover a larger user base.
-  const [{ data: usersPage }, { data: claims }, { data: files }, { data: aiRuns }] = await Promise.all([
-    admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("claims").select("user_id, claim_category"),
-    admin.from("files").select("user_id"),
-    admin.from("ai_runs").select("user_id"),
-  ]);
+  const [{ data: usersPage }, { data: claims }, { data: files }, { data: aiRuns }, { data: profiles }, { data: analyticsEvents }] =
+    await Promise.all([
+      admin.auth.admin.listUsers({ perPage: 1000 }),
+      admin.from("claims").select("id, user_id, claim_category, storage_used_bytes"),
+      admin.from("files").select("user_id, claim_id"),
+      admin.from("ai_runs").select("user_id, claim_id, created_at"),
+      admin.from("profiles").select("id, subscription_status, converted_at, storage_used_bytes"),
+      admin.from("analytics_events").select("event_type, user_id, metadata, created_at"),
+    ]);
 
   const claimCountByUser = new Map<string, number>();
   const claimCategoriesByUser = new Map<string, Map<string, number>>();
@@ -87,6 +98,79 @@ export default async function AdminPage() {
     }))
     .sort((a, b) => new Date(b.signedUp).getTime() - new Date(a.signedUp).getTime());
 
+  // Beta metrics summary (proposal approved 2026-07-31). Pure calculation
+  // functions live in src/lib/betaMetrics.ts (unit-tested there) -- this
+  // page only fetches and hands off. Metric 6 (cost per free account) is
+  // deliberately not here yet: it needs current AI token pricing and a
+  // Supabase Storage $/GB figure, both pending from the founder rather
+  // than guessed.
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  const conversionStats = computeConversionStats(
+    (usersPage?.users ?? []).map((u) => ({
+      createdAt: u.created_at,
+      convertedAt: profileById.get(u.id)?.converted_at ?? null,
+    })),
+  );
+
+  const aiExhaustionStats = computeAiExhaustionStats(
+    (aiRuns ?? []).map((r) => ({ userId: r.user_id, claimId: r.claim_id, createdAt: r.created_at })),
+    FREE_CLAIM_CAP,
+  );
+
+  const now = new Date();
+  const retention30 = computeRetentionRate(
+    (usersPage?.users ?? []).map((u) => ({ createdAt: u.created_at, lastSignInAt: u.last_sign_in_at ?? null })),
+    30,
+    now,
+  );
+  const retention60 = computeRetentionRate(
+    (usersPage?.users ?? []).map((u) => ({ createdAt: u.created_at, lastSignInAt: u.last_sign_in_at ?? null })),
+    60,
+    now,
+  );
+  const retention90 = computeRetentionRate(
+    (usersPage?.users ?? []).map((u) => ({ createdAt: u.created_at, lastSignInAt: u.last_sign_in_at ?? null })),
+    90,
+    now,
+  );
+
+  const claimFileCounts = new Map<string, number>();
+  for (const f of files ?? []) {
+    if (!f.claim_id) continue;
+    claimFileCounts.set(f.claim_id, (claimFileCounts.get(f.claim_id) ?? 0) + 1);
+  }
+  const medianFilesPerClaim = median([...claimFileCounts.values()]);
+
+  // Currently at/over the storage limit, account-level (the more visible,
+  // single-number version of metric 3) -- reuses the exact thresholds
+  // checkUploadAccess enforces against, not separately computed. Per-claim
+  // blocking is captured in everBlockedUsers below instead, since
+  // aggregating per-claim status into one account-level number would
+  // hide which limit actually bound.
+  let accountsAtOrOverStorage = 0;
+  for (const p of profiles ?? []) {
+    const used = p.storage_used_bytes ?? 0;
+    const isProAccount = Boolean(
+      p.subscription_status && SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(p.subscription_status),
+    );
+    const limit = isProAccount
+      ? PRO_STORAGE_LIMIT_PER_ACCOUNT_BYTES + PRO_STORAGE_BUFFER_BYTES
+      : FREE_STORAGE_LIMIT_PER_ACCOUNT_BYTES;
+    if (used >= limit * 0.8) accountsAtOrOverStorage++;
+  }
+
+  const everBlockedUsers = new Set(
+    (analyticsEvents ?? []).filter((e) => e.event_type === "storage_limit_blocked").map((e) => e.user_id),
+  );
+  const deletionReasons = new Map<string, number>();
+  for (const e of analyticsEvents ?? []) {
+    if (e.event_type !== "account_deleted") continue;
+    const metadata = e.metadata as { reason?: string | null } | null;
+    const reason = metadata?.reason ?? "unspecified";
+    deletionReasons.set(reason, (deletionReasons.get(reason) ?? 0) + 1);
+  }
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <header className="mb-8">
@@ -95,6 +179,60 @@ export default async function AdminPage() {
           Read-only. {rows.length} signed-up user{rows.length === 1 ? "" : "s"}.
         </p>
       </header>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">Free → Pro conversion</p>
+          <p className="text-lg font-semibold text-ink">{conversionStats.conversionRatePercent}%</p>
+          <p className="text-xs text-ink/40">
+            {conversionStats.convertedUsers} of {conversionStats.totalUsers}
+            {conversionStats.medianDaysToConvert !== null &&
+              ` — median ${conversionStats.medianDaysToConvert}d to convert`}
+          </p>
+        </div>
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">AI cap exhaustion</p>
+          <p className="text-lg font-semibold text-ink">{aiExhaustionStats.exhaustionRatePercent}%</p>
+          <p className="text-xs text-ink/40">
+            {aiExhaustionStats.claimsExhausted} of {aiExhaustionStats.claimsWithAnyRun} claims
+            {aiExhaustionStats.medianDaysToExhaust !== null &&
+              ` — median ${aiExhaustionStats.medianDaysToExhaust}d`}
+          </p>
+        </div>
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">Storage: at/over limit</p>
+          <p className="text-lg font-semibold text-ink">{accountsAtOrOverStorage}</p>
+          <p className="text-xs text-ink/40">{everBlockedUsers.size} ever hit a block</p>
+        </div>
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">Returning: 30 / 60 / 90d</p>
+          <p className="text-lg font-semibold text-ink">
+            {retention30.ratePercent}% / {retention60.ratePercent}% / {retention90.ratePercent}%
+          </p>
+          <p className="text-xs text-ink/40">
+            of {retention30.eligible} / {retention60.eligible} / {retention90.eligible} eligible
+          </p>
+        </div>
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">Median files/claim</p>
+          <p className="text-lg font-semibold text-ink">{medianFilesPerClaim}</p>
+          <p className="text-xs text-ink/40">{claimFileCounts.size} claims with files</p>
+        </div>
+        <div className="border border-ink/15 rounded-sm px-3 py-3">
+          <p className="text-xs text-ink/50 mb-1">Cost per free account</p>
+          <p className="text-lg font-semibold text-ink/30">—</p>
+          <p className="text-xs text-ink/40">pending AI/storage pricing input</p>
+        </div>
+      </div>
+
+      {deletionReasons.size > 0 && (
+        <div className="border border-ink/15 rounded-sm px-3 py-3 mb-8">
+          <p className="text-xs text-ink/50 mb-1.5">Deletion reasons</p>
+          <p className="text-sm text-ink/70">
+            {[...deletionReasons.entries()].map(([reason, count]) => `${reason}: ${count}`).join(", ")}
+          </p>
+        </div>
+      )}
 
       <div className="border border-ink/15 rounded-sm overflow-x-auto">
         <table className="w-full text-sm">

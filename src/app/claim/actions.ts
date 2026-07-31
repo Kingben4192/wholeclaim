@@ -421,6 +421,20 @@ export async function uploadFile(
   if (!gate.allowed) {
     if (gate.reason === "STORAGE_LIMIT_REACHED") {
       const limitLabel = gate.bindingLimit === "claim" ? "this claim's" : "your account's";
+      // Analytics instrumentation (metric 3, 2026-07-31) -- checkUploadAccess
+      // returning blocked was previously invisible: nothing persisted the
+      // event, only the CURRENT running total. Awaited so it reliably
+      // completes before the throw ends this Server Action; a failed
+      // insert is logged, not surfaced -- a missed analytics event is not
+      // a reason to give the user a worse error message.
+      const { error: analyticsError } = await supabase.from("analytics_events").insert({
+        user_id: user.id,
+        event_type: "storage_limit_blocked",
+        metadata: { claim_id: claimId, binding_limit: gate.bindingLimit, upgrade_required: gate.upgradeRequired },
+      });
+      if (analyticsError) {
+        console.error("uploadFile: analytics_events insert failed:", analyticsError.message);
+      }
       throw new Error(
         gate.upgradeRequired
           ? `You've reached ${limitLabel} storage limit on the free plan. Upgrade to Pro for more space.`

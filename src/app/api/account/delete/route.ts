@@ -31,6 +31,22 @@ export async function POST(request: NextRequest) {
 
   const admin = getAdminClient();
 
+  // Analytics instrumentation (metric 7, 2026-07-31) -- must be written
+  // BEFORE deleteUser() below, not after: analytics_events.user_id is
+  // ON DELETE SET NULL (0029 migration), so the row survives the account
+  // deletion it describes, but only if it exists before the FK's target
+  // row is gone. Optional/skippable on the form -- reason may be null.
+  const reasonRaw = (await request.formData()).get("reason");
+  const reason = typeof reasonRaw === "string" && reasonRaw.trim().length > 0 ? reasonRaw : null;
+  const { error: analyticsError } = await admin.from("analytics_events").insert({
+    user_id: user.id,
+    event_type: "account_deleted",
+    metadata: { reason },
+  });
+  if (analyticsError) {
+    console.error("account delete: analytics_events insert failed:", analyticsError.message);
+  }
+
   const filePaths = await listAllObjects(admin, "evidence", user.id);
   if (filePaths.length > 0) {
     await admin.storage.from("evidence").remove(filePaths);

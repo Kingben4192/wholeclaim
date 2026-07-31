@@ -31,6 +31,20 @@ function createFakeSupabase(seed: { profiles?: Record<string, unknown>[] }) {
           tables[table].push({ ...payload });
           return Promise.resolve({ error: null });
         },
+        // Only what converted_at's read-before-write needs (webhookHandlers.ts)
+        // -- .select(cols).eq(col, val).maybeSingle().
+        select() {
+          return {
+            eq(col: string, val: unknown) {
+              return {
+                maybeSingle() {
+                  const row = tables[table].find((r) => r[col] === val) ?? null;
+                  return Promise.resolve({ data: row, error: null });
+                },
+              };
+            },
+          };
+        },
       };
     },
     _tables: tables,

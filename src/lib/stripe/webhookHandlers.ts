@@ -140,6 +140,27 @@ async function handleCheckoutSessionCompletedPayment(
     // doesn't crash the webhook.
     console.error("webhook checkout.session.completed (payment): claim_entitlements insert failed:", error.message);
   }
+
+  // First-conversion timestamp -- a lifetime claim unlock is a real
+  // conversion event for this metric even though the entitlement itself
+  // is claim-scoped, not account-wide (profiles.plan is deliberately left
+  // untouched above for that same reason; converted_at tracks "ever paid
+  // us," a different question). Same never-overwrite-once-set rule as
+  // handleSubscriptionSync.
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("converted_at")
+    .eq("id", userId)
+    .maybeSingle();
+  if (existingProfile && !existingProfile.converted_at) {
+    const { error: convertedError } = await supabase
+      .from("profiles")
+      .update({ converted_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (convertedError) {
+      console.error("webhook checkout.session.completed (payment): converted_at update failed:", convertedError.message);
+    }
+  }
 }
 
 export async function handleCheckoutSessionCompleted(
@@ -181,13 +202,32 @@ export async function handleSubscriptionSync(supabase: SupabaseClient, subscript
     return;
   }
 
+  const update: Record<string, unknown> = {
+    stripe_subscription_id: subscription.id,
+    subscription_status: subscription.status,
+    subscription_current_period_end: toIso(getCurrentPeriodEnd(subscription)),
+  };
+
+  // First-conversion timestamp (analytics instrumentation, 2026-07-31) --
+  // set once, only on a sync that reports 'active', only if not already
+  // set. Read-before-write since the query builder has no "set X only if
+  // currently null" expression -- a plain .update() would blindly
+  // overwrite it on every subsequent sync (e.g. a renewal), erasing the
+  // original conversion date.
+  if (subscription.status === "active") {
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("converted_at")
+      .eq("stripe_customer_id", custId)
+      .maybeSingle();
+    if (existing && !existing.converted_at) {
+      update.converted_at = new Date().toISOString();
+    }
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      stripe_subscription_id: subscription.id,
-      subscription_status: subscription.status,
-      subscription_current_period_end: toIso(getCurrentPeriodEnd(subscription)),
-    })
+    .update(update)
     .eq("stripe_customer_id", custId);
   if (error) console.error("webhook subscription sync: profiles update failed:", error.message);
 }

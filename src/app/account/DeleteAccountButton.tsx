@@ -63,6 +63,27 @@ export function DeleteAccountButton() {
           )}
 
           <form action="/api/account/delete" method="POST" className="flex flex-col gap-2 items-start w-full">
+            {/* Optional, skippable -- analytics instrumentation (metric 7,
+                2026-07-31). "Prefer not to say" is the default/first
+                option, not required to submit the form. */}
+            <label className="flex flex-col gap-1 w-full">
+              <span className="text-xs font-semibold text-ink/60">
+                Mind sharing why you&apos;re leaving? (optional)
+              </span>
+              <select
+                name="reason"
+                defaultValue=""
+                className="text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white"
+              >
+                <option value="">Prefer not to say</option>
+                <option value="resolved">Resolved my claim / no longer need it</option>
+                <option value="too_expensive">Too expensive</option>
+                <option value="missing_feature">Missing a feature I needed</option>
+                <option value="confusing">Found it confusing to use</option>
+                <option value="privacy">Privacy concerns</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
             <p className="text-sm text-red-700 font-semibold">Type DELETE to confirm.</p>
             <input
               name="confirm"
