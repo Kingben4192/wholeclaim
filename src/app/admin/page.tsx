@@ -2,7 +2,13 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isServiceRoleConfigured, getAdminClient } from "@/lib/supabase/admin";
-import { computeConversionStats, computeAiExhaustionStats, computeRetentionRate, median } from "@/lib/betaMetrics";
+import {
+  computeConversionStats,
+  computeAiExhaustionStats,
+  computeRetentionRate,
+  computeCostPerFreeAccount,
+  median,
+} from "@/lib/betaMetrics";
 import { FREE_CLAIM_CAP } from "@/lib/anthropic/rateLimit";
 import {
   FREE_STORAGE_LIMIT_PER_ACCOUNT_BYTES,
@@ -59,7 +65,7 @@ export default async function AdminPage() {
       admin.auth.admin.listUsers({ perPage: 1000 }),
       admin.from("claims").select("id, user_id, claim_category, storage_used_bytes"),
       admin.from("files").select("user_id, claim_id"),
-      admin.from("ai_runs").select("user_id, claim_id, created_at"),
+      admin.from("ai_runs").select("user_id, claim_id, created_at, tokens_in, tokens_out"),
       admin.from("profiles").select("id, subscription_status, converted_at, storage_used_bytes"),
       admin.from("analytics_events").select("event_type, user_id, metadata, created_at"),
     ]);
@@ -171,6 +177,22 @@ export default async function AdminPage() {
     deletionReasons.set(reason, (deletionReasons.get(reason) ?? 0) + 1);
   }
 
+  // Metric 6, pricing supplied by the founder 2026-07-31 (AI_PRICING_*/
+  // STORAGE_PRICING_* constants, src/lib/betaMetrics.ts) -- confirmed
+  // against Decision #7's locked model before use. Storage cost here is a
+  // point-in-time snapshot of current storage_used_bytes, not an accrued
+  // monthly bill -- a real simplification, noted in betaMetrics.ts's own
+  // comment, not hidden.
+  const freeAccounts = (profiles ?? [])
+    .filter(
+      (p) => !(p.subscription_status && SUBSCRIPTION_STATUSES_GRANTING_PRO.includes(p.subscription_status)),
+    )
+    .map((p) => ({ userId: p.id, storageUsedBytes: p.storage_used_bytes ?? 0 }));
+  const costStats = computeCostPerFreeAccount(
+    freeAccounts,
+    (aiRuns ?? []).map((r) => ({ userId: r.user_id, tokensIn: r.tokens_in, tokensOut: r.tokens_out })),
+  );
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <header className="mb-8">
@@ -220,8 +242,11 @@ export default async function AdminPage() {
         </div>
         <div className="border border-ink/15 rounded-sm px-3 py-3">
           <p className="text-xs text-ink/50 mb-1">Cost per free account</p>
-          <p className="text-lg font-semibold text-ink/30">—</p>
-          <p className="text-xs text-ink/40">pending AI/storage pricing input</p>
+          <p className="text-lg font-semibold text-ink">${costStats.avgCostPerFreeAccountUsd.toFixed(2)}</p>
+          <p className="text-xs text-ink/40">
+            {costStats.freeAccountCount} free — ${costStats.totalAiCostUsd.toFixed(2)} AI + $
+            {costStats.totalStorageCostUsd.toFixed(2)} storage
+          </p>
         </div>
       </div>
 

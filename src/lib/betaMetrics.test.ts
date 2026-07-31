@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { median, computeConversionStats, computeAiExhaustionStats, computeRetentionRate } from "./betaMetrics";
+import {
+  median,
+  computeConversionStats,
+  computeAiExhaustionStats,
+  computeRetentionRate,
+  computeCostPerFreeAccount,
+} from "./betaMetrics";
 
 describe("median", () => {
   it("returns 0 for an empty array", () => {
@@ -109,5 +115,61 @@ describe("computeRetentionRate", () => {
       now,
     );
     expect(result.returned).toBe(0);
+  });
+});
+
+describe("computeCostPerFreeAccount", () => {
+  it("returns 0 with no free accounts, not a divide-by-zero throw", () => {
+    const result = computeCostPerFreeAccount([], []);
+    expect(result.avgCostPerFreeAccountUsd).toBe(0);
+  });
+
+  it("computes AI cost from input/output tokens at the supplied per-million rates", () => {
+    // 1,000,000 input tokens @ $3/M = $3; 1,000,000 output tokens @ $15/M = $15
+    const result = computeCostPerFreeAccount(
+      [{ userId: "u1", storageUsedBytes: 0 }],
+      [{ userId: "u1", tokensIn: 1_000_000, tokensOut: 1_000_000 }],
+    );
+    expect(result.totalAiCostUsd).toBe(18);
+    expect(result.totalStorageCostUsd).toBe(0);
+    expect(result.avgCostPerFreeAccountUsd).toBe(18);
+  });
+
+  it("computes storage cost from bytes at the supplied $/GB/month rate", () => {
+    const oneGb = 1024 ** 3;
+    const result = computeCostPerFreeAccount([{ userId: "u1", storageUsedBytes: oneGb }], []);
+    expect(result.totalStorageCostUsd).toBe(0.02); // $0.021 rounds to $0.02 at 2 decimal places
+  });
+
+  it("excludes Pro accounts' AI usage from the free-tier cost total", () => {
+    const result = computeCostPerFreeAccount(
+      [{ userId: "free_user", storageUsedBytes: 0 }],
+      [
+        { userId: "free_user", tokensIn: 1_000_000, tokensOut: 0 },
+        { userId: "pro_user", tokensIn: 1_000_000, tokensOut: 0 }, // not in freeAccounts, must not count
+      ],
+    );
+    expect(result.totalAiCostUsd).toBe(3);
+  });
+
+  it("averages total cost across all free accounts, not just ones with usage", () => {
+    const result = computeCostPerFreeAccount(
+      [
+        { userId: "u1", storageUsedBytes: 0 },
+        { userId: "u2", storageUsedBytes: 0 }, // no AI runs, no storage -- still counts in the denominator
+      ],
+      [{ userId: "u1", tokensIn: 1_000_000, tokensOut: 0 }], // $3 total
+    );
+    expect(result.freeAccountCount).toBe(2);
+    expect(result.avgCostPerFreeAccountUsd).toBe(1.5);
+  });
+
+  it("treats null token counts as zero rather than propagating NaN", () => {
+    const result = computeCostPerFreeAccount(
+      [{ userId: "u1", storageUsedBytes: 0 }],
+      [{ userId: "u1", tokensIn: null, tokensOut: null }],
+    );
+    expect(result.totalAiCostUsd).toBe(0);
+    expect(Number.isNaN(result.totalAiCostUsd)).toBe(false);
   });
 });

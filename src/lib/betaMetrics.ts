@@ -15,7 +15,23 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 const MS_PER_DAY = 86400000;
+
+// Metric 6 pricing inputs, supplied by the founder 2026-07-31 -- not
+// derived or guessed. AI figures confirmed against src/lib/anthropic/
+// client.ts's locked MODEL constant ("claude-sonnet-4-6", Decision #7)
+// before use; if that constant ever changes, these no longer apply and
+// must be re-confirmed, not silently kept.
+export const AI_PRICING_PER_MILLION_INPUT_USD = 3;
+export const AI_PRICING_PER_MILLION_OUTPUT_USD = 15;
+// Supabase Storage (object storage), not database storage -- those are
+// billed separately and storage_used_bytes tracks Storage specifically.
+export const STORAGE_PRICING_PER_GB_MONTH_USD = 0.021;
+const BYTES_PER_GB = 1024 ** 3;
 
 export type ConversionStats = {
   totalUsers: number;
@@ -115,5 +131,49 @@ export function computeRetentionRate(
     eligible: eligible.length,
     returned: returned.length,
     ratePercent: eligible.length === 0 ? 0 : round1((returned.length / eligible.length) * 100),
+  };
+}
+
+export type CostPerFreeAccountStats = {
+  freeAccountCount: number;
+  totalAiCostUsd: number;
+  totalStorageCostUsd: number;
+  totalCostUsd: number;
+  avgCostPerFreeAccountUsd: number;
+};
+
+// Free accounts only -- Pro's cost profile is a different question (their
+// subscription/purchase revenue is the offsetting side of that ledger);
+// this metric is specifically about what the free tier costs to run.
+// Storage cost is a point-in-time snapshot (current storage_used_bytes x
+// $/GB/month), not an accrued monthly bill -- an account that used 1GB for
+// one day and an account that's held 1GB for a year read identically here,
+// which is a real simplification worth knowing about, not hidden.
+export function computeCostPerFreeAccount(
+  freeAccounts: { userId: string; storageUsedBytes: number }[],
+  aiRuns: { userId: string; tokensIn: number | null; tokensOut: number | null }[],
+): CostPerFreeAccountStats {
+  const freeUserIds = new Set(freeAccounts.map((a) => a.userId));
+
+  let totalAiCostUsd = 0;
+  for (const run of aiRuns) {
+    if (!freeUserIds.has(run.userId)) continue;
+    totalAiCostUsd += ((run.tokensIn ?? 0) / 1_000_000) * AI_PRICING_PER_MILLION_INPUT_USD;
+    totalAiCostUsd += ((run.tokensOut ?? 0) / 1_000_000) * AI_PRICING_PER_MILLION_OUTPUT_USD;
+  }
+
+  let totalStorageCostUsd = 0;
+  for (const a of freeAccounts) {
+    totalStorageCostUsd += (a.storageUsedBytes / BYTES_PER_GB) * STORAGE_PRICING_PER_GB_MONTH_USD;
+  }
+
+  const totalCostUsd = totalAiCostUsd + totalStorageCostUsd;
+  const freeAccountCount = freeAccounts.length;
+  return {
+    freeAccountCount,
+    totalAiCostUsd: round2(totalAiCostUsd),
+    totalStorageCostUsd: round2(totalStorageCostUsd),
+    totalCostUsd: round2(totalCostUsd),
+    avgCostPerFreeAccountUsd: freeAccountCount === 0 ? 0 : round2(totalCostUsd / freeAccountCount),
   };
 }
