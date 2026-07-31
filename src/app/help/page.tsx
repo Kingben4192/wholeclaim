@@ -155,9 +155,10 @@ export default async function HelpPage() {
               <p className="font-display font-bold text-sm mb-2">Billing &amp; Upgrades</p>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
                 The free plan includes the Binder &amp; Claim Grade, up to 25 Evidence Vault
-                uploads per claim, the Deadline Tracker, 1 active claim per dispute category,
-                and 3 AI analyses per claim (not resettable) across Policy Decoder, Loss-Count
-                Auditor, Estimate Gap Analyzer, Decision Assistant, and Letter Builder.
+                uploads per claim (500MB per claim, 2GB per account), the Deadline Tracker,
+                1 active claim per dispute category, and 3 AI analyses per claim (not
+                resettable) across Policy Decoder, Loss-Count Auditor, Estimate Gap
+                Analyzer, Decision Assistant, and Letter Builder.
               </p>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
                 WholeClaim Pro is available two ways:

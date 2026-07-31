@@ -47,6 +47,7 @@ export const PRO_LIFETIME = {
 export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[] = [
   { feature: "The Binder & Claim Grade", free: "Included", pro: "Included" },
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },
+  { feature: "Storage", free: "500MB per claim, 2GB per account", pro: "10GB per account" },
   { feature: "Deadline Tracker", free: "Included", pro: "Included" },
   {
     feature: "AI analysis (Policy Decoder, Loss-Count Auditor, Estimate Gap Analyzer, Decision Assistant, Letter Builder)",
