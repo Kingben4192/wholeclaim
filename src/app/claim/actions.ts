@@ -396,18 +396,10 @@ export async function uploadFile(
   if (claimError) throw new Error("Could not verify this claim. Try again.");
   if (!claim) throw new Error("You don't have access to this claim.");
 
-  // Step 6: free-tier evidence upload cap. Pro (any grant) skips this
-  // entirely — checkUploadAccess() never even runs the count query for a
-  // Pro user, since isPro() is checked first and short-circuits. Runs
-  // BEFORE the file itself is validated/uploaded/inserted anywhere, so a
-  // blocked attempt touches neither Storage nor the database.
-  const gate = await checkUploadAccess(supabase, user.id, claimId);
-  if (!gate.allowed) {
-    throw new Error(
-      `Free plan includes ${FREE_UPLOAD_LIMIT_PER_CLAIM} uploads per claim. Upgrade to Pro for unlimited uploads.`,
-    );
-  }
-
+  // File itself is validated first now (Decision #88 storage enforcement)
+  // so its size is known before the gate runs -- the gate needs to check
+  // "current usage + this file" against both the count and storage limits
+  // in one pass, before anything touches Storage or the database.
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     throw new Error("Choose a photo or PDF to upload.");
@@ -417,6 +409,27 @@ export async function uploadFile(
   }
   if (!isAllowedUpload(file)) {
     throw new Error("That file type isn't supported. Upload a photo, PDF, or common document file.");
+  }
+
+  // Step 6 + Decision #88: free-tier file-count cap, then storage bytes.
+  // Pro (any grant) skips the count check entirely (isPro() short-circuits,
+  // same as before) but NOT the storage check -- Decision #81 gives Pro a
+  // real 10GB + 500MB-buffer ceiling, not "unlimited," unlike uploads
+  // themselves. Runs BEFORE the file is uploaded/inserted anywhere, so a
+  // blocked attempt touches neither Storage nor the database.
+  const gate = await checkUploadAccess(supabase, user.id, claimId, file.size);
+  if (!gate.allowed) {
+    if (gate.reason === "STORAGE_LIMIT_REACHED") {
+      const limitLabel = gate.bindingLimit === "claim" ? "this claim's" : "your account's";
+      throw new Error(
+        gate.upgradeRequired
+          ? `You've reached ${limitLabel} storage limit on the free plan. Upgrade to Pro for more space.`
+          : `You've reached ${limitLabel} storage limit. Delete some files to free up space.`,
+      );
+    }
+    throw new Error(
+      `Free plan includes ${FREE_UPLOAD_LIMIT_PER_CLAIM} uploads per claim. Upgrade to Pro for unlimited uploads.`,
+    );
   }
 
   const kind = kindForFile(file);
@@ -442,6 +455,20 @@ export async function uploadFile(
     });
   if (uploadError) throw new Error(uploadError.message);
 
+  // Don't trust the client-reported File.size as final (STORAGE_ENFORCEMENT_BRIEF.md's
+  // explicit open design item) -- reconcile against what Storage actually
+  // recorded for the object immediately after upload. Falls back to the
+  // client-reported size only if the list lookup itself fails, rather than
+  // blocking the upload over a metadata read.
+  let sizeBytes = file.size;
+  const folderPath = `${user.id}/${claimId}`;
+  const objectName = storagePath.slice(folderPath.length + 1);
+  const { data: listData } = await supabase.storage
+    .from("evidence")
+    .list(folderPath, { search: objectName });
+  const actualSize = listData?.find((entry) => entry.name === objectName)?.metadata?.size;
+  if (typeof actualSize === "number") sizeBytes = actualSize;
+
   const { data: fileRow, error: insertError } = await supabase
     .from("files")
     .insert({
@@ -451,12 +478,25 @@ export async function uploadFile(
       kind,
       original_name: file.name,
       evidence_stage: evidenceStage,
+      size_bytes: sizeBytes,
     })
     .select("id")
     .single();
   if (insertError || !fileRow) {
     await supabase.storage.from("evidence").remove([storagePath]);
     throw new Error(insertError?.message ?? "Could not save the upload.");
+  }
+
+  const { error: usageError } = await supabase.rpc("increment_storage_usage", {
+    p_claim_id: claimId,
+    p_user_id: user.id,
+    p_delta_bytes: sizeBytes,
+  });
+  if (usageError) {
+    // The file itself is already saved and usable -- a running-total miss
+    // here is a drift bug to fix, not a reason to fail the whole upload
+    // the user is waiting on.
+    console.error("uploadFile: increment_storage_usage failed:", usageError.message);
   }
 
   if (promisedItemId) {
@@ -649,6 +689,19 @@ export async function deleteFile(
 ) {
   const supabase = await createClient();
 
+  // This IS the hard purge (removes both the Storage object and the row
+  // together, in one step) -- Decision #52's soft-delete/hard-purge
+  // distinction doesn't apply here since there's no separate unlink state
+  // in this codebase; every call to deleteFile frees bytes immediately.
+  // user_id read off the row itself (RLS on `files` already scopes it to
+  // its owner) rather than a fresh auth.getUser() call.
+  const { data: fileRow, error: fetchError } = await supabase
+    .from("files")
+    .select("size_bytes, user_id")
+    .eq("id", fileId)
+    .single();
+  if (fetchError || !fileRow) throw new Error("Could not find that file.");
+
   const { error: storageError } = await supabase.storage
     .from("evidence")
     .remove([storagePath]);
@@ -656,6 +709,17 @@ export async function deleteFile(
 
   const { error } = await supabase.from("files").delete().eq("id", fileId);
   if (error) throw new Error(error.message);
+
+  if (fileRow.size_bytes) {
+    const { error: usageError } = await supabase.rpc("increment_storage_usage", {
+      p_claim_id: claimId,
+      p_user_id: fileRow.user_id,
+      p_delta_bytes: -fileRow.size_bytes,
+    });
+    if (usageError) {
+      console.error("deleteFile: increment_storage_usage failed:", usageError.message);
+    }
+  }
 
   revalidatePath(`/claim/${claimId}`);
 }

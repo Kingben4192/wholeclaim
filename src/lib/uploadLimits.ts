@@ -5,8 +5,16 @@
 // explicit MVP decision (2026-07-18), not silently invented here.
 export const FREE_UPLOAD_LIMIT_PER_CLAIM = 25;
 
-// Future enhancement, NOT implemented in Step 6 — file-count enforcement
-// only, per explicit scope. A byte-sum limit (e.g. FREE_UPLOAD_STORAGE_LIMIT_MB
-// = 250) would live here as a sibling constant, and would only require
-// adding one more query + condition inside checkUploadAccess
-// (src/lib/uploadGate.ts) — no rewrite of uploadFile or any UI component.
+// Storage enforcement (Decision #88, 04_Engineering/STORAGE_ENFORCEMENT_BRIEF.md).
+// Free tier is a flat ceiling with no buffer of any kind (Decision #55,
+// clarified 2026-07-31 -- the "500MB emergency buffer" language in
+// Decisions #81/#82 is a Pro-tier concept only, not free). Pro gets a real
+// ceiling too, not "unlimited" -- Decision #81 -- with a buffer beyond it
+// that free does not get.
+const MB = 1024 * 1024;
+const GB = 1024 * MB;
+
+export const FREE_STORAGE_LIMIT_PER_CLAIM_BYTES = 500 * MB;
+export const FREE_STORAGE_LIMIT_PER_ACCOUNT_BYTES = 2 * GB;
+export const PRO_STORAGE_LIMIT_PER_ACCOUNT_BYTES = 10 * GB;
+export const PRO_STORAGE_BUFFER_BYTES = 500 * MB;

@@ -37,6 +37,8 @@ import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 import { CategoryRequiredGate } from "./CategoryRequiredGate";
 import { getFreeAiUsageCount, FREE_CLAIM_CAP } from "@/lib/anthropic/rateLimit";
 import { FreeAiUsageBadge } from "./FreeAiUsageBadge";
+import { computeFreeStorageStatus, computeProStorageStatus } from "@/lib/storageStatus";
+import { StorageUsageBar } from "./StorageUsageBar";
 
 export default async function ClaimDetailPage({
   params,
@@ -113,6 +115,11 @@ export default async function ClaimDetailPage({
       supabase.auth.getUser(),
     ]);
 
+  // profiles.storage_used_bytes read separately, after user is known --
+  // needs user.id, which isn't available until this same Promise.all
+  // resolves user itself, same reason isPro/proSource below are resolved
+  // after the batch rather than inside it.
+
   if (!claim) notFound();
 
   // Decision #86 -- a grader-converted claim can exist with claim_category
@@ -133,6 +140,20 @@ export default async function ClaimDetailPage({
   // this only fixes what the page displays to match reality.
   const isPro = user ? await resolveIsPro(supabase, id, user.id) : false;
   const proSource = user && isPro ? await resolveProAccessSource(supabase, id, user.id) : null;
+
+  // Storage usage bar -- reads the exact same computeFreeStorageStatus/
+  // computeProStorageStatus functions checkUploadAccess enforces against
+  // (Decision #88), not a UI-side estimate. Falls back to a zero-usage
+  // "normal" free-tier reading if the profile row can't be read for any
+  // reason, rather than failing the whole page over a display-only value.
+  const { data: profileRow } = user
+    ? await supabase.from("profiles").select("storage_used_bytes").eq("id", user.id).single()
+    : { data: null };
+  const accountUsedBytes = profileRow?.storage_used_bytes ?? 0;
+  const claimUsedBytes = claim.storage_used_bytes ?? 0;
+  const storageStatus = isPro
+    ? computeProStorageStatus(accountUsedBytes)
+    : computeFreeStorageStatus(claimUsedBytes, accountUsedBytes);
 
   // AI usage counter -- same source checkAiAccess/checkUsageGate enforce
   // against (getFreeAiUsageCount), not a derived count. null for Pro, so
@@ -411,6 +432,12 @@ export default async function ClaimDetailPage({
         <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
           Evidence Vault
         </h2>
+        <StorageUsageBar
+          usedBytes={storageStatus.usedBytes}
+          limitBytes={storageStatus.limitBytes}
+          status={storageStatus.status}
+          bindingLimit={storageStatus.bindingLimit}
+        />
         <div className="border border-ink/15 rounded-sm mb-4">
           {filesWithUrls.length > 0 ? (
             filesWithUrls.map((f) => (
