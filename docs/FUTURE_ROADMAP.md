@@ -168,3 +168,65 @@ phase number since Phase 2/3 already mean Contractor/Public Adjuster in
 the pricing ladder. Legal counsel must review implementation +
 disclaimers before launch (same UPL family as Anna question #2 on AI
 claim letters).
+
+---
+
+## 2026-08-01 — Claim Grade A-Action-Center (audit) (PARKED, pieces vary)
+
+Source: founder audit request covering the full A-Action-Center concept.
+Two pieces were approved to build separately (Annual Claim Health Check,
+PDF-only claim binder export) and are not part of this parked entry. This
+covers everything else from that audit.
+
+### Document Vault, Home Inventory, Disaster Preparedness (storage-dependent pieces)
+
+**Real blocker, corrected from how it was originally framed.** The
+storage model (Decision #55) is confirmed claim-scoped: 500MB/claim,
+2GB/account ceiling — no account-level "vault" allocation exists.
+Enforcement itself (Decision #88) is **not** an open blocker — it shipped
+and has been live in production since 2026-07-31 (Decision #89,
+`supabase/migrations/0027_storage_enforcement.sql`). The actual blocker
+is architectural, not a pending to-do: nothing in this schema represents
+storage that persists independent of a specific claim. Document Vault,
+Home Inventory, and any Disaster Prep piece needing standalone document
+storage all require the same new concept — an account-level storage
+object with no claim to belong to — which doesn't exist yet and hasn't
+been decided, not just unbuilt. Building any of these on the current
+model would mean either awkwardly attaching everything to a placeholder
+claim, or introducing a second storage allocation with its own limits,
+pricing implications, and RLS surface. That's a real design decision, not
+a build task, and belongs in that form when this is revisited.
+
+### Policy Review Checklist (AI coverage-gap detection, endorsement suggestions)
+
+Same public-adjusting/UPL question already queued for Anna's legal
+review — not a new legal question, and a disclaimer does not resolve it
+(same standing rule as every other AI-advice-adjacent feature in this
+product). Not built until her opinion lands.
+
+### Everything else — no blockers, not urgent
+
+Claim Health Monitoring reminders, Coverage Change Tracker, Maintenance
+Timeline, and the remaining Disaster Preparedness items (the ones that
+don't need standalone storage) have no identified blocker. Parked purely
+on priority, not on a dependency.
+
+### Per-claim-scoped export variant
+
+Surfaced while scoping the claim binder PDF (below): the existing
+account-wide "Export Everything" ZIP (`/api/account/export`) has no
+per-claim equivalent — no way to export just one claim's own raw files
+without pulling the entire account. Distinct from the PDF binder itself
+(an organized index/cover document) — this would be a scoped variant of
+the existing raw-file export, not a new format. Not built now.
+
+**Revisit trigger for the whole A-Action-Center.** After Stripe goes live
+AND Anna's clearance lands — both conditions, not either alone. The
+storage-dependent pieces above have an additional, separate precondition
+(the account-level vault architecture decision) on top of that.
+
+**Explicitly not covered here:** the "always-on home documentation
+platform" pivot this audit surfaced. That changes ICP, GTM story, and
+pricing SKUs — it's a business-model decision, not sequenced feature
+work, and belongs in a dedicated strategy conversation post-launch, not
+folded into this engineering backlog.
