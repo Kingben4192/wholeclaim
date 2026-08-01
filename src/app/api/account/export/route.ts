@@ -14,13 +14,14 @@ export async function GET() {
     return NextResponse.json({ error: "Sign in first." }, { status: 401 });
   }
 
-  const [profile, claims, entries, deadlines, evidenceItems, files, leads] = await Promise.all([
+  const [profile, claims, entries, deadlines, evidenceItems, files, promisedItems, leads] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("claims").select("*").eq("user_id", user.id),
     supabase.from("entries").select("*").eq("user_id", user.id),
     supabase.from("deadlines").select("*").eq("user_id", user.id),
     supabase.from("evidence_items").select("*").eq("user_id", user.id),
     supabase.from("files").select("*").eq("user_id", user.id),
+    supabase.from("promised_items").select("*").eq("user_id", user.id),
     user.email
       ? supabase.from("leads").select("*").ilike("email", user.email)
       : Promise.resolve({ data: [] as unknown[] }),
@@ -38,6 +39,7 @@ export async function GET() {
         deadlines: deadlines.data,
         evidence_items: evidenceItems.data,
         files: files.data,
+        promised_items: promisedItems.data,
         grader_leads: leads.data,
       },
       null,

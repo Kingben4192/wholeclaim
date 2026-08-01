@@ -39,6 +39,7 @@ import { getFreeAiUsageCount, FREE_CLAIM_CAP } from "@/lib/anthropic/rateLimit";
 import { FreeAiUsageBadge } from "./FreeAiUsageBadge";
 import { computeFreeStorageStatus, computeProStorageStatus } from "@/lib/storageStatus";
 import { StorageUsageBar } from "./StorageUsageBar";
+import { ClaimBinderExportButton } from "./ClaimBinderExportButton";
 
 export default async function ClaimDetailPage({
   params,
@@ -245,6 +246,9 @@ export default async function ClaimDetailPage({
             claimId={id}
             status={isClaimStatus(claim.status) ? claim.status : "active"}
           />
+        </div>
+        <div className="mt-3">
+          <ClaimBinderExportButton claimId={id} />
         </div>
       </header>
 
