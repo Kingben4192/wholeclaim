@@ -21,7 +21,10 @@ import { getResendClient, isResendConfigured } from "@/lib/resend";
 // implementation exactly.
 
 type SendEmailHookPayload = {
-  user: { email: string };
+  // id confirmed present in Supabase's actual documented payload
+  // (supabase.com/docs/guides/auth/auth-hooks/send-email-hook), not
+  // previously declared here since this file only used email before.
+  user: { id: string; email: string };
   email_data: {
     token: string;
     token_hash: string;
@@ -136,8 +139,12 @@ export async function POST(request: NextRequest) {
     // relying on a generic message, since a prior version of this catch
     // silently swallowed the real reason behind a static fallback string.
     console.error("send-email-hook: Resend send failed:", err);
+    // Correlate by user ID, not email (security/PII audit, 2026-08-01) --
+    // an internal identifier is enough to trace a failure back to an
+    // account without sending the person's actual email address to a
+    // third-party error-monitoring service.
     Sentry.captureException(err, {
-      extra: { stage: "resend_send", recipient: user.email },
+      extra: { stage: "resend_send", recipientUserId: user.id },
     });
     await Sentry.flush(2000);
     const message =
