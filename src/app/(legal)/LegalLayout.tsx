@@ -1,12 +1,31 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-export function LegalLayout({
+// Auth-blindness fix (bug investigation, 2026-08-02), applied once here
+// rather than in each of the 4 pages that use this shared layout
+// (privacy, terms, cookies, ai-disclaimer) -- same "one place decides"
+// principle as getClaimDisplayTitle (Decision #75), just applied to the
+// header's login link instead of a claim title. Same pattern already
+// shipped for the homepage and /help: a signed-in visitor sees "My
+// account," not an unconditional "Log in" that gives no indication
+// they're already signed in.
+export async function LegalLayout({
   title,
   children,
 }: {
   title: string;
   children: React.ReactNode;
 }) {
+  let isSignedIn = false;
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isSignedIn = !!user;
+  }
+
   return (
     <main className="min-h-screen flex flex-col">
       <header className="px-6 py-4 flex items-center justify-between border-b border-ink/10">
@@ -16,9 +35,15 @@ export function LegalLayout({
         >
           Whole<span className="text-ledger">Claim</span>
         </Link>
-        <Link href="/login" className="text-sm font-semibold text-ledger">
-          Log in
-        </Link>
+        {isSignedIn ? (
+          <Link href="/account" className="text-sm font-semibold text-ledger">
+            My account
+          </Link>
+        ) : (
+          <Link href="/login" className="text-sm font-semibold text-ledger">
+            Log in
+          </Link>
+        )}
       </header>
       <div className="max-w-2xl w-full mx-auto px-6 py-16">
         <h1 className="font-display text-2xl font-extrabold mb-8">{title}</h1>
