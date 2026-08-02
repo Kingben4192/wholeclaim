@@ -230,3 +230,47 @@ platform" pivot this audit surfaced. That changes ICP, GTM story, and
 pricing SKUs — it's a business-model decision, not sequenced feature
 work, and belongs in a dedicated strategy conversation post-launch, not
 folded into this engineering backlog.
+
+---
+
+## WholeClaim for Renters (Renter Mode) — PARKED, post-homeowner-MVP
+Parked: 2026-08-02 | Source: founder concept doc + competitive scan (unverified)
+
+Concept: renter-focused evidence platform on the shared core (vault,
+timeline, deadlines, scoring, AI letters). Outcome shifts from claim
+maximization to deposit recovery, lease enforcement, maintenance
+documentation, and renters-insurance claims.
+
+Candidate modules: move-in condition report; maintenance tracker; deposit
+protection / move-out package; communication vault; property inventory;
+renters-insurance policy explainer; Renter Claim Grade; deadline tracker;
+AI letter builder; evidence timeline; lease decoder (already parked as its
+own entry — renter mode inherits those constraints; do not duplicate scope).
+
+Hard constraints (binding if ever activated):
+1. Sequencing — no activation before the homeowner-MVP condition in the
+   Activation trigger below is met and Lease Decoder's own gates are
+   cleared. Lease Decoder is a dependency, not a build.
+2. UPL — renter mode carries HIGHER unauthorized-practice risk than
+   homeowner mode: eviction/dispute "defense," lease interpretation,
+   deposit-dispute letters under GA landlord-tenant law. No activation
+   without written counsel review (new question for Anna; not added to the
+   current four).
+3. Scoring — Renter Claim Grade forks the Documentation Score engine and
+   category caps; requires its own spec freeze (equivalent of Decision #66
+   — verify number) before any build.
+4. EXCLUDED: "Apartment History" crowdsourced property-issue database.
+   Rejected as a WholeClaim feature — defamation/trade-libel exposure,
+   verification/moderation burden, cold-start network effects, occupied
+   lane.
+5. Economics gate — validate renter willingness-to-pay before build;
+   deposit stakes (~$1.5–3K) vs. homeowner claim stakes; incumbents
+   monetize landlords/PMs, not renters.
+6. Competitive table in source doc is unverified — re-run competitor scan
+   at activation; do not cite MoveProof / DwellFile / Renter's Vault
+   externally without confirmation.
+
+Activation trigger: founder directive only, after the homeowner MVP has
+demonstrated sustained paying revenue — the specific threshold met is
+logged in Decisions.md at activation — and written counsel review is
+complete.
