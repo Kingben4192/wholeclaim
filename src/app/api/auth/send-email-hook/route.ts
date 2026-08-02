@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { Webhook } from "standardwebhooks";
 import * as Sentry from "@sentry/nextjs";
 import { getResendClient, isResendConfigured } from "@/lib/resend";
+import { sendWithRetry } from "@/lib/resendRetry";
 
 // Supabase Auth "Send Email" Hook (Decision #41, 2026-07-23) — replaces
 // Supabase's built-in SMTP-based email sending entirely for auth emails.
@@ -32,6 +33,13 @@ type SendEmailHookPayload = {
     email_action_type: string;
   };
 };
+
+// Retry/timeout fix for the Resend send below (2026-08-02 bug
+// investigation) -- see src/lib/resendRetry.ts for the full reasoning
+// and implementation. Extracted there rather than kept inline, matching
+// this codebase's own convention (uploadValidation.ts, storageStatus.ts,
+// betaMetrics.ts): pure logic lives in src/lib/, not inside a route
+// handler, so it's directly unit-testable.
 
 export async function POST(request: NextRequest) {
   const hookSecretRaw = process.env.SEND_EMAIL_HOOK_SECRET;
@@ -126,13 +134,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const resend = getResendClient();
-    const { error } = await resend.emails.send({
+    await sendWithRetry(resend, {
       from: process.env.RESEND_FROM_EMAIL || "WholeClaim <onboarding@resend.dev>",
       to: user.email,
       subject: "Sign in to WholeClaim",
       html,
     });
-    if (error) throw error;
   } catch (err) {
     // Resend's own error objects aren't `instanceof Error` -- logging the
     // raw value server-side (visible in Vercel function logs) instead of
