@@ -26,16 +26,62 @@ export const RESEND_SEND_TIMEOUT_MS = 4000;
 export const RESEND_MAX_ATTEMPTS = 2;
 export const RESEND_RETRY_DELAY_MS = 500;
 
-export function isRetryableResendFailure(err: unknown): boolean {
+// 2026-08-02 follow-up: a real production failure (Sentry event
+// 6c010966) turned out to be our own test artifact -- an @example.com
+// address, correctly hard-rejected by Resend as name: "validation_error".
+// The 800ms round-trip (too fast to be a timeout) was the tell. The
+// existing statusCode-range check below already excluded this correctly
+// in principle, but this adds an explicit check by name too -- Resend's
+// own documented RESEND_ERROR_CODE_KEY enum -- as a more robust, directly
+// testable signal that doesn't depend on statusCode being populated
+// exactly as expected on every error shape Resend might ever return.
+const NON_RETRYABLE_RESEND_ERROR_NAMES = new Set([
+  "validation_error",
+  "invalid_idempotency_key",
+  "missing_api_key",
+  "restricted_api_key",
+  "invalid_api_key",
+  "not_found",
+  "method_not_allowed",
+  "invalid_idempotent_request",
+  "invalid_attachment",
+  "invalid_from_address",
+  "invalid_access",
+  "invalid_parameter",
+  "invalid_region",
+  "missing_required_field",
+  "security_error",
+]);
+
+export type ResendFailureKind = "invalid_address" | "transient";
+
+// One shared classification used both to decide whether to retry (below)
+// and, by the hook route, to decide what to tell the client -- kept as a
+// single source rather than two separate checks that could drift apart.
+export function classifyResendFailure(err: unknown): { retryable: boolean; kind: ResendFailureKind } {
+  if (err && typeof err === "object" && "name" in err) {
+    const name = (err as { name: unknown }).name;
+    if (typeof name === "string" && NON_RETRYABLE_RESEND_ERROR_NAMES.has(name)) {
+      return { retryable: false, kind: "invalid_address" };
+    }
+  }
   // Resend's own ErrorResponse shape carries statusCode: number | null.
   // null (network-level) or 5xx (server-side) are worth retrying; a 4xx
-  // (invalid recipient, bad request) is permanent -- retrying wastes the
-  // one additional attempt this budget allows and won't change the
-  // outcome. Anything that doesn't even match that shape (a thrown
-  // timeout/network error from withTimeout) is also retryable.
-  if (!err || typeof err !== "object" || !("statusCode" in err)) return true;
+  // not already caught by name above is still treated as permanent.
+  // Anything that doesn't match this shape at all (a thrown timeout/
+  // network error from withTimeout) is retryable/transient.
+  if (!err || typeof err !== "object" || !("statusCode" in err)) {
+    return { retryable: true, kind: "transient" };
+  }
   const statusCode = (err as { statusCode: number | null }).statusCode;
-  return statusCode === null || statusCode >= 500;
+  if (statusCode === null || statusCode >= 500) {
+    return { retryable: true, kind: "transient" };
+  }
+  return { retryable: false, kind: "invalid_address" };
+}
+
+export function isRetryableResendFailure(err: unknown): boolean {
+  return classifyResendFailure(err).retryable;
 }
 
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {

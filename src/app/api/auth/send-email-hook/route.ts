@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { Webhook } from "standardwebhooks";
 import * as Sentry from "@sentry/nextjs";
 import { getResendClient, isResendConfigured } from "@/lib/resend";
-import { sendWithRetry } from "@/lib/resendRetry";
+import { sendWithRetry, classifyResendFailure } from "@/lib/resendRetry";
 
 // Supabase Auth "Send Email" Hook (Decision #41, 2026-07-23) — replaces
 // Supabase's built-in SMTP-based email sending entirely for auth emails.
@@ -132,10 +132,12 @@ export async function POST(request: NextRequest) {
     </p>
   `;
 
+  const from = process.env.RESEND_FROM_EMAIL || "WholeClaim <onboarding@resend.dev>";
+
   try {
     const resend = getResendClient();
     await sendWithRetry(resend, {
-      from: process.env.RESEND_FROM_EMAIL || "WholeClaim <onboarding@resend.dev>",
+      from,
       to: user.email,
       subject: "Sign in to WholeClaim",
       html,
@@ -154,15 +156,41 @@ export async function POST(request: NextRequest) {
       extra: { stage: "resend_send", recipientUserId: user.id },
     });
     await Sentry.flush(2000);
+
+    // Error mapping (2026-08-02 follow-up): distinguishes a permanent
+    // send failure (bad recipient address) from a transient one, using
+    // the same classification the retry logic itself relies on. Whether
+    // Supabase's OTP endpoint actually relays http_code/message through
+    // to the client, as opposed to generically wrapping every non-2xx
+    // hook response the same way, is unconfirmed -- every failure
+    // reproduced earlier this session surfaced identically on the client
+    // regardless of the underlying cause, which suggests it might not.
+    // login/actions.ts's own client-side handling is written to degrade
+    // safely to the transient framing either way, so this doesn't depend
+    // on Supabase's relay behavior to still be correct.
+    const { kind } = classifyResendFailure(err);
     const message =
       err && typeof err === "object" && "message" in err
         ? String((err as { message: unknown }).message)
         : "Could not send the email.";
     return NextResponse.json(
-      { error: { http_code: 500, message } },
-      { status: 500 },
+      { error: { http_code: kind === "invalid_address" ? 422 : 502, message } },
+      { status: kind === "invalid_address" ? 422 : 502 },
     );
   }
+
+  // Success-path logging (2026-08-02 follow-up): records which from
+  // address was actually used, so a real send can be checked against
+  // RESEND_FROM_EMAIL actually being set in production rather than
+  // silently falling back to the onboarding@resend.dev default. Sentry
+  // is the one channel already confirmed reachable this session (the
+  // founder found event 6c010966 directly), unlike Vercel's own log
+  // tooling or the Resend dashboard's send history via this API key.
+  Sentry.captureMessage("send-email-hook: sent", {
+    level: "info",
+    extra: { from, recipientUserId: user.id },
+  });
+  await Sentry.flush(2000);
 
   return NextResponse.json({});
 }

@@ -1,5 +1,50 @@
 import { describe, it, expect, vi } from "vitest";
-import { isRetryableResendFailure, withTimeout, sendWithRetry } from "./resendRetry";
+import { isRetryableResendFailure, classifyResendFailure, withTimeout, sendWithRetry } from "./resendRetry";
+
+describe("classifyResendFailure", () => {
+  it("classifies the real production failure this fix was built for: validation_error, invalid recipient", () => {
+    // Shape matches Sentry event 6c010966 (2026-08-02): Resend rejecting
+    // an @example.com-class address with "Invalid `to` field."
+    const result = classifyResendFailure({
+      statusCode: 422,
+      message: "Invalid `to` field. The email address needs to follow the email@example.com format",
+      name: "validation_error",
+    });
+    expect(result).toEqual({ retryable: false, kind: "invalid_address" });
+  });
+
+  it("classifies by name even if statusCode were absent or unexpected -- robustness, not just the range check", () => {
+    const result = classifyResendFailure({ message: "x", name: "validation_error" });
+    expect(result).toEqual({ retryable: false, kind: "invalid_address" });
+  });
+
+  it("classifies other documented non-retryable Resend error names as invalid_address/not retryable", () => {
+    for (const name of ["invalid_from_address", "missing_required_field", "invalid_parameter", "restricted_api_key"]) {
+      expect(classifyResendFailure({ statusCode: 400, message: "x", name })).toEqual({
+        retryable: false,
+        kind: "invalid_address",
+      });
+    }
+  });
+
+  it("classifies a 5xx or application_error as transient/retryable", () => {
+    expect(classifyResendFailure({ statusCode: 500, message: "x", name: "internal_server_error" })).toEqual({
+      retryable: true,
+      kind: "transient",
+    });
+    expect(classifyResendFailure({ statusCode: null, message: "x", name: "application_error" })).toEqual({
+      retryable: true,
+      kind: "transient",
+    });
+  });
+
+  it("classifies a thrown timeout/network error (no Resend shape at all) as transient/retryable", () => {
+    expect(classifyResendFailure(new Error("Resend send timed out after 4000ms"))).toEqual({
+      retryable: true,
+      kind: "transient",
+    });
+  });
+});
 
 describe("isRetryableResendFailure", () => {
   it("treats a 5xx statusCode as retryable", () => {
