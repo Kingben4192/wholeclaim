@@ -100,6 +100,77 @@ user was affected going forward, previously always "Users: 0"), so if this
 recurs, it should be traceable to a specific account next time instead of
 anonymous. Revisit if it happens again.
 
+## Open investigation — recurring `leads` anon-insert RLS breakage, pg_audit setup
+
+4 confirmed occurrences of the same symptom ("new row violates row-level
+security policy for table leads" on anon INSERT via the public Claim Grade
+form): 2026-07-16, 2026-07-19, 2026-07-24, 2026-07-31. Three repair
+migrations on record (`0008`, `0020`, `0030`), each re-asserting the same
+policy/grant, each eventually followed by recurrence. Supabase support's
+position on the open ticket: nothing on their platform auto-reverts RLS
+without a trigger; they floated an unconfirmed theory that AI-driven
+changes on our side might be reintroducing the broken state.
+
+**Self-investigation findings (2026-08-03), checked before accepting that
+theory:**
+
+- **Deploy/CI pipeline: cleared.** `.github/workflows/ci.yml` runs
+  typecheck/lint/test only — no database, migration, or Supabase-touching
+  step of any kind. `package.json` has no `predeploy`/`postbuild`/
+  seed/reset hooks. `vercel.json` has no `buildCommand` override. Vercel's
+  build (`next build`) never touches the database, and per
+  `supabase/migrations/README.md` there is no CLI/CI migration pipeline at
+  all — every migration is a manual paste into the SQL Editor. This
+  structurally rules out "a deploy step silently replays an old migration."
+- **Old-migration replay: ruled out on logic, not just absence of a
+  mechanism.** Every leads-related migration (`0006`, `0008`, `0013`,
+  `0020`, `0026`, `0030`) is idempotent and additive (`if not exists`,
+  `drop policy if exists` / `create policy`). Re-running any of them,
+  even accidentally, would only re-assert the same correct anon-insert
+  policy — it cannot explain a working policy going missing.
+- **One real, direct hit:** `0013_leads_consent_unsubscribe.sql` (2026-07-19)
+  altered the `leads` table with no `NOTIFY pgrst, 'reload schema'`
+  statement — already documented in `supabase/migrations/README.md` as the
+  confirmed cause of the second recurrence. This is the only one of the 4
+  incidents with a clean, direct causal link to something in this repo.
+- **The other 3 don't fit that same pattern.** The 2026-07-24 recurrence
+  has *no* migration touching `leads`' schema or policies at all in the
+  five days prior (`0014`–`0019` touch other tables only) — nothing in our
+  own migration history explains that one. The 2026-07-31 recurrence has
+  one candidate (`0026_grader_attribution.sql`, 2026-07-28, added 4 columns
+  to `leads`) but it already includes `NOTIFY pgrst, 'reload schema'` and
+  the gap is 3 days, not immediate — weaker evidence than `0013`, not a
+  clean match. The very first (2026-07-16) occurred at/near `leads`' own
+  initial creation (`0006`), before the `NOTIFY` convention existed at all.
+- **Can't rule in or out:** whether an AI-driven session made a live,
+  undocumented change outside the numbered-migration record. Git history
+  can't distinguish this either way — every commit in this repo shares one
+  author identity (`WholeClaim <benjaminhammonds@gmail.com>`), so there's
+  no separate "Claude-authored commit" signal to check. Worth stating
+  plainly: this Claude Code environment has never had live SQL execution
+  access at any point — migrations are 100% manual-paste, per
+  `supabase/migrations/README.md` — so if Supabase's theory means an agent
+  with live DB credentials, that isn't this environment.
+
+**pg_audit setup — APPLIED 2026-08-03.** `supabase/migrations/0032_pgaudit_leads_monitoring.sql`
+ran clean in the SQL Editor ("Success. No rows returned"), with one fix
+made during application: the draft's `create role if not exists ...` line
+is invalid Postgres syntax (`CREATE ROLE` has no `IF NOT EXISTS` clause,
+unlike `CREATE TABLE`/`CREATE EXTENSION`) — rewritten as a `DO $$ ... IF
+NOT EXISTS (SELECT FROM pg_roles ...) THEN CREATE ROLE ...` block, which
+is now reflected back into the migration file so the repo matches what's
+actually live. Verified against Supabase's real pgaudit docs before
+drafting, not assumed. Sets `pgaudit.log = 'ddl, role'` role-level
+(Supabase doesn't expose postgresql.conf, so this is database-wide, not
+scoped to `leads` alone — pgaudit's object-mode scoping only applies to
+read/write auditing, not DDL/GRANT). Also sets up a secondary object-mode
+role scoped to `leads` write traffic specifically. Manual verification
+(pg_extension/pg_roles config check, then a reversible test-policy
+create/drop checked against the Logs Explorer) in progress — pending
+results. If a 5th occurrence happens, pull the `postgres_logs` audit trail
+for that timestamp before attempting another repair — see the migration
+file's own trailing comment block for the exact query.
+
 ## Code cleanup (not urgent)
 
 - [ ] **Centralize the `isAdmin(email)` gate.** Duplicated inline in three
