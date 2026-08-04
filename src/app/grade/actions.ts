@@ -20,8 +20,25 @@ export type SubmitGradeInput = {
   firstTouchAt?: string | null;
 };
 
+// Decision #65 fix (2026-08-04): `emailed: false` used to collapse three
+// unrelated causes into one static "isn't configured on this environment
+// yet" message -- a signed-in user (who never gets a leads row or a send
+// attempt at all), a genuinely unconfigured environment, and a real,
+// transient send failure on a fully-configured one. Distinguishing them
+// so the client can show accurate copy for each, instead of one message
+// that's only literally true for one of the three cases.
+export type EmailNotSentReason = "already_signed_in" | "not_configured" | "send_failed";
+
 export type SubmitGradeResult =
-  | { ok: true; grade: string; score: number; scores: Record<string, number>; line: string; emailed: boolean }
+  | {
+      ok: true;
+      grade: string;
+      score: number;
+      scores: Record<string, number>;
+      line: string;
+      emailed: boolean;
+      emailNotSentReason?: EmailNotSentReason;
+    }
   | { ok: false; error: string };
 
 export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeResult> {
@@ -57,7 +74,15 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
   } = await supabase.auth.getUser();
 
   if (user) {
-    return { ok: true, grade: band.g, score: total, scores, line: band.line, emailed: false };
+    return {
+      ok: true,
+      grade: band.g,
+      score: total,
+      scores,
+      line: band.line,
+      emailed: false,
+      emailNotSentReason: "already_signed_in",
+    };
   }
 
   // No .select() here: anon has an INSERT policy on `leads` but deliberately
@@ -86,15 +111,20 @@ export async function submitGrade(input: SubmitGradeInput): Promise<SubmitGradeR
   }
 
   let emailed = false;
+  let emailNotSentReason: EmailNotSentReason | undefined;
   if (isResendConfigured() && isServiceRoleConfigured()) {
     try {
       emailed = await sendResultsEmail({ name, email, grade: band.g, score: total, line: band.line, scores });
+      if (!emailed) emailNotSentReason = "send_failed";
     } catch (err) {
       console.error("Grader results email failed:", err);
+      emailNotSentReason = "send_failed";
     }
+  } else {
+    emailNotSentReason = "not_configured";
   }
 
-  return { ok: true, grade: band.g, score: total, scores, line: band.line, emailed };
+  return { ok: true, grade: band.g, score: total, scores, line: band.line, emailed, emailNotSentReason };
 }
 
 async function sendResultsEmail(args: {
@@ -140,7 +170,14 @@ async function sendResultsEmail(args: {
   // unset, which only delivers to Resend's own reserved testing addresses.
   const from = process.env.RESEND_FROM_EMAIL || "WholeClaim <onboarding@resend.dev>";
 
-  await resend.emails.send({
+  // Decision #65 fix (2026-08-04): this previously returned true
+  // unconditionally after the await, regardless of what Resend's own
+  // response actually said -- Resend's send() reports failures via a
+  // returned { error } object, not a thrown exception (same shape
+  // classifyResendFailure/sendWithRetry already handle for the
+  // send-email-hook route), so a real send failure here was silently
+  // reported as a success.
+  const { error: sendError } = await resend.emails.send({
     from,
     to: args.email,
     subject: `Your Claim Grade: ${args.grade}`,
@@ -154,6 +191,11 @@ Create your claim file — pre-filled from what you already told us: ${wrappedLi
 
 WholeClaim is a self-help documentation tool, not legal or insurance advice.`,
   });
+
+  if (sendError) {
+    console.error("Grader results email: Resend send failed:", sendError);
+    return false;
+  }
 
   return true;
 }

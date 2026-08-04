@@ -257,7 +257,16 @@ export function GraderQuiz() {
           </div>
           <FirstPhotoCapture email={email} />
         </>
-      ) : (
+      ) : result.emailNotSentReason === "already_signed_in" ? (
+        <p className="text-sm text-ink/60">
+          You&apos;re already signed in, so this result wasn&apos;t saved as a new
+          lead — head to{" "}
+          <a href="/account" className="text-ledger underline">
+            your account
+          </a>{" "}
+          to add it to a claim file.
+        </p>
+      ) : result.emailNotSentReason === "not_configured" ? (
         <p className="text-sm text-ink/60">
           Your result is saved. Email delivery isn&apos;t configured on this
           environment yet, so use{" "}
@@ -265,6 +274,14 @@ export function GraderQuiz() {
             the sign-in link
           </a>{" "}
           with this email address to start your claim file.
+        </p>
+      ) : (
+        <p className="text-sm text-ink/60">
+          Your result is saved, but we couldn&apos;t send the email just now — use{" "}
+          <a href="/login" className="text-ledger underline">
+            the sign-in link
+          </a>{" "}
+          with this email address to start your claim file anytime.
         </p>
       )}
 
