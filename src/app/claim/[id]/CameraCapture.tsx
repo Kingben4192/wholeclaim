@@ -17,10 +17,12 @@ interface CameraCaptureProps {
   onUploadComplete?: () => void;
 }
 
+type BatchSummary = { succeeded: number; failed: number; failedMessages: string[] };
+
 export default function CameraCapture({ claimId, evidenceItemId, onUploadComplete }: CameraCaptureProps) {
   const [pending, setPending] = useState<PendingCapture[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<BatchSummary | null>(null);
   const [evidenceStage, setEvidenceStage] = useState("");
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +34,9 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
       file,
       previewUrl: URL.createObjectURL(file),
     }));
+    // A fresh batch is being staged -- the last summary now describes an
+    // older, already-cleared batch, not what's about to be uploaded.
+    setSummary(null);
     setPending((prev) => [...prev, ...newItems]);
   }, []);
 
@@ -43,26 +48,48 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
     });
   };
 
+  // Fix (2026-08-04): the previous version wrapped the whole loop in one
+  // try/catch -- a single failure (wrong file type, oversized, storage
+  // limit reached, all of which uploadFile already reports with a real,
+  // specific message) stopped the loop immediately, silently abandoning
+  // every file after it, and collapsed whatever happened into one generic
+  // "Some photos failed to upload." It also never cleared already-
+  // succeeded items from `pending` on a partial failure, risking a
+  // duplicate upload if the user just hit "Upload" again. Each file is
+  // now attempted independently; only the ones that actually succeeded
+  // are cleared, failed ones stay staged for a retry without re-picking
+  // or re-shooting them, and the real per-file error is surfaced instead
+  // of a generic line.
   const uploadAll = async () => {
     if (pending.length === 0) return;
     setUploading(true);
-    setError(null);
-    try {
-      for (const item of pending) {
+    setSummary(null);
+
+    const succeededIds: string[] = [];
+    const failedMessages: string[] = [];
+
+    for (const item of pending) {
+      try {
         const formData = new FormData();
         formData.append("file", item.file);
         if (evidenceStage) formData.append("evidence_stage", evidenceStage);
         await uploadFile(claimId, evidenceItemId ?? null, formData);
+        succeededIds.push(item.id);
+      } catch (err) {
+        console.error("Photo upload failed:", err);
+        failedMessages.push(err instanceof Error ? err.message : "Upload failed.");
       }
-      pending.forEach((p) => URL.revokeObjectURL(p.previewUrl));
-      setPending([]);
-      onUploadComplete?.();
-    } catch (err) {
-      console.error("Batch upload failed:", err);
-      setError("Some photos failed to upload. Please try again.");
-    } finally {
-      setUploading(false);
     }
+
+    setPending((prev) => {
+      prev
+        .filter((p) => succeededIds.includes(p.id))
+        .forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      return prev.filter((p) => !succeededIds.includes(p.id));
+    });
+    setUploading(false);
+    setSummary({ succeeded: succeededIds.length, failed: failedMessages.length, failedMessages });
+    if (succeededIds.length > 0) onUploadComplete?.();
   };
 
   return (
@@ -155,7 +182,33 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
           </button>
         </div>
       )}
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {summary && (
+        <div
+          className={`rounded-sm px-3 py-2 text-sm ${
+            summary.failed === 0
+              ? "border-2 border-ledger bg-ledger/10 text-ledger"
+              : "border-2 border-amber-700 bg-amber-50 text-amber-800"
+          }`}
+        >
+          {summary.failed === 0 ? (
+            <p>
+              {summary.succeeded} photo{summary.succeeded > 1 ? "s" : ""} added.
+            </p>
+          ) : (
+            <>
+              <p>
+                {summary.succeeded} of {summary.succeeded + summary.failed} uploaded
+                {summary.succeeded > 0 ? " — the rest are still staged above, ready to retry." : "."}
+              </p>
+              <ul className="mt-1 list-disc list-inside">
+                {summary.failedMessages.map((m, i) => (
+                  <li key={i}>{m}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
