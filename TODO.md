@@ -164,12 +164,35 @@ drafting, not assumed. Sets `pgaudit.log = 'ddl, role'` role-level
 (Supabase doesn't expose postgresql.conf, so this is database-wide, not
 scoped to `leads` alone — pgaudit's object-mode scoping only applies to
 read/write auditing, not DDL/GRANT). Also sets up a secondary object-mode
-role scoped to `leads` write traffic specifically. Manual verification
-(pg_extension/pg_roles config check, then a reversible test-policy
-create/drop checked against the Logs Explorer) in progress — pending
-results. If a 5th occurrence happens, pull the `postgres_logs` audit trail
-for that timestamp before attempting another repair — see the migration
-file's own trailing comment block for the exact query.
+role scoped to `leads` write traffic specifically.
+
+**Verification (2026-08-04): CONFIRMED WORKING END TO END.** Took two
+rounds to actually prove out, not one:
+- Round 1 (test policy create/drop on `leads`): config confirmed set
+  (`pg_extension` row present, `rolconfig` showed `pgaudit.log=ddl, role`),
+  but Logs Explorer showed zero `AUDIT` entries.
+- Ruled out session timing and preload as causes: `shared_preload_libraries`
+  confirmed to include pgaudit, and `show pgaudit.log` returned `ddl, role`
+  correctly in a brand-new session — both theories directly disproven.
+- Ruled out policy-statement-specific scoping: a plain `create table`/
+  `drop table` test also produced zero `AUDIT` entries — the gap was
+  `ddl`-class logging as a whole, not something about `CREATE POLICY`
+  specifically.
+- Real cause, sourced from Supabase's own docs
+  (supabase.com/docs/guides/telemetry/logs): setting `pgaudit.log` via
+  `alter role ... set ...` requires a project **fast reboot** afterward
+  before logging actually activates — a step the original migration draft
+  didn't include. Now documented directly in
+  `0032_pgaudit_leads_monitoring.sql`'s trailing comment block.
+- After the reboot: a repeat create/drop table test produced clean
+  `AUDIT: SESSION,...,DDL,CREATE TABLE ...` / `...DROP TABLE ...` entries
+  in Logs Explorer within the same minute. Confirmed working.
+
+If a 5th `leads` anon-insert recurrence happens, pull the Logs Explorer
+`postgres_logs` audit trail (Dashboard → Logs → Postgres Logs, filter for
+`event_message like 'AUDIT%'`) for that exact timestamp before attempting
+another repair — see the migration file's own trailing comment block for
+the exact query.
 
 ## Code cleanup (not urgent)
 

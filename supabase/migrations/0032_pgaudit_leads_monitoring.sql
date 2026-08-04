@@ -64,6 +64,31 @@ alter role postgres set pgaudit.role to 'wholeclaim_leads_audit';
 NOTIFY pgrst, 'reload schema';
 
 -- ============================================================
+-- REQUIRED MANUAL STEP -- this is load-bearing, not optional. Confirmed
+-- 2026-08-04 the hard way: after applying everything above, `show
+-- pgaudit.log` correctly returned 'ddl, role' in a brand-new session, and
+-- pg_extension/shared_preload_libraries both confirmed pgaudit was
+-- installed and loaded -- yet a real DDL statement (CREATE TABLE/DROP
+-- TABLE, then separately CREATE POLICY/DROP POLICY on leads) produced
+-- zero AUDIT log entries. Root cause: Supabase's own docs
+-- (supabase.com/docs/guides/telemetry/logs) state that setting
+-- pgaudit.log via `alter role ... set ...` requires a project "fast
+-- reboot" afterward before logging actually starts -- a step this
+-- migration's original draft omitted entirely. Config being visibly set
+-- (via SHOW or pg_roles.rolconfig) does NOT mean the audit pipeline is
+-- active.
+--
+-- After running everything above: Dashboard -> Settings -> Infrastructure
+-- -> Restart project (a "fast reboot"). This briefly interrupts live
+-- connections, including production -- time it deliberately, don't run it
+-- reflexively. Confirmed working 2026-08-04: after the reboot, a plain
+-- create/drop table pair produced clean
+-- `AUDIT: SESSION,...,DDL,CREATE TABLE ...` /
+-- `AUDIT: SESSION,...,DDL,DROP TABLE ...` entries in Logs Explorer within
+-- the same minute.
+-- ============================================================
+
+-- ============================================================
 -- MANUAL STEP -- founder must run these separately, after applying the
 -- above. Cannot be scripted: this environment has no way to execute SQL
 -- directly (see supabase/migrations/README.md), and step 2 specifically
