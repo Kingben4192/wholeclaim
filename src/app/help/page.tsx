@@ -70,6 +70,18 @@ const GUIDES: { title: string; steps?: string[]; body?: string }[] = [
     title: "How to use Policy Decoder",
     body: "Upload your policy documents. Use the tool to organize and understand policy sections. Review your policy information alongside your claim documentation.",
   },
+  {
+    title: "How to use Mold Coverage Timeline",
+    body: "Available with WholeClaim Pro. Builds a timeline automatically from your date of loss and logged entries — nothing to type in. Review it to see why timing matters and what to document next.",
+  },
+  {
+    title: "How to use Supplement Assistant",
+    body: "Available with WholeClaim Pro. Paste in the carrier's estimate and your contractor's estimate. The tool finds the gaps between them and drafts a supplement request you can review and send.",
+  },
+  {
+    title: "How to use Loss-of-Use Tracker",
+    body: "Available with WholeClaim Pro. Log hotel stays, meals, laundry, storage, mileage, and pet boarding tied to your claim. WholeClaim keeps a running summary of what you've logged.",
+  },
 ];
 
 export default async function HelpPage() {
