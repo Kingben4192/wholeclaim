@@ -1,0 +1,126 @@
+[
+  {
+    "slug": "water-damage",
+    "eventType": "Water Damage",
+    "title": "Water Damage Checklist",
+    "description": "What to photograph and record before cleanup starts, if a pipe, appliance, or storm has left standing water in your home.",
+    "pdfFile": "water-damage-checklist.pdf",
+    "groups": [
+      {
+        "title": "Immediate Actions",
+        "items": [
+          "Shut off the water source if you can identify it",
+          "Note the date and time you discovered the damage",
+          "Address safety concerns before documenting anything"
+        ]
+      },
+      {
+        "title": "Document the Damage",
+        "items": [
+          "Photograph the point of entry",
+          "Photograph the standing water level",
+          "Photograph affected walls and flooring",
+          "Photograph affected belongings"
+        ]
+      },
+      {
+        "title": "Keep Records",
+        "items": [
+          "Save any repair invoices",
+          "Save any plumber or restoration company estimates"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "fire-damage",
+    "eventType": "Fire Damage",
+    "title": "Fire Damage Checklist",
+    "description": "What to document before any cleanup begins, so nothing damaged gets discarded before it's recorded.",
+    "pdfFile": "fire-damage-checklist.pdf",
+    "groups": [
+      {
+        "title": "Immediate Actions",
+        "items": [
+          "Do not discard any damaged items before documenting them",
+          "Get the fire department report number",
+          "Address safety concerns before re-entering the property"
+        ]
+      },
+      {
+        "title": "Document the Damage",
+        "items": [
+          "Photograph every room, including smoke damage",
+          "Document all contents before any cleanup begins"
+        ]
+      },
+      {
+        "title": "Keep Records",
+        "items": [
+          "Save the fire department report",
+          "Save any restoration or cleanup estimates"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "wind-hail",
+    "eventType": "Wind & Hail",
+    "title": "Wind & Hail Checklist",
+    "description": "What to photograph from the ground and what to save, after a storm leaves damage to your roof, siding, or windows.",
+    "pdfFile": "wind-hail-checklist.pdf",
+    "groups": [
+      {
+        "title": "Immediate Actions",
+        "items": [
+          "Photograph the roof from the ground — do not climb onto the roof",
+          "Photograph siding, windows, and fencing",
+          "Date-stamp photos the same day as the storm, if possible"
+        ]
+      },
+      {
+        "title": "Document the Damage",
+        "items": [
+          "Save a weather report or storm-date reference",
+          "Note the approximate time the storm occurred"
+        ]
+      },
+      {
+        "title": "Keep Records",
+        "items": [
+          "Save any temporary repair invoices (tarps, board-up services)"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "theft",
+    "eventType": "Theft",
+    "title": "Theft Checklist",
+    "description": "What to file and record first, if your home has been broken into or items have gone missing.",
+    "pdfFile": "theft-checklist.pdf",
+    "groups": [
+      {
+        "title": "Immediate Actions",
+        "items": [
+          "File a police report and get the report number",
+          "Photograph any forced entry"
+        ]
+      },
+      {
+        "title": "Document What's Missing",
+        "items": [
+          "List missing items",
+          "Note approximate value and purchase date, if known"
+        ]
+      },
+      {
+        "title": "Keep Records",
+        "items": [
+          "Save the police report",
+          "Save any purchase receipts you can locate"
+        ]
+      }
+    ]
+  }
+]
