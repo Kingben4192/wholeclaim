@@ -64,6 +64,7 @@ The six questions below require an attorney licensed in Georgia. They are separa
    **Expanded (Decision #100):** does dispute-stage positioning create public-adjusting concerns, and where is the boundary between documentation support and claim advocacy?
 3. **Is the Success Guarantee enforceable, and does it create advertising exposure under GA FBPA / FTC guidance?**
    See also the Refund Policy and Success Guarantee section below, which asks a narrower, related question ("Could any wording be interpreted as acting as a public adjuster or promising an insurance result?"). This question adds the advertising/FBPA angle that section doesn't ask.
+   **Q3 expansion (Decision #101):** Guarantee evaluation basis is locked to the customer-facing Claim Grade computation as presented at purchase. Confirm this lock is sufficient if the displayed grade architecture later changes (provisional/verified split).
 4. **How can WholeClaim support contractors and restoration partners as documentation collaborators without becoming a public adjuster, claims negotiator, or settlement advocate under Georgia law?**
    New topic, not addressed elsewhere in this letter. See Decision #84 in `00_Founder/Decisions.md` for the current contractor-channel positioning (documentation-collaborator framing, carrier-neutral language, referral-only near-term) this question is checking against Georgia law — framing only, no partner materials exist yet.
 5. **Does calculating legal, appeal, or answer deadlines create UPL concerns?**
