@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isStripeConfigured, getStripeClient } from "@/lib/stripe/client";
 import { isPro, SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
+import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 
 // Billing Build Order Step 4 — extends the Step 1 checkout route (does not
 // replace it). Previously: no request body, an auto-assigned cohort
@@ -122,6 +123,16 @@ export async function POST(request: NextRequest) {
   }
 
   // purchaseType === "lifetime"
+  // Urgent fix (2026-08-08, master direct, founder-authorized): the $49
+  // Lifetime SKU is removed from pricing pages -- blocking the endpoint
+  // too so hiding the button doesn't leave an unadvertised purchase path
+  // still reachable by direct request.
+  if (!PRO_LIFETIME_ENABLED) {
+    return NextResponse.json(
+      { error: "This purchase option isn't available right now." },
+      { status: 503 },
+    );
+  }
   if (!claimId) {
     return NextResponse.json({ error: "claimId is required for a lifetime purchase." }, { status: 400 });
   }

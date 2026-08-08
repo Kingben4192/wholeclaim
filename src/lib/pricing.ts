@@ -20,24 +20,21 @@ export const PRO_LIFETIME = {
   description: "Unlock WholeClaim Pro features for this claim permanently.",
 } as const;
 
-// Free vs. Pro feature comparison — NEWLY PROPOSED 2026-07-23, not pulled
-// from an existing constant. None existed anywhere in the codebase: the
-// only prior "Free vs Pro" comparison was a table in 06_Website/Website-
-// Copy.md (a planning doc, not live code, and already flagged as stale
-// during the pricing audit). This list is built directly from the actual
-// current gating logic, not that doc:
-//   - AI tool cap: src/lib/anthropic/rateLimit.ts (checkUsageGate,
-//     Decision #32 — 3 analyses/claim shared across the 5 tools below,
-//     not per-tool)
-//   - Pro-only tools with zero free allowance: rateLimit.ts's
-//     requireProAiAccess call sites (Mold Coverage Timeline, Supplement
-//     Assistant)
+// Free vs. Pro feature comparison. Built directly from the actual current
+// gating logic:
 //   - Loss-of-Use Tracker: gated by isPro in LossOfUseTracker.tsx itself
 //   - Evidence upload cap: src/lib/uploadLimits.ts,
 //     FREE_UPLOAD_LIMIT_PER_CLAIM = 25 (Decision, Billing Build Order
 //     Step 6)
 //   - Active claims: src/lib/claimCategoryGate.ts,
 //     FREE_CLAIM_LIMIT_PER_CATEGORY = 1 (Decision #44)
+//
+// Urgent pricing-page fix (2026-08-08, master direct, founder-authorized):
+// the AI analysis row and the two AI-only Pro tools (Mold Coverage
+// Timeline, Supplement Assistant) are removed from this table entirely,
+// per explicit instruction -- not relabeled, removed. The underlying
+// tools themselves are unchanged by this fix and remain fully live in
+// the product; only this pricing-page listing is affected.
 //
 // Storage (500MB/claim, 2GB/account) deliberately NOT listed here --
 // policy-only, not enforced anywhere in code (src/lib/uploadLimits.ts's
@@ -49,13 +46,6 @@ export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },
   { feature: "Storage", free: "500MB per claim, 2GB per account", pro: "10GB per account" },
   { feature: "Deadline Tracker", free: "Included", pro: "Included" },
-  {
-    feature: "AI analysis (Policy Decoder, Loss-Count Auditor, Estimate Gap Analyzer, Decision Assistant, Letter Builder)",
-    free: "3 analyses per claim (not resettable)",
-    pro: "Unlimited (fair use)",
-  },
-  { feature: "Mold Coverage Timeline", free: "Not included", pro: "Included" },
-  { feature: "Supplement Assistant", free: "Not included", pro: "Included" },
   { feature: "Loss-of-Use Tracker", free: "Not included", pro: "Included" },
   {
     feature: "Active claims",

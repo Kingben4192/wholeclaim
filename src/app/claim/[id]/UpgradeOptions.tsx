@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
+import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 
 // Billing Build Order Step 4 — the dual purchase UI. Replaces the single
 // hidden-cohort "Upgrade to Pro" button (LossOfUseTracker.tsx previously
@@ -58,7 +59,10 @@ export function UpgradeOptions({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Urgent fix (2026-08-08): $49 Lifetime SKU removed from sale --
+          grid collapses to one column rather than showing a disabled
+          second card. */}
+      <div className={`grid grid-cols-1 ${PRO_LIFETIME_ENABLED ? "sm:grid-cols-2" : ""} gap-3`}>
         <div className="border border-ink/15 rounded-sm p-4 flex flex-col gap-2">
           <div className="font-display font-bold text-sm">WholeClaim Pro</div>
           <div className="font-mono text-2xl font-extrabold text-ledger">
@@ -79,47 +83,49 @@ export function UpgradeOptions({
           </button>
         </div>
 
-        <div className="border border-ink/15 rounded-sm p-4 flex flex-col gap-2">
-          <div className="font-display font-bold text-sm">WholeClaim Pro</div>
-          <div className="font-mono text-2xl font-extrabold text-ledger">
-            {PRO_LIFETIME.priceAmount}
-            <span className="text-sm font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
-          </div>
-          <p className="text-xs text-ink/60 flex-1">
-            {PRO_LIFETIME.description}
-          </p>
-          {claimId ? (
-            <button
-              type="button"
-              onClick={() => startCheckout("lifetime")}
-              disabled={loadingType !== null}
-              className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
-            >
-              {loadingType === "lifetime" && <Loader2 size={14} className="animate-spin" />}
-              {loadingType === "lifetime" ? "Starting checkout…" : PRO_LIFETIME.buttonLabel}
-            </button>
-          ) : lifetimeRedirectHref ? (
-            <Link
-              href={lifetimeRedirectHref}
-              className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm"
-            >
-              Choose a claim to unlock
-            </Link>
-          ) : (
-            <>
+        {PRO_LIFETIME_ENABLED && (
+          <div className="border border-ink/15 rounded-sm p-4 flex flex-col gap-2">
+            <div className="font-display font-bold text-sm">WholeClaim Pro</div>
+            <div className="font-mono text-2xl font-extrabold text-ledger">
+              {PRO_LIFETIME.priceAmount}
+              <span className="text-sm font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
+            </div>
+            <p className="text-xs text-ink/60 flex-1">
+              {PRO_LIFETIME.description}
+            </p>
+            {claimId ? (
               <button
                 type="button"
-                disabled
+                onClick={() => startCheckout("lifetime")}
+                disabled={loadingType !== null}
                 className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
               >
-                Open a claim to unlock it
+                {loadingType === "lifetime" && <Loader2 size={14} className="animate-spin" />}
+                {loadingType === "lifetime" ? "Starting checkout…" : PRO_LIFETIME.buttonLabel}
               </button>
-              <p className="text-xs text-ink/40">
-                This unlocks one specific claim — open a claim first to buy it.
-              </p>
-            </>
-          )}
-        </div>
+            ) : lifetimeRedirectHref ? (
+              <Link
+                href={lifetimeRedirectHref}
+                className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm"
+              >
+                Choose a claim to unlock
+              </Link>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center justify-center gap-2 border-2 border-ledger text-ledger px-4 py-2 rounded-sm font-semibold text-sm disabled:opacity-50"
+                >
+                  Open a claim to unlock it
+                </button>
+                <p className="text-xs text-ink/40">
+                  This unlocks one specific claim — open a claim first to buy it.
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
       {error && <p className="text-sm text-red-700">{error}</p>}
     </div>

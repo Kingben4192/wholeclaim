@@ -6,6 +6,7 @@ import {
   Download,
 } from "lucide-react";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME, FEATURE_COMPARISON } from "@/lib/pricing";
+import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -239,11 +240,13 @@ export default async function Page() {
               Pricing
             </span>
             <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
-              Two ways to go Pro.
+              {PRO_LIFETIME_ENABLED ? "Two ways to go Pro." : "Go Pro."}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-14">
+          <div
+            className={`grid grid-cols-1 ${PRO_LIFETIME_ENABLED ? "sm:grid-cols-2" : ""} gap-4 max-w-2xl mx-auto mb-14`}
+          >
             <div className="bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3">
               <div className="font-hp-display font-bold text-sm">WholeClaim Pro</div>
               <div className="font-mono text-3xl font-extrabold text-hp-pine">
@@ -261,22 +264,24 @@ export default async function Page() {
               </Link>
             </div>
 
-            <div className="bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3">
-              <div className="font-hp-display font-bold text-sm">WholeClaim Pro</div>
-              <div className="font-mono text-3xl font-extrabold text-hp-pine">
-                {PRO_LIFETIME.priceAmount}
-                <span className="text-base font-sans font-normal text-hp-ink-soft">
-                  {PRO_LIFETIME.pricePeriod}
-                </span>
+            {PRO_LIFETIME_ENABLED && (
+              <div className="bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3">
+                <div className="font-hp-display font-bold text-sm">WholeClaim Pro</div>
+                <div className="font-mono text-3xl font-extrabold text-hp-pine">
+                  {PRO_LIFETIME.priceAmount}
+                  <span className="text-base font-sans font-normal text-hp-ink-soft">
+                    {PRO_LIFETIME.pricePeriod}
+                  </span>
+                </div>
+                <p className="text-sm text-hp-ink-soft flex-1">{PRO_LIFETIME.description}</p>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
+                >
+                  Sign in first
+                </Link>
               </div>
-              <p className="text-sm text-hp-ink-soft flex-1">{PRO_LIFETIME.description}</p>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
-              >
-                Sign in first
-              </Link>
-            </div>
+            )}
           </div>
 
           {/* Free vs Pro comparison — src/lib/pricing.ts's FEATURE_COMPARISON.

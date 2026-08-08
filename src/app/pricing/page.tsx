@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UpgradeOptions } from "../claim/[id]/UpgradeOptions";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO, LIFETIME_ENTITLEMENT_TYPES } from "@/lib/entitlements";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
+import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 import { FreeVsProTable } from "./FreeVsProTable";
 
 // Pre-Launch Prep: Pricing Connection (2026-07-19) — the monthly
@@ -98,7 +99,7 @@ export default async function PricingPreviewPage() {
           WholeClaim Pro
         </h1>
         <p className="text-sm text-ink/60 max-w-xl mx-auto">
-          Two ways to go Pro.
+          {PRO_LIFETIME_ENABLED ? "Two ways to go Pro." : "Go Pro."}
         </p>
       </header>
 
@@ -126,7 +127,7 @@ export default async function PricingPreviewPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
+        <div className={`grid grid-cols-1 ${PRO_LIFETIME_ENABLED ? "sm:grid-cols-2" : ""} gap-4 mb-16`}>
           <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
             <div className="font-display font-bold text-sm">WholeClaim Pro</div>
             <div className="font-mono text-3xl font-extrabold text-ledger">
@@ -144,22 +145,24 @@ export default async function PricingPreviewPage() {
             </Link>
           </div>
 
-          <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
-            <div className="font-display font-bold text-sm">WholeClaim Pro</div>
-            <div className="font-mono text-3xl font-extrabold text-ledger">
-              {PRO_LIFETIME.priceAmount}
-              <span className="text-base font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
+          {PRO_LIFETIME_ENABLED && (
+            <div className="border border-ink/15 rounded-sm p-6 flex flex-col gap-3">
+              <div className="font-display font-bold text-sm">WholeClaim Pro</div>
+              <div className="font-mono text-3xl font-extrabold text-ledger">
+                {PRO_LIFETIME.priceAmount}
+                <span className="text-base font-sans font-normal text-ink/50">{PRO_LIFETIME.pricePeriod}</span>
+              </div>
+              <p className="text-sm text-ink/60 flex-1">
+                {PRO_LIFETIME.description}
+              </p>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center border-2 border-ledger text-ledger px-4 py-3 rounded-sm font-semibold text-sm"
+              >
+                Sign in first
+              </Link>
             </div>
-            <p className="text-sm text-ink/60 flex-1">
-              {PRO_LIFETIME.description}
-            </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center border-2 border-ledger text-ledger px-4 py-3 rounded-sm font-semibold text-sm"
-            >
-              Sign in first
-            </Link>
-          </div>
+          )}
         </div>
       )}
 
