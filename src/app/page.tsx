@@ -119,6 +119,7 @@ const FOOTER_LINKS: [string, string | null][] = [
   ["Terms", "/terms"],
   ["AI Disclaimer", "/ai-disclaimer"],
   ["Help", "/help"],
+  ["Free Guide", "/free-book?p=site-footer"],
 ];
 
 export default async function Page() {
