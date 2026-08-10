@@ -41,6 +41,17 @@ import { computeFreeStorageStatus, computeProStorageStatus } from "@/lib/storage
 import { StorageUsageBar } from "./StorageUsageBar";
 import { ClaimBinderExportButton } from "./ClaimBinderExportButton";
 
+// Emergency same-day disable (2026-08-10, founder-authorized): these seven
+// AI cards were live in production with no advisory-off gate anywhere in
+// the codebase (the AI_ADVISORY_ENABLED/AI_TOOL_FLAGS architecture only
+// exists on the unmerged feature/pro-storage-tier branch). Single
+// hard-coded constant, minimum surface area -- no new flag architecture.
+// Underlying components and API routes are untouched; the routes
+// (src/app/api/ai/{analyze,decide,letter,supplement}/route.ts) carry the
+// matching hard block so a direct request can't reach real analysis
+// either. Pending Section 8 attorney review.
+const AI_TOOLS_LIVE = false;
+
 export default async function ClaimDetailPage({
   params,
   searchParams,
@@ -284,21 +295,23 @@ export default async function ClaimDetailPage({
       </section>
 
       {/* Analysis */}
-      <section>
-        <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
-          Analysis
-        </h2>
-        <FreeAiUsageBadge count={freeAiUsageCount} max={FREE_CLAIM_CAP} />
-        <div className="flex flex-col gap-3">
-          <PolicyDecoderCard claimId={id} />
-          <MoldTimelineCard claimId={id} />
-          <LossCountAuditorCard claimId={id} />
-          <EstimateGapAnalyzerCard claimId={id} />
-          <SupplementAssistantCard claimId={id} />
-          <DecisionAssistantCard claimId={id} />
-          <LetterBuilderCard claimId={id} />
-        </div>
-      </section>
+      {AI_TOOLS_LIVE && (
+        <section>
+          <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60 mb-4">
+            Analysis
+          </h2>
+          <FreeAiUsageBadge count={freeAiUsageCount} max={FREE_CLAIM_CAP} />
+          <div className="flex flex-col gap-3">
+            <PolicyDecoderCard claimId={id} />
+            <MoldTimelineCard claimId={id} />
+            <LossCountAuditorCard claimId={id} />
+            <EstimateGapAnalyzerCard claimId={id} />
+            <SupplementAssistantCard claimId={id} />
+            <DecisionAssistantCard claimId={id} />
+            <LetterBuilderCard claimId={id} />
+          </div>
+        </section>
+      )}
 
       {/* Deadlines */}
       <section>

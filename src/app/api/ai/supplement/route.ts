@@ -6,7 +6,20 @@ import { requireProAiAccess, logAiRun } from "@/lib/anthropic/rateLimit";
 import { buildClaimContext, buildLibraryContext } from "@/lib/anthropic/context";
 import { supplementPrompt, PROMPT_VERSION } from "@/lib/anthropic/prompts";
 
+// Emergency same-day disable (2026-08-10, founder-authorized): matches the
+// hard block on the corresponding UI card in src/app/claim/[id]/page.tsx
+// (AI_TOOLS_LIVE) -- stops a direct request from reaching real analysis
+// even with the card hidden. Pending Section 8 attorney review.
+const AI_TOOLS_LIVE = false;
+
 export async function POST(request: NextRequest) {
+  if (!AI_TOOLS_LIVE) {
+    return NextResponse.json(
+      { error: "This tool isn't available right now.", featureDisabled: true },
+      { status: 503 },
+    );
+  }
+
   if (!isSupabaseConfigured() || !isAnthropicConfigured()) {
     return NextResponse.json(
       { error: "This service isn't configured yet." },
