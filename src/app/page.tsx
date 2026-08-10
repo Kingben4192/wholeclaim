@@ -164,8 +164,11 @@ export default async function Page() {
           The insurance claim workspace for homeowners
         </p>
         <h1 className="font-hp-display text-4xl md:text-6xl font-extrabold leading-[1.04] tracking-tight max-w-2xl mx-auto mb-5">
-          Your claim. Organized from day one.
+          Document it before you need to prove it.
         </h1>
+        <p className="text-base text-hp-ink-soft italic max-w-md mx-auto mb-3">
+          The claim is the evidence that proves what happened.
+        </p>
         <p className="text-base md:text-lg text-hp-ink-soft max-w-md mx-auto mb-8">
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
