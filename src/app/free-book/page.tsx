@@ -83,6 +83,19 @@ const WHATS_INSIDE = [
   "A guide to using WholeClaim as your digital property record",
 ];
 
+// Same items/labels as the Book 1 PDF's own "What's Next" section
+// (05_Marketing/book1-claim-documentation-guide.html) -- kept in sync
+// manually, labels only, no links since none of these have pages yet.
+const SERIES_ITEMS = [
+  { label: "$19 — Available soon", title: "Book 2 — What to Collect and When" },
+  { label: "Coming soon", title: "Book 3 — How to Read Your Insurance Policy" },
+  { label: "Coming soon", title: "Book 4 — Building Your Claim Binder" },
+  { label: "Coming soon", title: "Book 5 — Working With Your Contractor" },
+  { label: "Coming soon", title: "Book 6 — The Renter's Documentation Playbook" },
+  { label: "Coming soon", title: "Book 7 — After the Claim: Closing Your Claim File" },
+  { label: "Coming soon", title: "WholeClaim Property Documentation Workbook" },
+];
+
 // /free-book (Gumroad "proeta" free-guide lead magnet, mirrored on-site).
 // Same public/no-auth pattern as Disaster Response Center and Resource
 // Library. Content ported from 05_Marketing/landing.html into the site's
@@ -250,6 +263,27 @@ export default function FreeBookPage() {
           >
             Get the workbook — $19
           </a>
+        </div>
+
+        {/* More from the series -- labels only, no links (no pages exist
+            yet for these), same items/labels as the PDF's What's Next. */}
+        <div className="mt-10 text-left">
+          <span className="font-mono text-xs font-semibold uppercase tracking-wider text-ledger mb-3 block">
+            More from the WholeClaim Evidence Series
+          </span>
+          <div className="flex flex-col gap-2">
+            {SERIES_ITEMS.map((item) => (
+              <div
+                key={item.title}
+                className="border border-ink/15 rounded-sm px-4 py-3 flex items-center justify-between gap-3"
+              >
+                <p className="font-display font-bold text-sm">{item.title}</p>
+                <span className="font-mono text-[0.65rem] font-semibold uppercase tracking-wider text-ink/50 shrink-0">
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <p className="text-xs text-ink/50 leading-relaxed text-center mt-10 border-t border-ink/10 pt-4">

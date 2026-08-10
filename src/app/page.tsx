@@ -529,12 +529,28 @@ export default async function Page() {
             Check Your Claim Grade
           </Link>
         </div>
-        <p className="text-sm text-hp-ink-soft">
+        <p className="text-sm text-hp-ink-soft mb-10">
           Already know what you need?{" "}
           <Link href="/claim/new" className="font-semibold text-hp-pine">
             Start your claim file
           </Link>
         </p>
+
+        <div className="max-w-sm mx-auto bg-white border border-hp-line rounded-[10px] p-6 flex flex-col gap-3 text-left">
+          <h3 className="font-hp-display font-bold text-base">
+            New here? Start with the free guide.
+          </h3>
+          <p className="text-sm text-hp-ink-soft flex-1">
+            The Claim Documentation Guide — the four-pillar system for documenting your
+            property. Free, no account required.
+          </p>
+          <Link
+            href="/free-book?p=home-card"
+            className="inline-flex items-center justify-center border-[1.5px] border-hp-pine text-hp-pine hover:bg-hp-sage px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
+          >
+            Get the free guide
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}
