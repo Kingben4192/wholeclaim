@@ -35,12 +35,6 @@ export const PRO_LIFETIME = {
 // per explicit instruction -- not relabeled, removed. The underlying
 // tools themselves are unchanged by this fix and remain fully live in
 // the product; only this pricing-page listing is affected.
-//
-// Storage (500MB/claim, 2GB/account) deliberately NOT listed here --
-// policy-only, not enforced anywhere in code (src/lib/uploadLimits.ts's
-// own comment confirms no byte-sum check exists). Do not add a storage
-// row until enforcement actually ships (STORAGE_ENFORCEMENT_BRIEF.md) --
-// see the Decision logging this.
 export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[] = [
   { feature: "The Binder & Claim Grade", free: "Included", pro: "Included" },
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Lock,
@@ -9,6 +10,36 @@ import { PRO_SUBSCRIPTION, PRO_LIFETIME, FEATURE_COMPARISON } from "@/lib/pricin
 import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+
+// Page-level override of layout.tsx's shared default metadata -- scoped to
+// "/" only, same pattern as /free-book's own metadata export. Editing
+// layout.tsx directly would change the fallback title/description every
+// other page without its own override inherits, not just this one.
+const TITLE = "Document it before you need to prove it. | WholeClaim";
+const DESCRIPTION =
+  "The claim is the evidence that proves what happened. Store photos, documents, timelines, and conversations in one secure claim file.";
+
+// Same stopgap image as /free-book -- no dedicated OG/social-card asset
+// exists anywhere in public/ yet.
+const OG_IMAGE = "/icons/icon-512.png";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    type: "website",
+    images: [{ url: OG_IMAGE, width: 512, height: 512 }],
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+};
 
 // Homepage v2 (docs/wholeclaim_spec_homepage_and_roadmap.md, Part 1 —
 // approved; docs/wholeclaim_homepage_mockup.html is the visual reference).
