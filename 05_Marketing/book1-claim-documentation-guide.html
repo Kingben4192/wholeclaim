@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Claim Documentation Guide — Book 1 of the WholeClaim Evidence Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2f1ec;
+    --ledger: #1e4b3c;
+    --ink: #1b1f1d;
+    --brass: #8a6d2f;
+    --ink-soft: #55584f;
+    --rule: #d7d4ca;
+    --pine: #1e4636;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Public Sans", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 72px 48px;
+  }
+
+  h1, h2, h3 {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Cover */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: var(--ledger);
+    color: var(--paper);
+    padding: 64px 48px;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .cover .wordmark {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper);
+    margin-bottom: 56px;
+  }
+
+  .cover .wordmark span {
+    color: #c9b77a;
+  }
+
+  .cover .series-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c9b77a;
+    margin-bottom: 20px;
+  }
+
+  .cover h1 {
+    color: var(--paper);
+    font-size: 44px;
+    line-height: 1.12;
+    max-width: 560px;
+    margin-bottom: 20px;
+  }
+
+  .cover .subtitle {
+    font-size: 18px;
+    color: rgba(242, 241, 236, 0.75);
+    max-width: 460px;
+    line-height: 1.5;
+    margin-bottom: 48px;
+  }
+
+  .cover .cover-foot {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: rgba(242, 241, 236, 0.55);
+  }
+
+  /* Body content */
+  .content {
+    padding-top: 56px;
+  }
+
+  .content h2 {
+    font-size: 24px;
+    border-bottom: 2px solid var(--ledger);
+    padding-bottom: 12px;
+    margin-top: 56px;
+    margin-bottom: 20px;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .content h2:first-child { margin-top: 0; }
+
+  .content h3 {
+    font-size: 17px;
+    color: var(--ledger);
+    margin-top: 28px;
+    margin-bottom: 8px;
+  }
+
+  .content p {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  .content .lede {
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .content ul, .content ol {
+    margin: 0 0 16px 22px;
+  }
+
+  .content li {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .content strong { color: var(--ink); }
+
+  .content a {
+    color: var(--pine);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--brass);
+    text-underline-offset: 2px;
+  }
+
+  blockquote {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.4;
+    color: var(--ledger);
+    border-left: 3px solid var(--brass);
+    padding: 4px 0 4px 24px;
+    margin: 32px 0;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 40px 0;
+  }
+
+  .part-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .pillar-block {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .toc-block {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+
+  .toc-block .price {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--brass);
+    text-transform: uppercase;
+  }
+
+  /* Disclaimer + footer */
+  .disclaimer-box {
+    border: 2px solid var(--ledger);
+    background: #fff;
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 48px 0 32px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    margin-top: 24px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    text-align: center;
+  }
+
+  /* Print rules */
+  @media print {
+    body { background: #fff; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .content h2 { page-break-after: avoid; break-after: avoid; }
+    .pillar-block, .toc-block, .disclaimer-box { page-break-inside: avoid; break-inside: avoid; }
+    @page { margin: 20mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <span class="wordmark">Whole<span>Claim</span></span>
+  <span class="series-label">Book 1 of the WholeClaim Evidence Series</span>
+  <h1>The Claim Documentation Guide</h1>
+  <p class="subtitle">The four-pillar system for building a complete property insurance claim file.</p>
+  <span class="cover-foot">getwholeclaim.com</span>
+</div>
+
+<div class="page content">
+
+  <blockquote>
+    "The claim isn't just what happened.<br>The claim is the evidence that proves what happened."
+  </blockquote>
+
+  <h2>A Note Before We Start</h2>
+  <p>In 2021, a tree came through my roof.</p>
+  <p>The damage was real. The photos were on my phone. The contractor had already walked through and given me a number. I thought I understood what I was dealing with.</p>
+  <p>The insurance company's first offer told me otherwise.</p>
+  <p>What changed the outcome wasn't an attorney. It wasn't a public adjuster. It wasn't a fight or a threat or a letter written in legal language. What changed the outcome was documentation — a complete, organized, verifiable record of everything that happened, everything that was damaged, and everything it cost.</p>
+  <p>The adjuster on the other side of that claim was doing a job. And part of that job is working from what's in the file. When the file is thin — a few photos, a rough estimate, a couple of emails — that's all there is to go on. When the file is complete — every document in order, every gap filled, every item accounted for — you're having a different conversation.</p>
+  <p>I built WholeClaim because I learned that lesson the hard way. This guide is what I wish I had read before the tree fell.</p>
+
+  <hr>
+
+  <span class="part-label">Part One</span>
+  <h2 style="margin-top:0">The Misunderstanding</h2>
+  <p>Most homeowners believe an insurance claim works like this:</p>
+  <ol>
+    <li>Something bad happens.</li>
+    <li>You call your insurance company.</li>
+    <li>An adjuster comes out.</li>
+    <li>You get paid.</li>
+  </ol>
+  <p>That's not wrong, exactly. But it's missing the most important part.</p>
+  <p>Between step 3 and step 4 — between the adjuster's visit and the check — there is a process most policyholders never see. The adjuster writes a report. The report is built on what was observed, what was documented, and what was submitted. That report becomes the basis for the settlement offer.</p>
+  <p>If something wasn't documented, it often isn't in the report. If it isn't in the report, it often isn't in the offer. If it isn't in the offer, getting it added later is a fight — and fights take time, money, and energy most people don't have while they're also trying to repair their home.</p>
+  <p>The documentation you submit doesn't just support your claim. It is the record through which much of your claim is evaluated.</p>
+
+  <hr>
+
+  <span class="part-label">Part Two</span>
+  <h2 style="margin-top:0">What Insurance Companies Actually See</h2>
+  <p>When your claim arrives at an insurance company, it doesn't look like your experience. It looks like a file.</p>
+  <p>That file contains whatever you and the adjuster put into it. It might have photos — or it might not. It might have a contractor's estimate — or it might be based on the adjuster's own estimate. It might include documentation of every damaged item — or it might list only what was visible during a single walkthrough.</p>
+  <p>The adjuster has a job to do and a caseload to manage. They are not adversaries. But they are also not advocates. They document what they see, and they process what they receive.</p>
+  <p>Your job — the part nobody explains at the beginning — is to make sure what they see and what they receive tells the complete story of your loss.</p>
+  <p>This is not about gaming the system. It is about making sure your legitimate claim gets the full consideration it deserves.</p>
+
+  <hr>
+
+  <span class="part-label">Part Three</span>
+  <h2 style="margin-top:0">The Four Pillars of a Complete Claim File</h2>
+  <p>After studying hundreds of claims — including my own — the difference between a complete claim file and an incomplete one comes down to four things. These four pillars are the organizing framework behind everything WholeClaim is built to help you do.</p>
+
+  <div class="pillar-block">
+    <h3 style="margin-top:0">Pillar 1 — Policy</h3>
+    <p class="lede">What does the policy say?</p>
+    <p>Most policyholders have never read their insurance policy. That's understandable — it's a dense, technical document written in language that isn't designed for clarity. But the policy is the contract. It defines what is covered, what is excluded, what the deductible is, and what process you're required to follow.</p>
+    <p>Before your claim can be fully documented, you need to know what your policy says. Not what you think it says. Not what you remember being told when you bought it. What it actually says, in the declarations page, the definitions section, and the coverage provisions.</p>
+    <p style="margin-bottom:0">A complete claim file starts with the policy. If you don't have a copy, call your agent and get one today — before anything else happens.</p>
+  </div>
+
+  <div class="pillar-block">
+    <h3 style="margin-top:0">Pillar 2 — Evidence</h3>
+    <p class="lede">What happened, and what was damaged?</p>
+    <p>This is what most people think of when they think of documentation: photos, videos, damage reports. But evidence is more specific than that. It includes:</p>
+    <ul>
+      <li>Photos and video showing the extent and nature of the damage</li>
+      <li>Documentation of when the damage was discovered</li>
+      <li>The sequence of events that led to the loss</li>
+      <li>Documentation of the cause — storm, water source, fire origin</li>
+      <li>Third-party reports when available — weather reports, fire department reports, inspection reports</li>
+    </ul>
+    <p style="margin-bottom:0">Evidence answers the question: <em>what happened, when, and how bad is it?</em></p>
+  </div>
+
+  <div class="pillar-block">
+    <h3 style="margin-top:0">Pillar 3 — Cost</h3>
+    <p class="lede">What did the loss and restoration actually cost?</p>
+    <p>An adjuster's estimate is one data point. You can provide documentation of the costs you believe are relevant to your loss, subject to your policy and applicable requirements.</p>
+    <p>Cost documentation includes:</p>
+    <ul>
+      <li>Contractor estimates, when available, including detailed scope and pricing</li>
+      <li>Itemized invoices for any work already completed</li>
+      <li>Receipts for emergency repairs or protective measures taken immediately after the loss</li>
+      <li>Documentation of personal property lost or damaged, including make, model, age, and replacement cost</li>
+      <li>Receipts, credit card statements, or bank records supporting those values</li>
+      <li>Documentation of additional living expenses if you've had to relocate</li>
+    </ul>
+    <p style="margin-bottom:0">Cost answers the question: <em>what does it actually take to make this right?</em></p>
+  </div>
+
+  <div class="pillar-block">
+    <h3 style="margin-top:0">Pillar 4 — Correspondence</h3>
+    <p class="lede">What has been communicated, requested, paid, or decided?</p>
+    <p>Every important conversation about your claim should be documented somewhere. This includes:</p>
+    <ul>
+      <li>The initial claim report</li>
+      <li>Every email, letter, and written communication with the insurance company</li>
+      <li>Notes from phone calls — date, time, name of person, what was said</li>
+      <li>The adjuster's written report, once available</li>
+      <li>Any written explanations of partial payments or denials</li>
+      <li>Every supplement request and the response to it</li>
+    </ul>
+    <p style="margin-bottom:0">Correspondence answers the question: <em>what has been communicated, requested, paid, or decided — and by whom?</em></p>
+  </div>
+
+  <p>A complete claim file has all four pillars. Most initial claim files have one or two, partially filled in. The gap between what's in the file and what belongs in the file is often the gap between the first offer and the complete picture of the loss.</p>
+
+  <hr>
+
+  <span class="part-label">Part Four</span>
+  <h2 style="margin-top:0">The Timing Problem Nobody Warns You About</h2>
+  <p>Here is the thing about documentation that changes everything: some of the most valuable evidence needs to happen immediately.</p>
+  <p>After a storm, a fire, or a water loss, you are also dealing with stress, disruption, family needs, and often temporary displacement. The last thing you want to think about is creating a systematic evidence record. But the earliest days after a loss are when the original conditions still exist — and once mitigation, cleanup, and repair begin, that original evidence changes or disappears.</p>
+  <p><strong>Before cleanup begins:</strong> This is when the most accurate evidence of the original damage exists. Once mitigation starts — once the water is extracted, the debris is removed, the damaged materials are cut out — the original condition is gone. Document everything before anything is touched.</p>
+  <p><strong>Before contractors leave:</strong> Every time a contractor, mitigation crew, or adjuster is on site, get documentation. Who was there. What they found. What they did. Verbal conversations disappear; written records don't.</p>
+  <p><strong>Before you throw anything away:</strong> Personal property, damaged materials, and debris may need to be preserved as evidence. When in doubt, document it first — photo and description — before it's removed.</p>
+  <p>The insurance process moves at one speed. Your window to document the original loss moves at another, much faster speed. Complete documentation can make it easier to evaluate the scope of a loss and address missing or disputed information — which is why it's the first job, not a paperwork task to handle later.</p>
+
+  <hr>
+
+  <span class="part-label">Part Five</span>
+  <h2 style="margin-top:0">The Most Common Documentation Mistakes</h2>
+  <p><strong>Mistake 1: Letting the adjuster's visit be the documentation.</strong><br>The adjuster's job is to document what they see during their visit. That visit is one moment in time, with one set of eyes, under time pressure. It does not replace your own documentation. Your file should contain everything the adjuster saw — plus everything they didn't.</p>
+  <p><strong>Mistake 2: Treating photos as the whole file.</strong><br>Photos are essential. They are also just one layer. A photo of water damage does not document the cause, the extent of hidden damage behind walls, the cost to repair, or the personal property affected. Photos belong in a complete file — they don't replace one.</p>
+  <p><strong>Mistake 3: Waiting until the claim is disputed.</strong><br>The time to build the file is at the beginning, not after you've received an offer that doesn't reflect the full loss. Reconstructing documentation after the fact is harder, less credible, and often incomplete. The homeowners who avoid disputes are frequently the ones who built a complete file before the first offer arrived.</p>
+  <p><strong>Mistake 4: Failing to document additional living expenses.</strong><br>If your home is uninhabitable and your policy includes loss of use or additional living expense coverage, every dollar you spend on temporary housing, meals, laundry, and storage may be reimbursable. Every dollar you can't document is a dollar you can't claim.</p>
+  <p><strong>Mistake 5: No correspondence record.</strong><br>Phone calls feel like documentation, but an unwritten conversation can be much harder to establish later — what was said, when it was said, and what was understood. Follow up every important phone call with a written summary sent by email. Keep every email. Save every letter.</p>
+
+  <hr>
+
+  <span class="part-label">Part Six</span>
+  <h2 style="margin-top:0">What a Professional Claim File Looks Like</h2>
+  <p>A complete, professional claim file tells the story of the loss from beginning to resolution. It contains:</p>
+
+  <h3>Policy</h3>
+  <ul>
+    <li>Declarations page</li>
+    <li>Full policy document</li>
+    <li>Endorsements</li>
+    <li>Prior claims history if relevant</li>
+  </ul>
+
+  <h3>Evidence</h3>
+  <ul>
+    <li>Timeline of events: when the loss occurred, when it was discovered, when it was reported</li>
+    <li>Cause documentation: storm data, fire report, plumbing inspection, whatever applies</li>
+    <li>Photo and video record: pre-loss if available, immediate post-loss, throughout the repair process</li>
+    <li>Damage inventory: room by room, item by item, with descriptions and values</li>
+  </ul>
+
+  <h3>Cost</h3>
+  <ul>
+    <li>All contractor estimates</li>
+    <li>All invoices for completed work</li>
+    <li>All receipts for emergency measures</li>
+    <li>Personal property documentation with replacement values</li>
+    <li>Additional living expense receipts</li>
+  </ul>
+
+  <h3>Correspondence</h3>
+  <ul>
+    <li>Claim confirmation</li>
+    <li>All adjuster communications</li>
+    <li>All written estimates and reports</li>
+    <li>All payment records</li>
+    <li>All supplement requests and responses</li>
+    <li>Notes from phone conversations</li>
+  </ul>
+
+  <p>When a file like this arrives on an adjuster's desk, it changes the dynamic. There are no gaps to fill with assumptions. There are no missing pieces to use as reasons for delay. The story is complete, verifiable, and professional.</p>
+  <p>That file is what WholeClaim is built to help you create.</p>
+
+  <hr>
+
+  <span class="part-label">Part Seven</span>
+  <h2 style="margin-top:0">Getting Started</h2>
+  <p>You don't need to have a current claim to start building the right habits.</p>
+  <p><strong>If you have a pending claim right now:</strong><br>Start today. Document what exists, in whatever state it's in. Fill the gaps systematically — the four pillars above are your checklist. Every hour you spend building the file now is an hour you don't spend arguing later.</p>
+  <p><strong>If you're in the middle of a repair:</strong><br>Document every phase. Before work starts, during work, after work is complete. Get every invoice. Photograph every material. Keep every receipt.</p>
+  <p><strong>If you don't have an active claim:</strong><br>Now is the best time. Take inventory photos of your home and personal property. Know where your policy is. Make sure you have a copy of the declarations page. Build the habit before you need it.</p>
+  <p>The evidence system you build before the loss is the strongest evidence system you'll have. The one you build during the first 72 hours is the second strongest. The one you build after the file is already in dispute is always the hardest.</p>
+
+  <hr>
+
+  <h2>What's Next</h2>
+  <p>This guide is the foundation. The rest of the WholeClaim Evidence Series goes deeper into each part of the documentation process:</p>
+
+  <div class="toc-block">
+    <span class="price">$19 — Available soon</span>
+    <h3 style="margin-top:4px">Book 2 — What to Collect and When</h3>
+    <p style="margin-bottom:0">The evidence checklist for storm, water, fire, and theft claims — what to gather, in what order, and why.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">Book 3 — How to Read Your Insurance Policy</h3>
+    <p style="margin-bottom:0">A plain-language walkthrough of what your policy actually says: declarations, definitions, exclusions, and endorsements.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">Book 4 — Building Your Claim Binder</h3>
+    <p style="margin-bottom:0">The practical system for organizing your evidence into a professional, complete claim file.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">Book 5 — Working With Your Contractor</h3>
+    <p style="margin-bottom:0">What homeowners should document, ask, and keep at every stage of contractor work on an insurance claim.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">Book 6 — The Renter's Documentation Playbook</h3>
+    <p style="margin-bottom:0">Move-in condition records, maintenance history, landlord communication logs, and move-out documentation for renters.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">Book 7 — After the Claim: Closing Your Claim File</h3>
+    <p style="margin-bottom:0">Final documents, payment records, warranties, repair records, and how to preserve your property record permanently.</p>
+  </div>
+  <div class="toc-block">
+    <span class="price">Coming soon</span>
+    <h3 style="margin-top:4px">WholeClaim Property Documentation Workbook</h3>
+    <p style="margin-bottom:0">The fillable paper and digital system for documenting your property before you need to file a claim — closing documents, room-by-room photos, appliance records, personal property inventory, maintenance log, and more.</p>
+  </div>
+
+  <hr>
+
+  <h2>Your Next Step</h2>
+  <p>Reading this guide is the start. The next step is knowing where you actually stand.</p>
+  <p>Go to <a href="https://getwholeclaim.com/?p=book1">getwholeclaim.com</a> and take the free Claim Grade — about five minutes, no account required — to see what documentation you have, what may be missing, and where to focus next.</p>
+  <p>Then, when you're ready to build the file itself, WholeClaim gives you the workspace to do it — evidence vault, timeline, documentation score, and claim binder — free to start.</p>
+  <p>The claim isn't just what happened. The claim is the evidence that proves what happened.</p>
+  <p><strong><a href="https://getwholeclaim.com/?p=book1">Start building yours</a>.</strong></p>
+
+  <div class="disclaimer-box">
+    WholeClaim helps organize documentation. It does not provide insurance advice, guarantee claim approval, or determine claim outcomes.
+  </div>
+
+  <footer>
+    getwholeclaim.com<br>
+    © 2026 WholeClaim. All rights reserved.
+  </footer>
+
+</div>
+
+</body>
+</html>

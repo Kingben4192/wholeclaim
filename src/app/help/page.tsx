@@ -67,18 +67,6 @@ const GUIDES: { title: string; steps?: string[]; body?: string }[] = [
     body: "Upload photos, documents, estimates, invoices, reports, and correspondence. Keep records organized by claim. Maintain a chronological evidence history.",
   },
   {
-    title: "How to use Policy Decoder",
-    body: "Upload your policy documents. Use the tool to organize and understand policy sections. Review your policy information alongside your claim documentation.",
-  },
-  {
-    title: "How to use Mold Coverage Timeline",
-    body: "Available with WholeClaim Pro. Builds a timeline automatically from your date of loss and logged entries — nothing to type in. Review it to see why timing matters and what to document next.",
-  },
-  {
-    title: "How to use Supplement Assistant",
-    body: "Available with WholeClaim Pro. Paste in the carrier's estimate and your contractor's estimate. The tool finds the gaps between them and drafts a supplement request you can review and send.",
-  },
-  {
     title: "How to use Loss-of-Use Tracker",
     body: "Available with WholeClaim Pro. Log hotel stays, meals, laundry, storage, mileage, and pet boarding tied to your claim. WholeClaim keeps a running summary of what you've logged.",
   },
@@ -168,9 +156,7 @@ export default async function HelpPage() {
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
                 The free plan includes the Binder &amp; Claim Grade, up to 25 Evidence Vault
                 uploads per claim (500MB per claim, 2GB per account), the Deadline Tracker,
-                1 active claim per dispute category, and 3 AI analyses per claim (not
-                resettable) across Policy Decoder, Loss-Count Auditor, Estimate Gap
-                Analyzer, Decision Assistant, and Letter Builder.
+                and 1 active claim per dispute category.
               </p>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
                 WholeClaim Pro is available two ways:
@@ -192,9 +178,8 @@ export default async function HelpPage() {
                 </li>
               </ul>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
-                Pro unlocks unlimited Evidence Vault uploads, unlimited (fair use) AI analyses,
-                the Mold Coverage Timeline, the Supplement Assistant, and the Loss-of-Use
-                Tracker. You can review or change your plan any time from{" "}
+                Pro unlocks unlimited Evidence Vault uploads and the Loss-of-Use Tracker. You
+                can review or change your plan any time from{" "}
                 <Link href="/pricing" className="text-ledger font-semibold">
                   the pricing page
                 </Link>
