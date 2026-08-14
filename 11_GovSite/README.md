@@ -1,4 +1,4 @@
-# [Kit Series Name] — informational site
+# The Documentation Center — informational site
 
 **Status: built, NOT deployed, NOT publicly reachable.**
 
@@ -21,12 +21,14 @@ institutional-positioned product line, not a page of the consumer product.
 
 ## What this is
 
-Three static pages, no build step, no framework, no JavaScript:
+Five static pages, no build step, no framework, no JavaScript:
 
 | File | Page |
 |---|---|
-| `index.html` | Home — hero, problem, who it's for, evidence, from-finding-to-record, how it works, what you get, is/isn't, pilot, research methodology |
+| `index.html` | Home — three-door org split, then hero, problem, who it's for, evidence, from-finding-to-record, how it works, what you get, is/isn't, pilot, research methodology |
 | `kits.html` | The Kits — kit-by-kit reference, Kit 4 gated |
+| `nonprofit.html` | Nonprofit — research-stage only, no kit references |
+| `business.html` | Business — research-stage only, no kit references |
 | `contact.html` | Contact — plain mailto |
 | `style.css` | Shared styling |
 
@@ -51,10 +53,12 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
 
 ## Fences held (Decision #121) — verified after build
 
-- **Placeholder branding throughout** — `[Kit Series Name]` ×12, never a real
-  name. No consumer-brand name appears in any served file (HTML or CSS),
-  including in comments, which ship to the browser and are visible in
-  view-source.
+- **Working name applied** — "The Documentation Center" replaced the
+  `[Kit Series Name]` placeholder (19 occurrences). See the WORKING NAME
+  caveat below: this is **not** cleared branding. No consumer-brand name
+  appears in any served file (HTML or CSS), including in comments, which ship
+  to the browser and are visible in view-source. Each page carries a visible
+  "working name" badge.
 - **No grader, no scored instrument, no assessment.** Zero references to the
   internal Property Documentation Readiness Check, which stays internal per its
   own §9 fencing.
@@ -64,11 +68,14 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
   held since #110 is untouched.
 - **Language guardrails.** No letter grades. Zero occurrences of "audit-ready",
   "compliant", or "certified". The word "guarantee" appears only inside the
-  required footer disclaimer (3 pages × 1).
+  required footer disclaimer (5 pages × 1).
 - **No editorial annotations leaked into the site** — the draft's internal
   notes (OPEN DECISION, Option A/B, "corrected — see note", DRAFT/INTERNAL
   headers) are all absent from the built pages. Verified by explicit search.
-- `noindex, nofollow` on all 3 pages.
+- `noindex, nofollow` on all 5 pages.
+- **Nonprofit / Business doors are research-stage only** — no kit references
+  (their nav deliberately omits "The Kits"), no pilot language, no findings,
+  no assessment link, no Document/Test/Deploy framing.
 
 ## Open items before go-live
 
@@ -81,8 +88,8 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
    Switching to B is a copy change to Home plus a replacement of the
    *From documented failure to standardized record* section with named case
    studies. **No option was chosen here.**
-2. **Final brand name** — pending Anna's trademark opinion, then substitute
-   `[Kit Series Name]` throughout (4 files, including `<title>` tags).
+2. **Final brand name** — see WORKING NAME caveat below. Still pending Anna's
+   trademark opinion.
 3. **Contact address** — `contact.html` carries a literal `[address]`
    placeholder in both link text and `mailto:` target. **No address was
    invented.** The existing consumer support alias is disqualified twice over:
@@ -94,3 +101,29 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
 5. **Kit 4 legal review** — unchanged, pending counsel. The "In development /
    pending legal review" framing on `kits.html` remains the only public Kit 4
    language authorized.
+
+---
+
+## ⚠ WORKING NAME — "The Documentation Center"
+
+**This is a working name, not cleared branding.**
+
+It has had a **lightweight name/domain screen only — two searches.** That is
+**not** a trademark clearance, a knockout search, or a legal opinion. It is the
+same caveat status as the earlier Dwellmark self-screen: enough to proceed
+internally, nowhere near enough to rely on publicly.
+
+**What this does not change:**
+
+- **Decision #121's condition still stands.** That decision authorised a public
+  informational site under neutral placeholder branding *"until [Anna's
+  trademark opinion] resolves."* Substituting a working name is fine while the
+  site is local-only, but **go-live under this name would deviate from #121 as
+  written** unless the opinion has landed or #121 is amended. Flagging rather
+  than assuming.
+- **The name-clearance gate (#17/#18) is untouched.** Nothing here pre-empts it.
+- Every page still shows a visible **"working name"** badge, so the provisional
+  status is legible on the page itself and not only in this file.
+
+**If the name changes**, substitution touches 6 files (5 HTML incl. `<title>`
+tags, plus the CSS header comment) — 19 occurrences at last count.

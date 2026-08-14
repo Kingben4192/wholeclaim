@@ -1,5 +1,5 @@
-/* [Kit Series Name] — informational site.
-   Neutral placeholder styling, deliberately distinct from the consumer
+/* The Documentation Center (WORKING NAME) — informational site.
+   Neutral styling, deliberately distinct from the consumer
    product's palette: this is a separate, institutional-positioned product
    line and final branding is pending (Decision #121). */
 
@@ -129,9 +129,10 @@ p { margin: 0 0 16px; }
 
 .doors { margin-bottom: 8px; }
 
-.doors-q {
-  margin: 0 0 16px;
-  font-size: 20px;
+.doors-lead {
+  margin: 0 0 18px;
+  font-size: 19px;
+  line-height: 1.45;
 }
 
 .door-row {
