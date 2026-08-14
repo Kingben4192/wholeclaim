@@ -1,0 +1,21 @@
+# This directory is served as a FLAT STATIC SITE. Every file that is not
+# excluded here becomes publicly fetchable by URL.
+#
+# README.md is internal: it names decision numbers, unresolved gates, counsel,
+# and the working-name risk position. Served statically it would be readable at
+# /README.md by anyone who guessed the path. It must never ship.
+README.md
+
+# Credentials written here by `vercel link`. .env.local holds an OIDC token.
+# The CLI may exclude these on its own; not relying on that — a served
+# /.env.local would be a live credential handed out over HTTP.
+.env.local
+.env*
+.vercel
+
+# Local tooling config, not site content
+.gitignore
+
+# Editor/OS noise
+.DS_Store
+Thumbs.db
