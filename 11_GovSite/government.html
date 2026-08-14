@@ -45,6 +45,163 @@
     </ul>
   </section>
 
+  <h2>What a completed record looks like</h2>
+
+  <p class="intro-line">Two views of the same asset — the record itself, and an honest read on how complete it is. Sample data, shown to make the structure concrete.</p>
+
+  <div class="artifact-row">
+
+    <section class="record-card reveal" aria-labelledby="rec-title">
+      <div class="record-head">
+        <div>
+          <p class="record-kicker">Sample record — illustrative</p>
+          <h3 id="rec-title" class="record-title">HVAC Unit #04</h3>
+          <p class="record-facility">Municipal Operations Building</p>
+        </div>
+        <span class="record-badge">Retrieval-ready record</span>
+      </div>
+
+      <dl class="record-fields">
+        <div class="rf"><dt>Facility</dt><dd>Municipal Operations Building</dd></div>
+        <div class="rf"><dt>Asset name / ID</dt><dd>HVAC Unit #04</dd></div>
+        <div class="rf"><dt>Location</dt><dd>Building A, Mechanical Room</dd></div>
+        <div class="rf"><dt>Last verified</dt><dd>08/12/2026</dd></div>
+        <div class="rf"><dt>Condition</dt><dd>Good</dd></div>
+        <div class="rf"><dt>Photos</dt><dd>14</dd></div>
+        <div class="rf"><dt>Service records</dt><dd>6</dd></div>
+        <div class="rf"><dt>Responsible department</dt><dd>Facilities</dd></div>
+        <div class="rf"><dt>Documentation status</dt><dd><span class="rf-complete">Complete</span></dd></div>
+      </dl>
+    </section>
+
+    <section class="health-card reveal" aria-labelledby="health-title">
+      <h3 id="health-title" class="health-title">Documentation Health</h3>
+      <p class="health-note">The same record, scored by category. Not everything is green — that is the point.</p>
+
+      <ul class="health-list">
+        <li class="hs hs-ok"><span class="hs-mark" aria-hidden="true">&#10003;</span><span class="hs-name">Ownership</span><span class="hs-state">Verified</span></li>
+        <li class="hs hs-ok"><span class="hs-mark" aria-hidden="true">&#10003;</span><span class="hs-name">Location</span><span class="hs-state">Verified</span></li>
+        <li class="hs hs-ok"><span class="hs-mark" aria-hidden="true">&#10003;</span><span class="hs-name">Condition</span><span class="hs-state">Verified</span></li>
+        <li class="hs hs-ok"><span class="hs-mark" aria-hidden="true">&#10003;</span><span class="hs-name">Photos</span><span class="hs-state">Verified</span></li>
+        <li class="hs hs-warn"><span class="hs-mark" aria-hidden="true">&#9888;</span><span class="hs-name">Maintenance</span><span class="hs-state">Needs update</span></li>
+        <li class="hs hs-ok"><span class="hs-mark" aria-hidden="true">&#10003;</span><span class="hs-name">Custodian</span><span class="hs-state">Verified</span></li>
+        <li class="hs hs-miss"><span class="hs-mark" aria-hidden="true">&#10007;</span><span class="hs-name">Supporting records</span><span class="hs-state">Missing</span></li>
+      </ul>
+
+      <div class="health-total">
+        <div class="health-bar"><span class="health-fill"></span></div>
+        <p class="health-pct">Documentation completeness: <strong>71%</strong></p>
+        <p class="health-basis">5 of 7 categories verified. Maintenance history is stale; supporting records were never filed.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <h2>What changes</h2>
+
+  <div class="ba-row">
+    <div class="ba-col ba-before">
+      <p class="ba-label">Before</p>
+      <ul>
+        <li>Spreadsheets</li>
+        <li>Photos on phones</li>
+        <li>Email attachments</li>
+        <li>Paper files</li>
+        <li>Staff memory</li>
+        <li>Disconnected records</li>
+      </ul>
+    </div>
+    <div class="ba-col ba-after">
+      <p class="ba-label">After</p>
+      <p class="ba-headline">One structured property record</p>
+      <ul>
+        <li>What exists</li>
+        <li>Where it is</li>
+        <li>What condition it's in</li>
+        <li>What happened</li>
+        <li>Who documented it</li>
+        <li>When it was documented</li>
+        <li>Supporting evidence</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Who it's for</h2>
+
+  <div class="role">
+    <span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
+    <div class="role-body">
+    <h3>Finance / CFO</h3>
+    <p class="role-q">"Can we prove what we own, what it costs, and why the next investment is necessary?"</p>
+    <p>A property record that answers the question with documents rather than estimates — before a board, an auditor, or a budget cycle asks it.</p>
+    </div>
+  </div>
+
+  <div class="role">
+    <span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
+    <div class="role-body">
+    <h3>Property / Asset Manager</h3>
+    <p class="role-q">"Can we produce the record when someone asks for it?"</p>
+    <p>Not reconstruct it, not go looking for it — produce it. Indexed, consistent, and the same shape across every department.</p>
+    </div>
+  </div>
+
+  <div class="role">
+    <span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2"/><path d="M10 21v-3h4v3"/></svg></span>
+    <div class="role-body">
+    <h3>Facilities Director</h3>
+    <p class="role-q">"Can the person taking over this facility understand its history without calling three people?"</p>
+    <p>Condition, maintenance, incidents and custody in one place, so institutional knowledge survives the person who held it.</p>
+    </div>
+  </div>
+
+  <h2>This isn't another CMMS</h2>
+
+  <div class="not-cmms">
+    <ul class="not-list">
+      <li><strong>Not</strong> work-order management.</li>
+      <li><strong>Not</strong> an ERP replacement.</li>
+      <li><strong>Not</strong> procurement software.</li>
+      <li><strong>Not</strong> facilities scheduling.</li>
+    </ul>
+    <p class="is-line">It's the documentation layer — the record those systems assume you already have.</p>
+  </div>
+
+  <h2>Built around documented government problems</h2>
+
+  <p>Each item below is a published finding from a metro-Atlanta county's internal audit function, reviewed as part of an ongoing research program. They are quoted because they are real, not because they are representative.</p>
+
+  <p class="sample-note"><strong>The sample, stated plainly:</strong> 27 audit documents reviewed across 5 Georgia counties. 19 findings recorded; 9 contained asset, inventory or custody content. Those 9 come from 4 independent sources inside a single county's internal audit office, spanning 2015–2026. That is the entire evidence base. It is not a survey, and it is not large enough to claim these patterns are typical of government generally.</p>
+
+  <div class="ev-step">
+    <p class="ev-finding"><span class="ev-tag">Audit finding</span> Roughly 250 surplus water meters were stolen from a storage facility the audit found lacked surveillance and required only a key for entry. The same review found the required annual physical inventory count had not been performed that year.</p>
+    <p class="ev-line"><span class="ev-tag">Documentation gap</span> With no current count, the loss was not detectable from the records themselves.</p>
+    <p class="ev-line"><span class="ev-tag">Evidence requirement</span> A periodic verification that produces a dated, retrievable result.</p>
+    <p class="ev-line"><span class="ev-tag">What the kit structures</span> A scheduled verification log attached to each asset record, so a missing count is visible before a loss is.</p>
+  </div>
+
+  <div class="ev-step">
+    <p class="ev-finding"><span class="ev-tag">Audit finding</span> At a county-funded institution, available records and labeling did not clearly distinguish pieces owned by the county from those owned by the organization housing them.</p>
+    <p class="ev-line"><span class="ev-tag">Documentation gap</span> Ownership was not determinable from the record or the item.</p>
+    <p class="ev-line"><span class="ev-tag">Evidence requirement</span> Ownership attributable per item, on the record and on the object.</p>
+    <p class="ev-line"><span class="ev-tag">What the kit structures</span> Identification fields that tie item to owner to supporting evidence, rather than assuming custody implies ownership.</p>
+  </div>
+
+  <div class="ev-step">
+    <p class="ev-finding"><span class="ev-tag">Audit finding</span> A county airport had fifteen tenants; only twelve leases could be produced.</p>
+    <p class="ev-line"><span class="ev-tag">Documentation gap</span> The document set was incomplete, and nothing made the incompleteness visible.</p>
+    <p class="ev-line"><span class="ev-tag">Evidence requirement</span> Completeness legible against the set that should exist.</p>
+    <p class="ev-line"><span class="ev-tag">What the kit structures</span> An index showing what should be on file beside what is, so gaps surface without an audit to find them.</p>
+  </div>
+
+  <p class="emphasis">What makes these worth acting on isn't how many there are. It's that four unrelated departments — a water utility, an airport, a museum, and a juvenile court — produced the same shape of failure across eleven years, inside one organization. That points at a documentation practice, not four unlucky departments.</p>
+
+  <h3>What this research does not establish</h3>
+
+  <p>An audit finding does not automatically mean a documentation kit addresses it. Some findings point to policy, training, staffing, or governance changes instead — and a kit would not fix those. Part of what this research tries to do is tell those apart: distinguishing an actual documentation problem from a problem that merely produces documentation symptoms.</p>
+
+  <p>The evidence base above is one county's internal audit function. We have not established that these patterns hold across other jurisdictions, and we don't claim it. The research is expanding; we will say so plainly when that changes.</p>
+
   <h2>Start with a documentation pilot</h2>
 
   <p>Pick one department, one property class, or one documentation gap. We build the structure, your team uses it against real records, and you decide whether it's worth expanding.</p>

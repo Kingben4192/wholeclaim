@@ -328,3 +328,297 @@ footer {
   font-style: italic;
   margin: 0;
 }
+
+/* ---------- Phase 2: documentation artifact + health panel ---------- */
+
+.artifact-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 22px 0 42px;
+  align-items: flex-start;
+}
+
+.record-card,
+.health-card {
+  flex: 1 1 320px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 20px 22px 18px;
+}
+
+/* --- The record --- */
+
+.record-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+
+.record-kicker {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.record-title { margin: 0 0 2px; font-size: 18px; }
+.record-facility { margin: 0; font-size: 13px; color: var(--muted); }
+
+.record-badge {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.record-fields { margin: 0; }
+
+.rf {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #eeece8;
+}
+
+.rf:last-child { border-bottom: 0; padding-bottom: 2px; }
+
+.rf dt {
+  font-size: 12.5px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.rf dd {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: right;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rf-complete {
+  color: var(--accent);
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+
+/* --- Documentation Health --- */
+
+.health-title { margin: 0 0 4px; font-size: 18px; }
+
+.health-note {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.health-list { list-style: none; padding: 0; margin: 0 0 16px; }
+
+.hs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eeece8;
+  margin: 0;
+}
+
+.hs:last-child { border-bottom: 0; }
+
+.hs-mark {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.hs-name { flex: 1 1 auto; font-size: 13.5px; }
+
+.hs-state {
+  flex: 0 0 auto;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.hs-ok   .hs-mark { background: var(--accent); color: #fff; }
+.hs-ok   .hs-state { color: var(--accent); }
+
+.hs-warn .hs-mark { background: #b8860b; color: #fff; }
+.hs-warn .hs-state { color: #8a6508; }
+
+.hs-miss .hs-mark { background: #9d3b34; color: #fff; }
+.hs-miss .hs-state { color: #9d3b34; }
+
+.health-total { border-top: 1px solid var(--line); padding-top: 14px; }
+
+.health-bar {
+  height: 7px;
+  background: #e8e6e1;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.health-fill {
+  display: block;
+  width: 71%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.health-pct { margin: 0 0 4px; font-size: 14px; }
+.health-pct strong { color: var(--accent); }
+
+.health-basis { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* --- Reveal on scroll, CSS only. --------------------------------------
+   The initial hidden state is scoped inside @supports so browsers without
+   scroll-linked animation simply render the panels visible. No JS: a
+   script would breach the no-script fence on this site, and a JS reveal
+   that failed would leave the content invisible. */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 24%;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 620px) {
+  .rf { flex-direction: column; gap: 2px; }
+  .rf dd { text-align: left; }
+}
+
+/* ---------- Phase 3: before/after, roles, not-a-CMMS, evidence ---------- */
+
+.ba-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 40px; align-items: stretch; }
+
+.ba-col {
+  flex: 1 1 280px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px 22px 14px;
+}
+
+.ba-before { background: var(--paper); border-style: dashed; }
+.ba-after { background: #fff; border-left: 3px solid var(--accent); }
+
+.ba-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.ba-after .ba-label { color: var(--accent); }
+
+.ba-headline { font-weight: 700; font-size: 16px; margin: 0 0 10px; color: var(--accent); }
+
+.ba-col ul { margin: 0; padding-left: 20px; }
+.ba-col li { margin-bottom: 6px; font-size: 14.5px; }
+.ba-before li { color: var(--muted); }
+
+.role-q {
+  font-style: italic;
+  color: var(--ink);
+  margin: 0 0 6px !important;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.not-cmms {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: #fff;
+  padding: 18px 22px 14px;
+  margin: 18px 0 40px;
+}
+
+.not-list { list-style: none; padding: 0; margin: 0 0 12px; }
+.not-list li { margin-bottom: 7px; font-size: 15px; color: var(--muted); }
+.not-list strong { color: var(--ink); }
+
+.is-line {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 15.5px;
+}
+
+.sample-note {
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+.ev-step {
+  border-left: 2px solid var(--line);
+  padding: 2px 0 2px 18px;
+  margin: 0 0 26px;
+}
+
+.ev-finding, .ev-line { margin: 0 0 9px; font-size: 14.5px; line-height: 1.6; }
+.ev-finding { color: var(--ink); }
+.ev-line { color: var(--muted); }
+.ev-line:last-child { margin-bottom: 0; }
+
+.ev-tag {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.ev-line .ev-tag { color: var(--muted); }
