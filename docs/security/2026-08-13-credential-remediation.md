@@ -220,3 +220,86 @@ All requests to `https://www.getwholeclaim.com`, no redirect-follow, single atte
 **Incident status: rotation/remediation COMPLETE; incident REMAINS OPEN on rows 1, 2, 4 (and optionally 5).**
 
 *Appendix added 2026-08-13 night.*
+
+---
+
+# Correction and addendum — 2026-08-13 late
+
+## E. Machine-state language — CORRECTED
+
+**Earlier sections of this record state that `.claude/settings.local.json` was pruned to zero credential material. That remains true and is not retracted. But it was allowed to imply the machine was clean. It was not.**
+
+Precise state:
+
+- **Pruning cleaned one file.** It did not remove credential material from the machine.
+- **Claude Code session transcripts (`~/.claude/**/*.jsonl`) retained full-length credential values** — written automatically whenever a command or file output containing a secret passed through a session. Pruning the settings file had no effect on them.
+- **Retired transcripts were purged tonight** — see §F.
+- **The current session's transcript still exists** and holds masked-workflow residue plus a small number of non-secret `.env.local` values (`ADMIN_EMAIL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`). **It is scheduled for manual deletion at session close** — it cannot delete itself while the session is live.
+- **All future scans are repo-locked** to `c:\Users\benja\Documents\wholeclaim`. A profile-wide grep earlier tonight walked OneDrive-backed paths and triggered a files-on-demand hydration; scope was corrected immediately.
+
+## F. Transcript exposure — the larger finding
+
+A read-only sweep of all 18 transcript files (135.6 MB) found the transcripts, not the settings file, were the substantive exposure.
+
+| Class | Occurrences |
+|---|---|
+| Dead / revoked material | 53 |
+| **Live `.env.local` values** | **2,144** |
+| Live generic classes (`eyJ…` JWT, `sk-ant`, Stripe `sk_`) | 256 |
+
+Concentrated in five files, overwhelmingly one 124.1 MB transcript from a **prior** session, which held the service-role key, Stripe secret and webhook secrets, the Anthropic key, the live Resend key, VAPID private key, and the email hook secret — each many times over.
+
+**Two findings worth preserving:**
+
+1. **The rotated `CRON_SECRET` never entered any transcript.** Zero occurrences of the full value across all 18 files. Persist-first custody — generate, write to `.env.local`, read back, feed to Vercel via stdin, never echo — kept it out entirely. **This validates the custody model as the correct default.**
+2. **The current session leaked no secret-class values.** 163 live hits, all non-secret identifiers. Masking discipline held where it was applied.
+
+**Remediation:** deletion, not scrubbing. Retired transcripts were purged (§G). Editing them in place was rejected — a partially-scrubbed transcript is indistinguishable from a clean one.
+
+## G. Retired transcript purge
+
+**15 files, 130.4 MB deleted.** Each deletion individually verified; post-delete verification confirmed only the current session's 3 files remain.
+
+Included: the 124.1 MB prior-session transcript, a 1.9 MB and a 2.1 MB session transcript (the latter under a different project directory), 11 subagent transcripts, and `history.jsonl`.
+
+**Accepted cost:** resume history for those sessions is gone. Deliberate — deletion is the remediation regardless of dead/live counts.
+
+## H. OneDrive scope — RESOLVED, repo is outside sync
+
+A hydration popup during the profile-wide scan raised the question of whether credential files were syncing to the cloud. **They were not.**
+
+The cause is a **two-Documents quirk**:
+
+| Path | State |
+|---|---|
+| `C:\Users\benja\Documents` | **Real local directory** — no junction, no reparse point. **Repo lives here.** |
+| `C:\Users\benja\OneDrive\Documents` | The KFM-redirected shell "Documents" |
+| Shell `Personal` redirection | → `C:\Users\benja\OneDrive\Documents` |
+| OneDrive KFM | Active (`KfmFoldersProtectedNow: 3584`) |
+| `C:\Users\benja\OneDrive\Documents\wholeclaim` | **Does not exist** — no synced duplicate |
+
+Known Folder Move redirected the *shell* Documents into OneDrive, but the legacy `C:\Users\benja\Documents` survived as a separate un-redirected folder — and that is where the repo sits.
+
+Placeholder attributes for both credential files:
+
+| File | Attributes | Offline | Reparse | Recall | Pinned |
+|---|---|---|---|---|---|
+| `.claude\settings.local.json` | `Archive` | ✗ | ✗ | ✗ | ✗ |
+| `.env.local` | `Archive` | ✗ | ✗ | ✗ | ✗ |
+
+Plain local files. **No credential material ever entered OneDrive sync scope.**
+
+## I. Pending — updated
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Four scheduled cron 200s | **OPEN** — the only scheduler-injection evidence |
+| 2 | Supabase org audit-log review | **OPEN — Benjamin** |
+| 3 | `supabase login` refresh | **CLOSED** — no credential ever cached |
+| 4 | Resend send-log scan | **OPEN — Benjamin, dashboard** (send-only key blocks the API route) |
+| 5 | Vercel manual cron run (optional) | **OPEN** |
+| 6 | **Current session transcript deletion** | **OPEN — Benjamin, at session close.** Command supplied in the session report. |
+
+**Incident status: rotation COMPLETE, transcript purge COMPLETE, OneDrive question RESOLVED. Incident REMAINS OPEN on rows 1, 2, 4, 6.**
+
+*Correction added 2026-08-13 late.*
