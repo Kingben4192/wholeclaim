@@ -149,10 +149,44 @@ p { margin: 0 0 16px; }
   display: block;
 }
 
-.door:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+/* Primary door — the only clickable one. Reads as the active path. */
+a.door-primary {
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(47, 71, 57, 0.10);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
+
+a.door-primary:hover,
+a.door-primary:focus-visible {
+  background: var(--accent);
+  box-shadow: 0 4px 12px rgba(47, 71, 57, 0.18);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+a.door-primary:hover .door-name,
+a.door-primary:hover .door-sub,
+a.door-primary:hover .door-go,
+a.door-primary:focus-visible .door-name,
+a.door-primary:focus-visible .door-sub,
+a.door-primary:focus-visible .door-go { color: #fff; }
+
+.door-go {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* Inert doors — research-stage, deliberately not clickable. */
+.door-inert {
+  background: var(--paper);
+  border-style: dashed;
+  cursor: default;
+}
+
+.door-inert .door-name { color: var(--muted); }
 
 .door-name {
   display: block;
@@ -167,6 +201,40 @@ p { margin: 0 0 16px; }
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Filled primary action, clearly weighted against body text. */
+.cta-button {
+  display: inline-block;
+  margin: 10px 0 8px;
+  padding: 12px 22px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta-button:hover,
+.cta-button:focus-visible {
+  background: #24352b;
+  box-shadow: 0 3px 10px rgba(47, 71, 57, 0.22);
+  outline: none;
+}
+
+/* Tinted section so the breakdown list separates from the hero. */
+.section-tint {
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 4px 24px 8px;
+  margin: 36px 0 40px;
+}
+
+.section-tint h2 { margin-top: 22px; }
+.section-tint ul { margin-bottom: 18px; }
 
 .eyebrow {
   font-size: 12px;
@@ -187,10 +255,25 @@ ul { padding-left: 22px; margin: 0 0 18px; }
 li { margin-bottom: 8px; }
 
 .role {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
   border-left: 3px solid var(--line);
   padding: 2px 0 2px 16px;
   margin-bottom: 18px;
 }
+
+.role-icon {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+.role-icon svg { width: 22px; height: 22px; display: block; }
+
+.role-body { flex: 1 1 auto; }
 
 .role h3 { margin: 0 0 4px; font-size: 16px; }
 .role p { margin: 0; color: var(--muted); }
