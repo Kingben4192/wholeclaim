@@ -209,6 +209,9 @@ li { margin-bottom: 8px; }
 
 .steps li { margin-bottom: 11px; }
 
+.status-list li { margin-bottom: 6px; color: var(--muted); }
+.status-list strong { color: var(--ink); }
+
 .note {
   border-left: 3px solid var(--accent);
   background: var(--accent-soft);
