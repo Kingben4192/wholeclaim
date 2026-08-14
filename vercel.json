@@ -16,5 +16,10 @@
       "path": "/api/cron/annual-claim-check",
       "schedule": "0 16 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "master": false
+    }
+  }
 }
