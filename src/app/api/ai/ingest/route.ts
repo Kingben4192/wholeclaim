@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isAnthropicConfigured, callClaude } from "@/lib/anthropic/client";
 import { checkUsageGate, logAiRun } from "@/lib/anthropic/rateLimit";
 import { ingestPrompt, PROMPT_VERSION } from "@/lib/anthropic/prompts";
+import { isAdminEmail } from "@/lib/isAdmin";
 
 // Drafts only — per Decision Log #10 (owner-approval gate on the Knowledge
 // Library), nothing here is inserted into library_entries. The owner reviews
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  }
+
+  // Decision #10 makes Knowledge Library ingestion admin-only. The /library
+  // pages enforce that, but this route did not — any signed-in user could
+  // POST here and reach Anthropic. Same allowlist the pages use.
+  if (!isAdminEmail(user.email)) {
+    return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   }
 
   const body = await request.json();

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { safeNext } from "@/lib/safeRedirect";
 
 // Handles both magic-link shapes this app actually produces (Fix: magic-link
 // auth flow, 2026-07-19):
@@ -23,7 +24,11 @@ export default function AuthCallbackPage() {
     async function run() {
       const supabase = createClient();
       const url = new URL(window.location.href);
-      const next = url.searchParams.get("next") || "/account";
+      // Validated before use: an unvalidated `next` was an open redirect —
+      // ?next=https://evil.com sent the user off-site *after* the session
+      // was set. safeNext() falls back to /account rather than erroring, so
+      // a bad value never blocks a legitimate sign-in.
+      const next = safeNext(url.searchParams.get("next"));
 
       const hashParams = new URLSearchParams(window.location.hash.slice(1));
       const access_token = hashParams.get("access_token");
