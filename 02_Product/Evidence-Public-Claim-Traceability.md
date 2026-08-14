@@ -77,6 +77,49 @@ HHM-2026 Museum · JUV-2024 Juvenile Court.
 - **Not** anything from Run 07 — it was designed but never executed. Break 2 is
   unresolved.
 
+---
+
+# Part 2 — Competitive research: verified vs. retracted
+
+Added under Decision #124. **Separate evidence base from Part 1.** Part 1 covers
+government audit findings quoted on the public site; this part covers competitor
+claims from the Nonprofit/Business market-validation research. They are kept in
+one file because both answer the same question — *can this claim be defended?* —
+but they must never be merged or cited interchangeably.
+
+The source research for this part **lives outside this repository.** Nothing in
+this repo cited any of these names before #124, so the entries below are the
+canonical record, not a summary of an in-repo document.
+
+## Verified — real products
+
+| Category | Product | Status |
+|---|---|---|
+| Maintenance tracking | **FixLog** — `https://www.fixlogapp.com/` | **Verified independently.** Real product; iOS app also listed on the App Store. Tracks assets, maintenance reminders, repairs, warranties, documents, costs, QR labels and reports. The only confirmed near-competitor. |
+| Depreciation / accounting | **Fixed Asset Pro**, **MIP**, **QuickBooks + AssetAccountant** | Verified in the source research (founder-supplied). Not re-verified here. |
+| Point-in-time insurance inventory | **HomeZada**, **Encircle**, **NAIC Home Inventory** | Verified in the source research (founder-supplied). Not re-verified here. |
+
+**None of these own the full proposed architecture** — they cover adjacent
+pieces. That is the defensible claim.
+
+## ⚠ RETRACTED — do not cite
+
+| Claim | Status |
+|---|---|
+| **"InsureLoc"** — cited in earlier research as a direct competitor with a specific feature set (Business Plus package, Proof File Checkup, and similar) | **RETRACTED. Unfounded.** Independent search returned **no company or product under that name.** Nearest real names are different companies: InsurEco (`insureco.io`), InsureCo (`insureco.org`), Insureon, Insure.com. The cited feature set has no verifiable source. |
+
+**Treat any future appearance of "InsureLoc" as a red flag**, not as a name to
+re-check. It was cited with specific, confident product detail that did not
+exist — which is the failure mode most likely to survive into positioning,
+sizing and pricing decisions unchallenged, because invented detail reads as
+research rather than as a gap.
+
+## Binding guardrail (#124)
+
+**Never claim uncontested "white space" or "no competitors"** in product copy or
+internal documents. Competitors exist in adjacent categories. The honest and
+stronger claim is that no one owns the full architecture.
+
 ## Maintenance
 
 If a second county contributes an independent asset-relevant source, this file
