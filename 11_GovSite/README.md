@@ -79,15 +79,13 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
 
 ## Open items before go-live
 
-1. **Evidence section — Option A vs Option B. NOT RESOLVED; Benjamin's call.**
-   The site currently ships **Option A** (the draft's stated default): general
-   research language, **no jurisdictions named and no specific findings
-   quoted**. Option B would name the counties studied and walk 2–3 specific
-   findings — more persuasive, and materially more exposed, since it means a
-   jurisdiction's own audit failures being read by people who recognise them.
-   Switching to B is a copy change to Home plus a replacement of the
-   *From documented failure to standardized record* section with named case
-   studies. **No option was chosen here.**
+1. ~~**Evidence section — Option A vs Option B**~~ — **RESOLVED by Decision
+   #123 (2026-08-14): Evidence Option C, specific but anonymized.** Real
+   sample size and real quoted findings, with generic geographic attribution
+   instead of naming counties. Neither A nor B was adopted. See #123 for the
+   binding evidence constraint on the copy, and
+   `02_Product/Evidence-Public-Claim-Traceability.md` for the private
+   claim-to-source mapping.
 2. ~~**Final brand name**~~ — **RESOLVED as a gate by Decision #122
    (2026-08-14), by accepted risk, not by clearance.** See the WORKING NAME
    section below: the name may now be used publicly as a *working* name.
