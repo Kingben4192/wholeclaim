@@ -136,3 +136,87 @@ Rotation is complete. These four remain outstanding, and the incident is **not c
 ---
 
 *Record created 2026-08-13. Rotation/remediation phase complete; verification tail pending.*
+
+---
+
+# Evidence appendix — 2026-08-13 night
+
+Read-only pass except where explicitly noted. No secret or key value was printed at any point.
+
+## A. Supabase CLI credential custody — **ROW CLOSED**
+
+| Check | Result |
+|---|---|
+| `supabase` CLI on PATH | **Not installed** |
+| `npx supabase` | **Not installed as a package** — npx attempted to fetch `supabase@2.114.0` and cancelled |
+| `SUPABASE_ACCESS_TOKEN` env var | **Not set** |
+| Stored token file (5 standard profile paths) | **Absent at all** |
+| `~/.supabase/` directory | Exists, contains only `telemetry.json` and an empty `traces/` — **no token file** |
+| `supabase projects list` | **Could not run** — CLI unavailable |
+
+**Conclusion: no credential was ever cached locally. Nothing to refresh.** The `supabase login` refresh row closes with no action required — the revoked PATs were used via `curl` against the management API, never through an authenticated CLI session.
+
+## B. Resend send log — **CANNOT COMPLETE VIA API**
+
+Live key read from `.env.local` (never printed), used against the Resend API read-only.
+
+| Endpoint | Status | Response |
+|---|---|---|
+| `GET /emails` | **401** | `restricted_api_key` — *"This API key is restricted to only send emails"* |
+| `GET /domains` | **401** | same |
+
+**This is not a dead key.** The application key is alive and sending normally; it is scoped **send-only** with no read permission — correct least-privilege configuration. Production email is unaffected.
+
+**Consequence:** the send-log scan cannot be performed programmatically with this key. It requires either the **Resend dashboard** or a separate read-scoped key. **Time window covered by this check: none** — zero send records were retrievable.
+
+**This row remains OPEN** and moves to the pending list as a dashboard task.
+
+## C. Cron route triage and manual execution
+
+### C1. Handler side-effect analysis (static)
+
+| Route | Send gate | External side effects |
+|---|---|---|
+| `deadline-check` | **NONE** | Sends **push notifications**; `delete` on `push_subscriptions`; `update` `reminder_sent_at` |
+| `tips` | `TIPS_SENDING_ENABLED === "true"` | Sends **email** via Resend; `update` `tips_stage`, `last_tip_sent_at` |
+| `leads-rls-check` | NONE | `insert` then `delete` of its **own probe row** — self-cleaning by design |
+| `annual-claim-check` | `ANNUAL_CHECK_SENDING_ENABLED === "true"` | Sends **email**; `update` `last_annual_check_*` |
+
+### C2. Production gate values
+
+Pulled to a gitignored temp file (`.env.gatecheck.local`, gitignore verified **before** writing), read, then deleted — **deletion confirmed**.
+
+| Flag | Production value | Effect |
+|---|---|---|
+| `TIPS_SENDING_ENABLED` | **Present but empty — marked Sensitive, unreadable** | **Gate state cannot be determined** |
+| `ANNUAL_CHECK_SENDING_ENABLED` | **Not present** | `undefined === "true"` → `live = false` → gate **OFF** |
+
+Dry-run path verified in source before invoking: with `live=false`, `annual-claim-check` records `dry-run: would email …` and `continue`s — **no send, no DB write**.
+
+### C3. MANUAL AUTHENTICATED EXECUTION
+
+> **These are MANUAL AUTHENTICATED EXECUTIONS, not scheduler-injection evidence.**
+> Each was invoked by hand with a Bearer token read from `.env.local`. They prove the deployed handler accepts the rotated secret. They prove **nothing** about whether Vercel's scheduler injects it correctly — that remains unverified until the scheduled runs occur.
+
+| Route | Result |
+|---|---|
+| `leads-rls-check` | **200** (recorded during rotation) |
+| `annual-claim-check` | **200** — gate off, dry-run path, no send, no write |
+| `deadline-check` | **SKIPPED** — no gate; sends real push notifications and mutates `push_subscriptions` |
+| `tips` | **SKIPPED** — gate value unreadable, so "off" could not be confirmed; sends real email |
+
+All requests to `https://www.getwholeclaim.com`, no redirect-follow, single attempt each.
+
+## D. Pending — carried forward
+
+| # | Item | Status |
+|---|---|---|
+| 1 | **Four scheduled cron 200s** (13:00 / 14:00 / 15:00 / 16:00 UTC) | **OPEN** — the only evidence that proves the **scheduler-injection leg**. Manual 200s above explicitly do not substitute. |
+| 2 | **Supabase org audit-log review** | **OPEN — Benjamin** — *placeholder: result to be recorded here.* Determine whether either revoked PAT was used by anyone other than the owner before revocation. |
+| 3 | `supabase login` refresh | **CLOSED** — see §A, no credential ever cached |
+| 4 | **Resend send-log scan** | **OPEN — Benjamin, dashboard** — *placeholder: result to be recorded here.* API route unavailable (send-only key, §B). |
+| 5 | **Vercel manual cron run** (optional) | **OPEN** — *placeholder: if Benjamin triggers a run from the Vercel dashboard, record route, timestamp and status here.* Would exercise the scheduler path ahead of the natural schedule. |
+
+**Incident status: rotation/remediation COMPLETE; incident REMAINS OPEN on rows 1, 2, 4 (and optionally 5).**
+
+*Appendix added 2026-08-13 night.*
