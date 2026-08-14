@@ -88,8 +88,12 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
    Switching to B is a copy change to Home plus a replacement of the
    *From documented failure to standardized record* section with named case
    studies. **No option was chosen here.**
-2. **Final brand name** — see WORKING NAME caveat below. Still pending Anna's
-   trademark opinion.
+2. ~~**Final brand name**~~ — **RESOLVED as a gate by Decision #122
+   (2026-08-14), by accepted risk, not by clearance.** See the WORKING NAME
+   section below: the name may now be used publicly as a *working* name.
+   Anna's opinion is still outstanding and the name is still not cleared —
+   what changed is that Benjamin explicitly accepted that risk for this line.
+   This unblocks brand/name only; items 1, 3, 4 and 5 are untouched.
 3. **Contact address** — `contact.html` carries a literal `[address]`
    placeholder in both link text and `mailto:` target. **No address was
    invented.** The existing consumer support alias is disqualified twice over:
@@ -106,24 +110,39 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
 
 ## ⚠ WORKING NAME — "The Documentation Center"
 
-**This is a working name, not cleared branding.**
+**This is a working name under accepted risk. It is NOT cleared branding.**
 
-It has had a **lightweight name/domain screen only — two searches.** That is
-**not** a trademark clearance, a knockout search, or a legal opinion. It is the
-same caveat status as the earlier Dwellmark self-screen: enough to proceed
-internally, nowhere near enough to rely on publicly.
+Those are two different things and the difference is the whole point of this
+section. The name has had a **lightweight name/domain screen only — two
+searches.** That is **not** a trademark clearance, a knockout search, or a legal
+opinion. It is the same caveat status as the earlier Dwellmark self-screen.
 
-**What this does not change:**
+**What changed — Decision #122 (2026-08-14).** Benjamin explicitly accepted the
+risk of using this name publicly for this line, **with knowledge of the
+neighbouring 1992 "DOCUMENT CENTER" trademark and the broader
+descriptive-saturation finding.** #122 is the **"(b)" branch** #121's amendment
+named: a further explicit decision accepting the self-screen as sufficient here.
 
-- **Decision #121's condition still stands.** That decision authorised a public
-  informational site under neutral placeholder branding *"until [Anna's
-  trademark opinion] resolves."* Substituting a working name is fine while the
-  site is local-only, but **go-live under this name would deviate from #121 as
-  written** unless the opinion has landed or #121 is amended. Flagging rather
-  than assuming.
-- **The name-clearance gate (#17/#18) is untouched.** Nothing here pre-empts it.
-- Every page still shows a visible **"working name"** badge, so the provisional
-  status is legible on the page itself and not only in this file.
+So the brand/name gate is **resolved by accepted risk** — not by clearance,
+not by an opinion, and not by anything a lawyer has looked at. Anyone reading
+this later should not upgrade "accepted risk" into "approved."
+
+**What #122 does NOT change:**
+
+- **The name is still not cleared, registered, or legally approved.** Describe
+  it internally as a *working name under accepted risk* — never as "cleared."
+- **The name-clearance gate (#17/#18) is untouched.** #122 consciously accepts
+  risk *around* it for this line only; it does not satisfy it.
+- **No ™, ®, or ℠ symbol may appear anywhere near the name, on any page.**
+  Asserting a mark Benjamin knows is neither cleared nor registered would turn
+  an accepted risk into a false claim — the one thing this decision must not be
+  allowed to become. Verified zero occurrences across all 5 pages, `style.css`
+  and this file; **re-verify before any deployment.**
+- **No new visible disclaimer is required.** The existing footer disclaimer and
+  the per-page "working name" badge stand as-is — the provisional status stays
+  legible on the page itself, not only in this file.
+- **#122 authorises no deployment.** Domain, hosting, contact address and the
+  Evidence Option A/B question remain open exactly as before.
 
 **If the name changes**, substitution touches 6 files (5 HTML incl. `<title>`
 tags, plus the CSS header comment) — 19 occurrences at last count.
