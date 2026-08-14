@@ -1,0 +1,165 @@
+/* [Kit Series Name] — informational site.
+   Neutral placeholder styling, deliberately distinct from the consumer
+   product's palette: this is a separate, institutional-positioned product
+   line and final branding is pending (Decision #121). */
+
+:root {
+  --ink: #1a1d1b;
+  --muted: #5a625d;
+  --line: #d8d5cf;
+  --paper: #faf9f7;
+  --accent: #2f4739;
+  --accent-soft: #eef1ee;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.65 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+header {
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.bar {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  gap: 28px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.placeholder-note {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  margin-right: 20px;
+}
+
+nav a:hover, nav a[aria-current="page"] {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 52px 24px 72px;
+}
+
+h1 {
+  font-size: 34px;
+  line-height: 1.2;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.subhead {
+  font-size: 19px;
+  color: var(--muted);
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+h2 {
+  font-size: 22px;
+  margin: 40px 0 10px;
+}
+
+h3 {
+  font-size: 17px;
+  margin: 28px 0 6px;
+}
+
+p { margin: 0 0 16px; }
+
+.intro-line {
+  font-size: 17px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.kit {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+.kit h3 { margin-top: 0; }
+
+.kit .status {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  background: var(--accent-soft);
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 14px 18px;
+  margin: 28px 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cta:hover { text-decoration: underline; }
+
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 56px;
+  background: #fff;
+}
+
+.foot-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 26px 24px 40px;
+}
+
+.disclaimer {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+}
