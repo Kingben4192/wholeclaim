@@ -158,14 +158,29 @@ us on their ground rather than differentiating.
 
 Neither may be cited as support for the correction above. Verify before any use.
 
-### Artifact status — OUTSTANDING
+### Artifact status — IMPORTED 2026-08-15
 
-The full research artifact behind this entry was **not received** and is **not
-stored in this repository.** The entries above record only what the founder
-stated directly. Until the artifact is imported and verified, #126 section
-3(i) — *import and verify the existing external research first* — remains
-**unsatisfied**, and no claim here should be treated as source-traceable in the
-way Part 1's government findings are.
+The full artifact is stored at
+`02_Product/Nonprofit-Business-Research-Artifact-Update-2026-08-15.md`.
+**#126 section 3(i) is satisfied as to import, and partially as to
+verification.**
+
+**Independent liveness check run at import:** `iii.org`, `fema.gov`,
+`gachamber.com`, `mip.com`, `assetpanda.com` and `redbeam.com` all return
+**200**. `insureloc.com` independently returned **404**, corroborating the
+third investigation. `gocodes.com` resolves via DNS (Cloudflare) and answers
+HTTP with a **301**, but HTTPS is not fetchable from this environment —
+consistent with bot protection, **neither corroborated nor contradicted, and
+explicitly not the InsureLoc pattern**.
+
+**Still weaker than Part 1.** Liveness proves a domain exists; it does not
+prove the domain says what the artifact reports. The artifact cites named pages
+(e.g. Triple-I "Filing a business insurance claim", FEMA "What Will FEMA Want
+to Know…") but the content claims — particularly Asset Panda's and RedBeam's
+marketing vocabulary — rest on the founder's two verification sessions and were
+not independently re-read here. Part 1's government findings remain the higher
+evidentiary standard, being traceable to specific quoted text in stored run
+files.
 
 ## Binding guardrail (#124)
 
