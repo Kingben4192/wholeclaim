@@ -1,6 +1,29 @@
 # The Documentation Center — informational site
 
-**Status: built, NOT deployed, NOT publicly reachable.**
+**Status: DEPLOYED AND PUBLICLY REACHABLE at `propertyevidenceresearch.org`.**
+
+Corrected 2026-08-15. This file previously read *"built, NOT deployed, NOT
+publicly reachable"* — that was true when written and is no longer true. The
+site is live on the Vercel project **`property-evidence-research`** (linked via
+`.vercel/project.json`). Anyone with the URL can read every page.
+
+Public deployment is authorized by **Decision #121** — informational site only.
+It is **not** authorized by #124, which is the Nonprofit/Business row and
+prohibits *expansion* into those markets; do not cite #124 as the deployment
+authority.
+
+**Verified live 2026-08-15** by direct request, not inferred from source:
+
+- all six pages return `<meta name="robots" content="noindex, nofollow">`
+- no downloadable file of any kind is linked or present — no PDF, DOCX, ZIP
+- no form, no script, no input field; contact is a plain `mailto:`
+- `/README.md`, `/.env.local`, `/.gitignore`, `/.vercelignore` and
+  `/.vercel/project.json` all return **404** — the `.vercelignore` fences held
+
+**Unresolved:** whether this Vercel project is git-connected or deploys only by
+CLI. That determines whether an ordinary `git push` can change the live site,
+and it is not answerable from inside this repository. Confirm in the Vercel
+project settings before assuming a push here is inert.
 
 Built from **Public Site Copy DRAFT v0.2**, which supersedes v0.1.
 Authorized by **Decision #121** (2026-08-14), committed as `f53814c`.
@@ -21,11 +44,14 @@ institutional-positioned product line, not a page of the consumer product.
 
 ## What this is
 
-Five static pages, no build step, no framework, no JavaScript:
+**Six** static pages, no build step, no framework, no JavaScript. (This table
+said five and omitted `government.html`, which shipped at `b98fbaf`; corrected
+2026-08-15 along with the status line above.)
 
 | File | Page |
 |---|---|
 | `index.html` | Home — three-door org split, then hero, problem, who it's for, evidence, from-finding-to-record, how it works, what you get, is/isn't, pilot, research methodology |
+| `government.html` | Government — the one door with kit references; card states, CTA buttons, role sections |
 | `kits.html` | The Kits — kit-by-kit reference, Kit 4 gated |
 | `nonprofit.html` | Nonprofit — research-stage only, no kit references |
 | `business.html` | Business — research-stage only, no kit references |
@@ -72,12 +98,17 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
 - **No editorial annotations leaked into the site** — the draft's internal
   notes (OPEN DECISION, Option A/B, "corrected — see note", DRAFT/INTERNAL
   headers) are all absent from the built pages. Verified by explicit search.
-- `noindex, nofollow` on all 5 pages.
+- `noindex, nofollow` on all 6 pages — **re-verified against the live site**
+  2026-08-15, not only against source.
 - **Nonprofit / Business doors are research-stage only** — no kit references
   (their nav deliberately omits "The Kits"), no pilot language, no findings,
   no assessment link, no Document/Test/Deploy framing.
 
-## Open items before go-live
+## Open items
+
+**Go-live already happened** — this section was written as a pre-launch list and
+is retitled accordingly. Items 3 and 4 were resolved by the deployment itself;
+item 6 is new and is live on the public site right now.
 
 1. ~~**Evidence section — Option A vs Option B**~~ — **RESOLVED by Decision
    #123 (2026-08-14): Evidence Option C, specific but anonymized.** Real
@@ -92,17 +123,32 @@ cd 11_GovSite && python -m http.server 8080   # then visit localhost:8080
    Anna's opinion is still outstanding and the name is still not cleared —
    what changed is that Benjamin explicitly accepted that risk for this line.
    This unblocks brand/name only; items 1, 3, 4 and 5 are untouched.
-3. **Contact address** — `contact.html` carries a literal `[address]`
-   placeholder in both link text and `mailto:` target. **No address was
-   invented.** The existing consumer support alias is disqualified twice over:
-   wrong product line, and confirmed non-deliverable.
-4. **Hosting / domain.** Flagged in the v0.2 draft and worth keeping visible:
-   serving this under the consumer domain would brand it as that product's
-   offering, cutting directly against the neutral, separate positioning #121
-   requires. Needs its own decision before go-live.
+3. ~~**Contact address**~~ — **RESOLVED.** All three pages carrying a contact
+   line now use `research@propertyevidenceresearch.org`, on the line's own
+   domain rather than the consumer alias. **Deliverability of that mailbox is
+   not verified here** — the consumer alias failed on exactly this point, so
+   send a live test before relying on it.
+4. ~~**Hosting / domain**~~ — **RESOLVED by the deployment.** The site is on
+   `propertyevidenceresearch.org`, its own neutral domain, not the consumer
+   domain. That is the outcome this item asked for.
 5. **Kit 4 legal review** — unchanged, pending counsel. The "In development /
    pending legal review" framing on `kits.html` remains the only public Kit 4
    language authorized.
+6. **⚠ LIVE ISSUE — `kits.html` implies four finished kits. None exist.**
+   Kit 4 carries an "In development" label; Kits 1, 2, 3 and 5 carry none.
+   Against that contrast the unlabeled four read as *available*, and the page
+   opens by inviting the reader to "pick the one that matches your
+   department's gap." **Actual build state as of 2026-08-15:** Kits 2, 3, 4
+   and 5 are outlines whose own headers read *"No content written, no layout,
+   no visual pass"*; Kit 1 has a vertical-slice prototype marked **"Not for
+   distribution."** Zero kits are complete.
+
+   Nothing is downloadable, so the gap cannot be discovered by clicking — only
+   by a reader emailing to ask for one. That is an overclaim under #121's
+   guardrails and it is public now. Two ways to close it: label the other four
+   the way Kit 4 already is, or build the kits and leave the copy standing.
+   **Neither has been done. No site copy has been changed — this item is a
+   record of the problem, not a fix, and the choice is the founder's.**
 
 ---
 
