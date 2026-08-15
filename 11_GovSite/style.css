@@ -109,7 +109,7 @@ p { margin: 0 0 16px; }
   background: #fff;
 }
 
-.kit h3 { margin-top: 0; }
+.kit h2 { margin-top: 0; font-size: 17px; }
 
 .kit .status {
   display: inline-block;
@@ -153,15 +153,12 @@ p { margin: 0 0 16px; }
 a.door-primary {
   border: 1.5px solid var(--accent);
   box-shadow: 0 1px 3px rgba(47, 71, 57, 0.10);
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 a.door-primary:hover,
 a.door-primary:focus-visible {
   background: var(--accent);
   box-shadow: 0 4px 12px rgba(47, 71, 57, 0.18);
-  transform: translateY(-1px);
-  outline: none;
 }
 
 a.door-primary:hover .door-name,
@@ -188,6 +185,18 @@ a.door-primary:focus-visible .door-go { color: #fff; }
 
 .door-inert .door-name { color: var(--muted); }
 
+/* Honest scope marker on the research-stage doors. Carries the hedge that the
+   card copy above it deliberately does not. */
+.door-status {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .door-name {
   display: block;
   font-weight: 700;
@@ -213,14 +222,29 @@ a.door-primary:focus-visible .door-go { color: #fff; }
   font-size: 15px;
   border-radius: 6px;
   text-decoration: none;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .cta-button:hover,
 .cta-button:focus-visible {
   background: #24352b;
   box-shadow: 0 3px 10px rgba(47, 71, 57, 0.22);
-  outline: none;
+}
+
+/* Keyboard focus. Drawn outside the element via outline-offset, so it lands on
+   the page background and stays legible even when the card itself fills. */
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Motion only for users who haven't asked for less. Colour changes stay
+   instant for everyone; nothing moves unless motion is permitted. */
+@media (prefers-reduced-motion: no-preference) {
+  a.door-primary { transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+  a.door-primary:hover,
+  a.door-primary:focus-visible { transform: translateY(-1px); }
+  .cta-button { transition: background 0.15s ease, box-shadow 0.15s ease; }
 }
 
 /* Tinted section so the breakdown list separates from the hero. */
@@ -355,6 +379,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 12px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
@@ -471,7 +496,7 @@ footer {
 .hs-ok   .hs-mark { background: var(--accent); color: #fff; }
 .hs-ok   .hs-state { color: var(--accent); }
 
-.hs-warn .hs-mark { background: #b8860b; color: #fff; }
+.hs-warn .hs-mark { background: #8a6508; color: #fff; }
 .hs-warn .hs-state { color: #8a6508; }
 
 .hs-miss .hs-mark { background: #9d3b34; color: #fff; }
