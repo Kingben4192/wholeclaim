@@ -134,21 +134,30 @@ item 6 is new and is live on the public site right now.
 5. **Kit 4 legal review** — unchanged, pending counsel. The "In development /
    pending legal review" framing on `kits.html` remains the only public Kit 4
    language authorized.
-6. **⚠ LIVE ISSUE — `kits.html` implies four finished kits. None exist.**
-   Kit 4 carries an "In development" label; Kits 1, 2, 3 and 5 carry none.
-   Against that contrast the unlabeled four read as *available*, and the page
-   opens by inviting the reader to "pick the one that matches your
-   department's gap." **Actual build state as of 2026-08-15:** Kits 2, 3, 4
-   and 5 are outlines whose own headers read *"No content written, no layout,
-   no visual pass"*; Kit 1 has a vertical-slice prototype marked **"Not for
-   distribution."** Zero kits are complete.
+6. ~~**⚠ LIVE ISSUE — `kits.html` implies four finished kits. None exist.**~~
+   — **RESOLVED AND DEPLOYED 2026-08-15.** All five kits now carry the
+   "In development" label on the live page, verified by direct request to
+   `propertyevidenceresearch.org/kits.html`. Committed at `5ce3f9d`, deployed
+   with the founder's explicit authorization. Decision #129 records the same
+   correction.
 
-   Nothing is downloadable, so the gap cannot be discovered by clicking — only
-   by a reader emailing to ask for one. That is an overclaim under #121's
-   guardrails and it is public now. Two ways to close it: label the other four
-   the way Kit 4 already is, or build the kits and leave the copy standing.
-   **Neither has been done. No site copy has been changed — this item is a
-   record of the problem, not a fix, and the choice is the founder's.**
+   **What the item originally said, kept because it is the reason the label
+   exists:** Kit 4 carried an "In development" label; Kits 1, 2, 3 and 5
+   carried none. Against that contrast the unlabeled four read as *available*,
+   on a page that opens by inviting the reader to "pick the one that matches
+   your department's gap." **Build state as of 2026-08-15 — unchanged by the
+   label fix:** Kits 2, 3, 4 and 5 are outlines whose own headers read *"No
+   content written, no layout, no visual pass"*; Kit 1 has a vertical-slice
+   prototype marked **"Not for distribution"**; Kit 2 has a content build
+   marked *"Not complete, not print-ready, not for distribution."* **Zero kits
+   are complete.** The label now tells the truth; the underlying build state
+   is what has to change for it to come off.
+
+   **Correction to this item's own earlier text.** It previously closed with
+   *"Neither has been done. No site copy has been changed."* Both halves were
+   false by the time they were read — the labeling was done, committed, and
+   deployed. Recorded rather than silently overwritten, for the same reason
+   #129 struck its erroneous sentence instead of deleting it.
 
 ---
 
