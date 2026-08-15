@@ -114,6 +114,59 @@ exist — which is the failure mode most likely to survive into positioning,
 sizing and pricing decisions unchallenged, because invented detail reads as
 research rather than as a gap.
 
+### InsureLoc — third investigation, 2026-08-15 (#126 amendment)
+
+`insureloc.com` was **directly fetched and returned 404.** The domain is dead,
+not merely absent from search results — a stronger negative than the original
+retraction, which rested on search alone.
+
+**Formally excluded from the research record. No conclusion is drawn from it in
+either direction.** Its exclusion is *not* evidence that the space is empty;
+that inference would repeat the original error with the sign flipped.
+
+## Verified 2026-08-15 — nonprofit/business competitive re-check (#126)
+
+Founder-supplied, from two separate verification sessions with live URLs.
+
+| Source | Role |
+|---|---|
+| **Triple-I** · **FEMA** · **Georgia Chamber** | Problem-side sources |
+| **MIP** | Accounting / fund-accounting (re-verified) |
+| **Asset Panda** · **RedBeam** · **GoCodes** | **Nonprofit asset-management competitors** |
+
+**The material finding:** Asset Panda, RedBeam and GoCodes **already use the
+exact "audit trail" / "chain of custody" vocabulary** the niche framing assumed
+was unclaimed.
+
+This is a **correction, not a retraction.** The problem still generalises and
+#124's market finding stands. What does not stand is "credible narrow niche"
+read as *uncrowded*. Open question narrows to whether a **paper/manual
+documentation structure** serves something these software products leave
+unserved — not whether anyone else is naming the problem. They are, in our
+words.
+
+**Positioning caution, not a ban:** "audit trail" and "chain of custody" are
+accurate and unbanned, but now known to be competitor-occupied. Using them puts
+us on their ground rather than differentiating.
+
+### ⚠ Secondary — reported, NOT independently verified
+
+| Claim | Status |
+|---|---|
+| GoCodes' claimed **2 CFR 200 compliance** | Not verified. **Not load-bearing.** |
+| RedBeam's **church-specific product** | Not verified. **Not load-bearing.** |
+
+Neither may be cited as support for the correction above. Verify before any use.
+
+### Artifact status — OUTSTANDING
+
+The full research artifact behind this entry was **not received** and is **not
+stored in this repository.** The entries above record only what the founder
+stated directly. Until the artifact is imported and verified, #126 section
+3(i) — *import and verify the existing external research first* — remains
+**unsatisfied**, and no claim here should be treated as source-traceable in the
+way Part 1's government findings are.
+
 ## Binding guardrail (#124)
 
 **Never claim uncontested "white space" or "no competitors"** in product copy or
