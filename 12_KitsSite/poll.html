@@ -1,52 +1,4 @@
 <!DOCTYPE html>
-<!--
-  ===========================================================================
-  PROPERTY RECORD SERIES — CONCEPT POLL
-  ===========================================================================
-
-  STATUS: BUILT, NOT DEPLOYED, NOT PUBLICLY REACHABLE.
-  No Vercel project is linked to this directory. Nothing here is live.
-
-  *** RESPONSES ARE NOT RECORDED ANYWHERE. ***
-
-  This page has NO submission backend, by decision, not by oversight. There is
-  deliberately NO fetch, XMLHttpRequest, sendBeacon, WebSocket, EventSource,
-  form action or dynamic import anywhere in this file. Submitting advances the
-  view locally and stores nothing. Nothing is transmitted to any server, first
-  or third party. Formspree is not used and must not be reintroduced.
-
-  WHY THERE IS NO BACKEND YET — inspected 2026-08-16:
-    - `leads` (0006_grader.sql) does not fit: name / email / grade / score are
-      all NOT NULL. This poll has no name, no grade, no score, and email is
-      OPTIONAL. Writing to it would require fabricating values.
-    - `analytics_events` is server-side event telemetry, not form capture.
-    - No poll/survey table exists.
-    - This directory is a static site with no server, so it cannot store a
-      submission without involving a third party.
-  Capture requires a deliberate backend decision (most likely a new Supabase
-  table plus a server action in the Next.js app, with a migration pasted
-  manually). That decision has NOT been made.
-
-  BECAUSE NOTHING IS RECORDED, the pre-publication banner below states so
-  plainly. Do not remove that banner while the submit handler is still a
-  no-op — a confirmation screen implying a response was received, when it was
-  discarded, would mislead respondents. Wire capture first, THEN remove it.
-
-  PRODUCT BOUNDARY:
-    - The poll tests FUTURE kit concepts. It is not a purchase page.
-    - Kit 1 (The Homeowner's Property Record Kit) is a separate, finished
-      product. Its name is used verbatim and is not modified here.
-    - No content is invented for Kits 2-5. The three concepts are named only
-      as poll options, with no described contents, page counts or features.
-    - This is the CONSUMER line. It is NOT 11_GovSite / The Documentation
-      Center, which is untouched.
-
-  PURCHASE CTA: href is the literal placeholder token GUMROAD_URL_PENDING.
-  The Gumroad URL for Kit 1 is not in the repository. The only Gumroad links
-  present are /l/Wholeclaim-Workbook and /l/Claim-documentation-guide, both
-  DIFFERENT products. Neither was substituted; no URL was invented.
-  ===========================================================================
--->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -57,16 +9,16 @@
 </head>
 <body class="poll-page">
 
-<!-- REMOVE ONLY AFTER A CAPTURE BACKEND IS CONNECTED. See comment above. -->
 <div class="prepub" role="note">
-  <strong>Pre-publication draft.</strong> Not published. Responses are not
-  recorded &mdash; no submission backend is connected yet.
+  <strong>Early prototype.</strong> Responses are not recorded yet &mdash;
+  nothing you enter is stored or sent anywhere. Results are not shown back to
+  participants. This is an informal opinion poll, not a scientific or
+  representative survey.
 </div>
 
 <main class="poll-wrap">
 
-  <!-- ================= POLL VIEW ================= -->
-  <div id="pollView">
+    <div id="pollView">
 
     <header class="poll-head">
       <p class="eyebrow">The Property Record Series</p>
@@ -147,13 +99,12 @@
     </form>
   </div>
 
-  <!-- ================= POST-SUBMISSION VIEW ================= -->
-  <div id="doneView" hidden>
+    <div id="doneView" hidden>
 
     <div class="done-mark" aria-hidden="true">&checkmark;</div>
-    <h2 class="done-title">Thanks &mdash; that&rsquo;s logged.</h2>
+    <h2 class="done-title">Thanks for weighing in.</h2>
     <p class="done-copy">
-      Answers like yours decide which Property Record Kit gets built next.
+      Answers like yours shape which Property Record Kit gets built next.
     </p>
 
     <hr class="rule">
@@ -167,13 +118,7 @@
         system, every serial number, receipt, repair, and warranty.
       </p>
 
-      <!--
-        href is the literal placeholder token GUMROAD_URL_PENDING.
-        Replace with the real Gumroad product URL for Kit 1 before publishing.
-        Do NOT substitute /l/Wholeclaim-Workbook or /l/Claim-documentation-guide.
-      -->
-      <p class="cta-pending">Purchase link not yet connected.</p>
-      <a class="btn is-disabled" href="GUMROAD_URL_PENDING" aria-disabled="true">
+            <a class="btn" href="https://hammondson6.gumroad.com/l/woisbe">
         Get Kit 1 on Gumroad
       </a>
 
@@ -189,19 +134,6 @@
 </footer>
 
 <script>
-// ---------------------------------------------------------------------------
-// SUBMISSION CAPTURE IS NOT CONNECTED.
-//
-// There is deliberately NO fetch / XMLHttpRequest / sendBeacon / WebSocket /
-// EventSource / dynamic import in this file, and the form has no action
-// attribute. Submitting advances the view locally. Nothing is stored, and
-// nothing leaves the browser.
-//
-// To enable capture: set CAPTURE_ENABLED = true, add a transport here, and
-// remove the .prepub banner from the markup. Do not remove that banner while
-// this remains false — the confirmation screen would then imply a response
-// was received when it was discarded.
-// ---------------------------------------------------------------------------
 const CAPTURE_ENABLED = false;
 
 const form      = document.getElementById('pollForm');
@@ -222,7 +154,6 @@ form.addEventListener('submit', function (e) {
   errLine.hidden = true;
 
   if (CAPTURE_ENABLED) {
-    // Intentionally unreachable. No transport is defined here by design.
     return;
   }
 
@@ -231,7 +162,6 @@ form.addEventListener('submit', function (e) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Clear the error as soon as a choice is made.
 form.querySelectorAll('input[name="concept"]').forEach(function (el) {
   el.addEventListener('change', function () { errLine.hidden = true; });
 });

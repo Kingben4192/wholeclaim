@@ -1,7 +1,27 @@
 # The Property Record Series — consumer product pages
 
-**Status: built, NOT deployed, NOT publicly reachable.** No Vercel project is
-linked to this directory. Nothing here is live.
+**Status: DEPLOYED AND PUBLICLY REACHABLE at
+`https://property-record-poll.vercel.app`.**
+
+Deployed 2026-08-16 to the Vercel project **`property-record-poll`** — a new,
+standalone project. It is **not** `wholeclaim` and **not**
+`property-evidence-research`; both were verified unchanged before and after
+(newest deployments `2026-08-14 11:28:32` and `2026-08-15 19:46:49`
+respectively, identical either side of this deploy). The `wholeclaim` team
+scope was used because this Vercel login rejects the personal account as a
+scope — that was flagged and confirmed before deploying.
+
+Both pages carry `noindex, nofollow`. Verified live: `/README.md`,
+`/.vercelignore`, `/.env.local`, `/.vercel/project.json` and `/.gitignore` all
+return 404.
+
+> **Comments are stripped from all served files, deliberately.** `index.html`,
+> `poll.html` and `style.css` originally carried explanatory comments naming
+> WholeClaim, the government line, Formspree, and the Supabase tables `leads`
+> and `analytics_events`. HTML and CSS comments ship in view-source and
+> **cannot be fenced by `.vercelignore`** — only `README.md` can. They were
+> removed before deploy. Keep internal context in this file, never in a served
+> file.
 
 ## What this is, and what it is not
 
@@ -95,22 +115,27 @@ for Kits 2–5. Note that two of the three already exist as built PDFs
 (`kit2-renovation-record.pdf`, `kit3-maintenance-systems-record.pdf`); built
 is not published, so "first access when it ships" remains accurate.
 
-## Blockers before this page can be published
+## Open items
 
-### 1. Purchase URL — unresolved
+### 1. Purchase URL — RESOLVED 2026-08-16
 
-The CTA in `index.html` points at the literal placeholder token
-`GUMROAD_URL_PENDING`. The Gumroad URL for *this* product was not found
-anywhere in the repository. The only Gumroad links present are:
+Both CTAs point to the live Kit 1 product:
 
-- `gumroad.com/l/Wholeclaim-Workbook`
-- `gumroad.com/l/Claim-documentation-guide`
+```
+https://hammondson6.gumroad.com/l/woisbe
+```
 
-Both are **different products**. Neither was substituted and no URL was
-invented. The button is rendered inert (`pointer-events: none`) so it cannot be
-clicked through to a wrong or missing destination.
+Founder-supplied and verified before wiring: HTTP 200, Gumroad returning the
+product name `The Homeowner's Property Record Kit`. This is the **only**
+external link on the site, and the sale happens entirely on Gumroad — no
+checkout, payment system, Stripe flow or alternate purchase mechanism exists
+here.
 
-### 2. Release authorisation — all open as of 2026-08-16
+**Do not substitute `gumroad.com/l/Wholeclaim-Workbook` or
+`gumroad.com/l/Claim-documentation-guide`** — those are different products and
+were the reason a placeholder was used until the real URL arrived.
+
+### 2. Release authorisation — all still open as of 2026-08-16
 
 | Gate | Status |
 |---|---|
@@ -128,18 +153,31 @@ directory. Decision #129's default-closed
 publication rule applies unchanged: **a page existing is not authorisation to
 publish it.**
 
-## Before any public launch
+## Live now — what is still outstanding
 
-1. Replace `GUMROAD_URL_PENDING` with the real product URL and remove the
-   `is-disabled` class and `aria-disabled` attribute from the CTA.
-2. Delete the `.prepub` banner from `index.html` and the `.prepub` rule from
-   `style.css`.
-3. Confirm the release gates above, per their own owners.
-4. Decide hosting. This directory is deliberately unlinked to any Vercel
-   project; `.vercelignore` already fences this README and local tooling files
-   in case that changes.
-5. Re-check that `noindex, nofollow` is still wanted before going public — it
-   is currently set on `index.html`.
+The site is public. The release gates above are **not** closed, and nothing on
+the page claims otherwise. What remains:
+
+1. **Capture backend.** Responses are discarded. Until that changes, the
+   `.prepub` banner on `poll.html` must stay up — it is the only thing telling
+   participants their answer is not recorded, and the confirmation screen would
+   otherwise imply receipt. Wire capture, flip `CAPTURE_ENABLED`, **then**
+   remove the banner. Never the other way round.
+2. **Results view.** The stated purpose includes letting participants see what
+   others think. That needs stored responses first and does not exist yet.
+3. **Release gates.** #17, refund policy, Terms, Privacy — all open, none with
+   an active clock.
+4. **Indexing.** `noindex, nofollow` is set on both pages. Remove only when the
+   gates above are settled.
+5. **Redeploying.** `vercel --prod` from this directory ships to
+   `property-record-poll`. It is a manual step; nothing here auto-deploys, and
+   pushing to git does not publish this site.
+
+## Local preview vs. deployed
+
+`python -m http.server` serves **every** file in this directory, including
+`README.md`. That is a limitation of the preview server, not a leak —
+`.vercelignore` fences it on Vercel, verified 404 on the live site.
 
 ## Local preview
 

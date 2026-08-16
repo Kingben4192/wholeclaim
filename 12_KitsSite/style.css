@@ -1,8 +1,3 @@
-/* The Homeowner's Property Record Kit — consumer product page.
-   Plain CSS, no build step, no framework, no JavaScript.
-   Muted token #63665F is the WCAG-corrected value from Decision #13 —
-   do not lighten it. */
-
 :root {
   --ink:        #1C1D1A;
   --muted:      #63665F;
@@ -27,7 +22,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* --- pre-publication banner: remove before any public launch --- */
 .prepub {
   max-width: var(--maxw);
   margin: 0 auto 40px;
@@ -69,7 +63,6 @@ h1 {
 
 .lede { margin: 0 0 34px; font-size: 17px; }
 
-/* --- format facts --- */
 .facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -114,7 +107,6 @@ h3 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
 
 p { margin: 0 0 14px; }
 
-/* --- numbered section list --- */
 ol.sections { margin: 0; padding: 0; list-style: none; counter-reset: sec; }
 
 ol.sections li {
@@ -139,7 +131,6 @@ ol.sections li::before {
 
 ol.sections p { margin: 0; color: var(--muted); font-size: 15px; }
 
-/* --- CTA --- */
 .cta {
   background: var(--accent-soft);
   border: 1px solid #D6E2EA;
@@ -171,7 +162,6 @@ ol.sections p { margin: 0; color: var(--muted); font-size: 15px; }
   font-size: 15px;
 }
 
-/* CTA is intentionally inert until a real product URL is supplied. */
 .btn.is-disabled {
   background: #B9C4CB;
   color: #F4F6F7;
@@ -179,7 +169,6 @@ ol.sections p { margin: 0; color: var(--muted); font-size: 15px; }
   pointer-events: none;
 }
 
-/* --- disclaimer --- */
 .notice {
   border-left: 3px solid var(--rule);
   padding: 4px 0 4px 18px;
@@ -203,11 +192,6 @@ footer p { margin: 0 0 6px; }
   ol.sections li { padding-left: 44px; }
 }
 
-/* ==========================================================================
-   CONCEPT POLL (poll.html)
-   Mobile-first. Touch targets are >=44px tall. No framework, no web fonts.
-   ========================================================================== */
-
 .poll-page { padding-bottom: 48px; }
 
 .poll-wrap { max-width: 560px; margin: 0 auto; }
@@ -222,7 +206,6 @@ footer p { margin: 0 0 6px; }
 
 .sub { margin: 0 0 8px; color: var(--muted); font-size: 16px; }
 
-/* --- steps --- */
 .step {
   border: 0;
   border-top: 1px solid var(--rule);
@@ -250,11 +233,9 @@ footer p { margin: 0 0 6px; }
 
 .hint { margin: 8px 0 14px; font-size: 13px; color: var(--muted); }
 
-/* --- radio choices --- */
 .choice { display: block; margin-top: 10px; cursor: pointer; }
 .choice:first-of-type { margin-top: 18px; }
 
-/* Input stays focusable for keyboard/AT; visually replaced by .choice-body. */
 .choice input {
   position: absolute;
   opacity: 0;
@@ -306,7 +287,6 @@ footer p { margin: 0 0 6px; }
   outline-offset: 2px;
 }
 
-/* --- free text + email --- */
 textarea, input[type="email"] {
   width: 100%;
   font: inherit;
@@ -325,7 +305,6 @@ textarea:focus, input[type="email"]:focus {
   border-color: var(--accent);
 }
 
-/* --- submit --- */
 .btn-submit {
   width: 100%;
   margin-top: 30px;
@@ -345,7 +324,6 @@ textarea:focus, input[type="email"]:focus {
   color: var(--muted);
 }
 
-/* --- post-submission --- */
 .done-mark {
   width: 46px;
   height: 46px;
