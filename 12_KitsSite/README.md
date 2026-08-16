@@ -71,6 +71,80 @@ exists in Google Drive (`1ATkjwKP0sJJXEm-mv0gs14vU88OvzRji`).
 pre-resolution source and still carries the unresolved publisher line. Drive
 holds both under the same filename — check the hash, not the name.
 
+## `index.html` — Kit 1 landing page
+
+### Design system — extracted from the PDF, not invented
+
+The Pine / Paper / Stamp Red / Brass system was read out of the approved
+artifact by parsing its colour operators, not chosen by eye:
+
+| Role | Hex | Uses in PDF |
+|---|---|---|
+| Brass | `#8A6D2F` | 406 |
+| Ink | `#14231C` | 360 |
+| Brass tint | `#C9B98F` | 178 |
+| Pine | `#1E4636` | 159 |
+| Paper | `#F2F0EB` | 30 |
+| Stamp Red | `#A32C1C` | 22 |
+| Pine mid / muted / tint | `#2A5A47` `#4A5A50` `#6B7A70` `#E4EAE7` | — |
+
+The kit's monospace field labels are echoed in eyebrows, stat labels, step
+clocks and the QR caption, so the page reads as the same object buyers receive.
+
+**Accessibility, measured per Decision #13 rather than assumed.** Brass on
+paper is **4.28:1** — below AA for body text. Brass is therefore restricted to
+large numerals, rules, borders and white-on-brass (4.87:1). Reading text uses
+ink (14.33:1) or muted `#4A5A50` (6.43:1). All other tested pairs pass AA.
+
+**`index.html` uses `kit1.css`; `poll.html` still uses `style.css`.** They were
+deliberately kept separate so the Kit 1 product identity and the poll's
+identity cannot drift into each other. `style.css` still contains vestigial
+Kit 1 rules that are no longer referenced — harmless, worth trimming when
+convenient.
+
+### Page previews — real pages, hash-gated
+
+`img/kit1-*.png` are rendered directly from the approved PDF at ~144 dpi. The
+render script **verifies the source SHA-256 against the approved artifact and
+aborts on mismatch**, so the pre-resolution 173,209-byte PDF cannot be used by
+accident.
+
+| Image | Source page |
+|---|---|
+| `kit1-cover.png` | p1 |
+| `kit1-property-profile.png` | p7 — Section 01 Property Identity |
+| `kit1-home-inventory.png` | p14 — Section 03 inventory register |
+| `kit1-systems-register.png` | p29 — Section 04 systems |
+| `kit1-repair-history.png` | p44 — Section 08 repair log |
+| `kit1-annual-review.png` | p59 — Section 12 annual checklist |
+
+Nothing is a mockup and no sample content was invented. The "60-minute
+baseline" step copy is likewise verbatim from page 5.
+
+### QR code
+
+`img/kit1-qr.svg`, 2.4 KB, encodes exactly
+`https://hammondson6.gumroad.com/l/woisbe`. Generated **offline** with `segno`
+— no third-party QR service, no tracking pixel. Error correction level H (~30%
+damage tolerance, suitable for print). Single colour `#1E4636` on white. Its
+only `http` string is the `xmlns` XML namespace, which browsers never fetch.
+
+Before wiring it in, the encoded payload was compared against the actual `href`
+in the page — a wrong URL is the realistic failure mode, not a library bug.
+
+### Price
+
+**$19 USD**, shown in exactly two places: the hero note and the purchase band.
+No sale price, discount, subscription, trial, refund or guarantee language.
+Gumroad remains the authoritative source and the only purchase destination.
+
+### Build-time dependencies — installed, used, removed
+
+`pymupdf` (page rendering) and `segno` (QR) were installed locally, used to
+produce the static assets above, and **uninstalled afterwards**. Nothing at
+runtime or in production depends on either. To re-render, reinstall
+temporarily and remove again.
+
 ## `poll.html` — concept poll
 
 A two-question poll testing which kit concept gets built next, linked from
