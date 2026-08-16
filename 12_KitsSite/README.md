@@ -51,6 +51,50 @@ exists in Google Drive (`1ATkjwKP0sJJXEm-mv0gs14vU88OvzRji`).
 pre-resolution source and still carries the unresolved publisher line. Drive
 holds both under the same filename — check the hash, not the name.
 
+## `poll.html` — concept poll
+
+A two-question poll testing which kit concept gets built next, linked from
+`index.html`. Free, no account. The primary action is answering; the Kit 1
+purchase CTA appears only *after* submission, so the page functions as an
+acquisition funnel rather than a purchase page.
+
+### Responses are NOT recorded
+
+**There is no submission backend, by decision, not by oversight.** The page
+contains no `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`,
+`EventSource`, dynamic `import()` or form `action` — verified against the
+executable JavaScript with comments stripped. Submitting advances the view
+locally and stores nothing. Nothing leaves the browser. Formspree is not used
+and must not be reintroduced.
+
+What was inspected before reaching that conclusion (2026-08-16):
+
+| Candidate | Verdict |
+|---|---|
+| `leads` (`0006_grader.sql`) | **Unusable.** `name`, `email`, `grade`, `score` are all `NOT NULL`. The poll has no name/grade/score and email is *optional*. Writing to it would mean fabricating values. |
+| `analytics_events` | Server-side event telemetry, not form capture. |
+| Poll/survey table | Does not exist. |
+| This directory | Static, no server — cannot store a submission without a third party. |
+
+Capture requires a deliberate decision, most likely a new Supabase table plus
+a server action in the Next.js app, with the migration pasted manually (the
+repo has no migration runner). **That decision has not been made.**
+
+### Before enabling capture
+
+The banner on `poll.html` states that responses are not recorded. **Do not
+remove it while `CAPTURE_ENABLED` is `false`** — the confirmation screen would
+then imply a response was received when it was discarded. Wire capture first,
+flip the constant, then remove the banner.
+
+### Product boundary
+
+The poll names three *concepts* only — Renovation, Inventory, Maintenance —
+with no described contents, page counts or features. No content is invented
+for Kits 2–5. Note that two of the three already exist as built PDFs
+(`kit2-renovation-record.pdf`, `kit3-maintenance-systems-record.pdf`); built
+is not published, so "first access when it ships" remains accurate.
+
 ## Blockers before this page can be published
 
 ### 1. Purchase URL — unresolved
