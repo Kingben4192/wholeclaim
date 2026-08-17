@@ -22,7 +22,7 @@
         for good, ready the day anyone asks you to prove it.
       </p>
       <div class="cta-row">
-        <a class="btn" href="https://hammondson6.gumroad.com/l/woisbe">Get the Kit on Gumroad</a>
+        <a class="btn" href="/api/go?s=direct">Get the Kit on Gumroad</a>
         <a class="btn btn-ghost" href="#inside">See what&rsquo;s inside</a>
       </div>
       <p class="cta-note">$19 USD &middot; 61-page PDF &middot; print-ready &middot; 2026 Peacetime Edition</p>
@@ -224,7 +224,7 @@
           fill it in, and keep it.
         </p>
         <div class="cta-row">
-          <a class="btn" href="https://hammondson6.gumroad.com/l/woisbe">Get the Kit on Gumroad</a>
+          <a class="btn" href="/api/go?s=direct">Get the Kit on Gumroad</a>
         </div>
         <p class="cta-note">Purchase and delivery are handled entirely by Gumroad.</p>
       </div>
@@ -278,5 +278,20 @@
   </div>
 </footer>
 
+
+<script>
+(function () {
+  var payload = JSON.stringify({ event_type: 'page_view', source: 'direct', poll_option: null });
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/event', new Blob([payload], { type: 'application/json' }));
+      return;
+    }
+  } catch (e) {}
+  try {
+    fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

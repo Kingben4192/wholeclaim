@@ -396,6 +396,104 @@ a { color: var(--pine); }
   .section { padding: 92px 0; }
 }
 
+.pollpage { background: var(--pine); color: #fff; }
+
+.pollwrap {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 52px 22px 40px;
+}
+
+.pollpage .eyebrow { color: var(--brass-tint); }
+
+.qtitle {
+  font-size: clamp(26px, 5.4vw, 38px);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  margin: 0 0 34px;
+  color: #fff;
+}
+
+.votes { display: grid; gap: 14px; }
+
+.vote {
+  display: block;
+  width: 100%;
+  min-height: 68px;
+  padding: 20px 24px;
+  font: 600 18px/1.35 var(--sans);
+  text-align: left;
+  color: #fff;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(201,185,143,.45);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease, transform .12s ease;
+}
+.vote:hover { background: rgba(255,255,255,.12); border-color: var(--brass-tint); }
+.vote:active { transform: translateY(1px); }
+.vote:focus-visible { outline: 2px solid var(--brass-tint); outline-offset: 3px; }
+
+.votenote {
+  margin: 22px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass-tint);
+  text-align: center;
+}
+
+.ack {
+  font-size: 17.5px;
+  line-height: 1.6;
+  color: #E7EDE9;
+  margin: 0;
+}
+
+.pollpage .rule { border: 0; border-top: 1px solid rgba(201,185,143,.3); margin: 34px 0; }
+
+.offer { text-align: center; }
+
+.offer-art {
+  width: 168px;
+  margin: 0 auto 22px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow: var(--shadow-lg);
+}
+
+.offer-copy {
+  font-size: 18px;
+  line-height: 1.55;
+  color: #fff;
+  margin: 0 auto 26px;
+  max-width: 34ch;
+}
+
+.offer-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  color: var(--brass-tint);
+  margin: 16px 0 0;
+}
+
+.offer-more { margin: 20px 0 0; font-size: 14px; }
+.offer-more a { color: var(--brass-tint); }
+
+.pollfoot {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 24px 22px 40px;
+  border-top: 1px solid rgba(201,185,143,.22);
+  color: #A9B6AE;
+  font-size: 12.5px;
+  text-align: center;
+}
+.pollfoot p { margin: 0 0 5px; }
+.pollfoot .fine { color: #8B998F; font-size: 11.5px; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .btn, .preview a { transition: none; }

@@ -4,167 +4,130 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Which one would you actually pay $19 for?</title>
-<link rel="stylesheet" href="style.css">
+<title>Would you build a record of your home before you needed one?</title>
+<link rel="stylesheet" href="kit1.css">
 </head>
-<body class="poll-page">
+<body class="pollpage">
 
-<div class="prepub" role="note">
-  <strong>Early prototype.</strong> Responses are not recorded yet &mdash;
-  nothing you enter is stored or sent anywhere. Results are not shown back to
-  participants. This is an informal opinion poll, not a scientific or
-  representative survey.
-</div>
+<main class="pollwrap">
 
-<main class="poll-wrap">
+  <div id="stepVote">
+    <p class="eyebrow">The Property Record Series</p>
+    <h1 class="qtitle">
+      Would you actually build a record of your home before you needed one
+      &mdash; or only after something goes wrong?
+    </h1>
 
-    <div id="pollView">
-
-    <header class="poll-head">
-      <p class="eyebrow">The Property Record Series</p>
-      <h1>Which one would you actually pay $19 for?</h1>
-      <p class="sub">
-        Not a survey about opinions. A test of what you&rsquo;d hand over money
-        for. Pick one, then tell us what would bump it to $29.
-      </p>
-    </header>
-
-    <form id="pollForm" novalidate>
-
-      <fieldset class="step">
-        <legend>
-          <span class="step-tag">Question 1 of 2</span>
-          Which would you actually pay $19 for?
-        </legend>
-
-        <label class="choice">
-          <input type="radio" name="concept" value="renovation">
-          <span class="choice-body">
-            <span class="choice-key">A</span>
-            <span class="choice-label">Home Renovation Record Kit</span>
-          </span>
-        </label>
-
-        <label class="choice">
-          <input type="radio" name="concept" value="inventory">
-          <span class="choice-body">
-            <span class="choice-key">B</span>
-            <span class="choice-label">Home Inventory Kit</span>
-          </span>
-        </label>
-
-        <label class="choice">
-          <input type="radio" name="concept" value="maintenance">
-          <span class="choice-body">
-            <span class="choice-key">C</span>
-            <span class="choice-label">Home Maintenance Record Kit</span>
-          </span>
-        </label>
-
-        <label class="choice">
-          <input type="radio" name="concept" value="none">
-          <span class="choice-body">
-            <span class="choice-key">D</span>
-            <span class="choice-label">None of these</span>
-          </span>
-        </label>
-      </fieldset>
-
-      <fieldset class="step">
-        <legend>
-          <span class="step-tag">Question 2 of 2</span>
-          What would make this worth $29 to you?
-        </legend>
-        <p class="hint">Optional.</p>
-        <textarea id="bump" name="bump" rows="4"
-          placeholder="Whatever comes to mind."></textarea>
-      </fieldset>
-
-      <fieldset class="step">
-        <legend>
-          <span class="step-tag">Last step</span>
-          Want first access when it ships?
-        </legend>
-        <p class="hint">Optional. One message when it&rsquo;s ready.</p>
-        <input id="email" name="email" type="email" inputmode="email"
-          autocomplete="email" placeholder="you@example.com">
-      </fieldset>
-
-      <button id="submitBtn" type="submit" class="btn btn-submit">
-        Submit response
+    <div class="votes">
+      <button class="vote" type="button" data-option="yes_before">
+        Yes, before
       </button>
-      <p id="pollError" class="err" hidden>Pick one option to continue.</p>
-      <p class="freenote">Free. No account needed.</p>
+      <button class="vote" type="button" data-option="only_after">
+        Only after, realistically
+      </button>
+    </div>
 
-    </form>
+    <p class="votenote">One tap. No account, no email.</p>
   </div>
 
-    <div id="doneView" hidden>
+  <div id="stepResult" hidden>
 
-    <div class="done-mark" aria-hidden="true">&checkmark;</div>
-    <h2 class="done-title">Thanks for weighing in.</h2>
-    <p class="done-copy">
-      Answers like yours shape which Property Record Kit gets built next.
+    <p class="eyebrow">Thanks for voting</p>
+
+    <p class="ack" id="ackYes" hidden>
+      Good instinct. Most people don&rsquo;t act until they&rsquo;re already
+      dealing with a claim, dispute, or repair &mdash; and by then the
+      paperwork, photos, and receipts they need are scattered or gone. A little
+      structure now saves a lot of scrambling later.
+    </p>
+
+    <p class="ack" id="ackAfter" hidden>
+      That&rsquo;s honest &mdash; and it&rsquo;s exactly why most people are
+      unprepared when something actually happens. The average homeowner
+      doesn&rsquo;t think about proof until they need it: a tree through the
+      roof, a burst pipe, an insurance adjuster asking questions they
+      can&rsquo;t answer. By then it&rsquo;s too late to document what things
+      looked like before.
     </p>
 
     <hr class="rule">
 
-    <section class="kit1">
-      <p class="eyebrow">Already finished</p>
-      <h3>The Homeowner&rsquo;s Property Record Kit</h3>
-      <p class="kit1-meta">Kit 1 of 5 &middot; 61 pages &middot; print-ready</p>
-      <p class="kit1-copy">
-        The complete written record of your home &mdash; every room, every
-        system, every serial number, receipt, repair, and warranty.
+    <section class="offer">
+      <img class="offer-art" src="img/kit1-cover.png" width="1224" height="1584"
+           alt="Cover of The Homeowner's Property Record Kit.">
+      <p class="offer-copy">
+        The Homeowner&rsquo;s Property Record Kit makes it a one-hour job
+        instead of a someday job &mdash; 61 pages, print-ready, $19.
       </p>
-
-            <a class="btn" href="https://hammondson6.gumroad.com/l/woisbe">
-        Get Kit 1 on Gumroad
-      </a>
-
-      <p class="kit1-more"><a href="index.html">See what&rsquo;s inside Kit 1</a></p>
+      <a class="btn" id="offerCta" href="/api/go?s=poll">Get the Kit on Gumroad</a>
+      <p class="offer-note">Purchase and delivery are handled entirely by Gumroad.</p>
+      <p class="offer-more"><a href="/">See what&rsquo;s inside the kit</a></p>
     </section>
   </div>
 
 </main>
 
-<footer class="poll-foot">
-  <p>The Property Record Series</p>
-  <p class="fine">&copy; 2026. All rights reserved.</p>
+<footer class="pollfoot">
+  <p>The Property Record Series &middot; Kit 1 of 5</p>
+  <p class="fine">&copy; 2026. All rights reserved. For personal, single-household use.</p>
 </footer>
 
 <script>
-const CAPTURE_ENABLED = false;
+(function () {
+  var SOURCE = 'poll';
+  var chosen = null;
 
-const form      = document.getElementById('pollForm');
-const pollView  = document.getElementById('pollView');
-const doneView  = document.getElementById('doneView');
-const errLine   = document.getElementById('pollError');
-
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const picked = form.querySelector('input[name="concept"]:checked');
-  if (!picked) {
-    errLine.hidden = false;
-    const first = form.querySelector('input[name="concept"]');
-    if (first) first.focus();
-    return;
+  function send(type, option) {
+    var payload = JSON.stringify({
+      event_type: type,
+      source: SOURCE,
+      poll_option: option || null
+    });
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/event',
+          new Blob([payload], { type: 'application/json' }));
+        return;
+      }
+    } catch (e) {}
+    try {
+      fetch('/api/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true
+      });
+    } catch (e) {}
   }
-  errLine.hidden = true;
 
-  if (CAPTURE_ENABLED) {
-    return;
-  }
+  var stepVote = document.getElementById('stepVote');
+  var stepResult = document.getElementById('stepResult');
+  var cta = document.getElementById('offerCta');
 
-  pollView.hidden = true;
-  doneView.hidden = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.vote'),
+    function (btn) {
+      btn.addEventListener('click', function () {
+        if (chosen) return;
+        chosen = btn.getAttribute('data-option');
 
-form.querySelectorAll('input[name="concept"]').forEach(function (el) {
-  el.addEventListener('change', function () { errLine.hidden = true; });
-});
+        send('vote', chosen);
+
+        document.getElementById(
+          chosen === 'yes_before' ? 'ackYes' : 'ackAfter'
+        ).hidden = false;
+
+        cta.setAttribute('href', '/api/go?s=poll&o=' + encodeURIComponent(chosen));
+
+        stepVote.hidden = true;
+        stepResult.hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        send('offer_view', chosen);
+      });
+    }
+  );
+})();
 </script>
 
 </body>
