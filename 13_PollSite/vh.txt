@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Cache-Control: public, max-age=0, must-revalidate
+Content-Type: application/json
+Date: Mon, 17 Aug 2026 04:55:56 GMT
+Server: Vercel
+Set-Cookie: wdpt_voter=7ab414d8-d603-4c41-af0f-c06d01d496f9; Path=/; Expires=Tue, 17 Aug 2027 04:55:56 GMT; Max-Age=31536000; Secure; HttpOnly; SameSite=lax
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Matched-Path: /api/polls/vote
+X-Robots-Tag: noindex
+X-Vercel-Cache: MISS
+X-Vercel-Id: iad1::iad1::fv2w8-1786942555295-244f3e3d33cb
+Transfer-Encoding: chunked
+

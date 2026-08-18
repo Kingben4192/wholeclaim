@@ -1,0 +1,22 @@
+# Dependencies / build output
+node_modules
+.next
+out
+
+# Environment — never commit. Supabase service-role key and the admin
+# password/session secret live here; committing this file leaks them
+# permanently into git history.
+.env
+.env.local
+.env*.local
+
+# Vercel link metadata
+.vercel
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+.vercel
+.env*

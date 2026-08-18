@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Private owner dashboard. The real access control is the signed-session
+# gate in middleware.js plus the noindex metadata in app/admin/layout.js --
+# this line is only a second layer, and it is not a security control.
+# Note it also publicly advertises that /admin exists; that is an accepted
+# trade-off because the path is not the secret, the session cookie is.
+Disallow: /admin

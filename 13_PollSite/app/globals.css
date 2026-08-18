@@ -1,0 +1,113 @@
+/* =============================================================================
+   Global baseline. The components carry their own inline styles, so this file
+   deliberately stays small: a reset, the Paper/Ink page surface, and the font
+   variables next/font generates in app/layout.js.
+
+   Palette (from the artifact's design tokens, Section 1):
+     Ink #14171C · Paper #FBFAF7 · Signal Yellow #F4B41A
+     Deep Violet #5B3A9E · Slate #6B7280 · Line #E4E1D8
+   ============================================================================= */
+
+:root {
+  color-scheme: light;
+
+  --ink: #14171c;
+  --paper: #fbfaf7;
+  --signal: #f4b41a;
+  --violet: #5b3a9e;
+  --slate: #6b7280;
+  --line: #e4e1d8;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------------------------------------------------------------------------
+   Homepage wordmark layer (Ticket 1).
+
+   A single giant "whatdopeoplethink" set in Fraunces -- the same display face
+   the poll questions use -- sitting behind the hero. Purely decorative:
+   aria-hidden in the markup, pointer-events none, non-selectable, so it is
+   invisible to screen readers, to clicks, and to text selection.
+
+   Contrast: Ink at 4% over Paper computes to roughly #F4F3F0. Against that,
+   body Ink (#14171C) is ~15:1 and the lightest text on the hero, Slate
+   (#6B7280), is ~4.9:1 -- still above the 4.5:1 AA threshold. The layer
+   therefore cannot push any existing text below its current compliance.
+
+   Cropping is deliberate: the line is set wider than the viewport and
+   overflow-hidden trims it at both edges, so there is no frame or box. Sizing
+   is proportional (vw-based clamp), so it crops the same way at any width
+   rather than degrading to two letters on a phone.
+   --------------------------------------------------------------------------- */
+
+.wordmark-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(220px, 46vw, 460px);
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 0;
+}
+
+.wordmark-layer span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(3.25rem, 17vw, 15rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.04;
+}
+
+/* Anything rendered above the layer needs its own stacking context. */
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Respect users who have asked for less motion. PollView animates its result
+   bars via a width transition; this makes that instant instead. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,21 @@
+-- =============================================================================
+-- Optional follow-up for schema.sql. Not part of the handoff -- written in
+-- review. Nothing here is required to deploy.
+--
+-- The (ip_hash, created_at) index this file used to carry is now in
+-- schema.sql itself as vote_attempt_log_ip_hash_created_idx (rev. 9). Do
+-- NOT re-add it under a second name -- two indexes on the same columns
+-- cost double on every write and buy nothing.
+-- =============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Retention. Not enabled -- Phase 1 wants the abuse data.
+--
+-- vote_attempt_log now receives a row for every malformed request up to the
+-- per-IP cap, and stores ip_hash. Nothing prunes it. Both the storage growth
+-- and the indefinite retention of a salted network identifier are worth a
+-- deliberate decision rather than a default of "forever." Revisit before the
+-- privacy posture is finalised.
+--
+--   delete from vote_attempt_log where created_at < now() - interval '90 days';
+-- ---------------------------------------------------------------------------

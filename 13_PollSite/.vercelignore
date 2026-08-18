@@ -1,0 +1,26 @@
+# Internal files that should not be uploaded to the deployment.
+#
+# Next.js only serves /public and built routes, so these would not be
+# publicly fetchable by URL the way they were on the flat static 11_GovSite
+# deploy. Excluding them anyway: they name project IDs, open legal gates,
+# decision numbers, and the full poll curation reasoning, and none of it is
+# needed to build or run the app.
+
+# Internal documentation
+README.md
+NEXT-SESSION-NOTES.md
+DEPLOYMENT_HANDOFF.md
+TRENDING_POLL_PIPELINE.md
+components/WIRING_NOTES.md
+
+# The original artifact, kept for cross-reference only. Contains the
+# DemoVotingAdapter and window.storage prototype code that must never ship.
+components/artifact-source-reference.jsx
+
+# Database DDL and internal measurement queries -- run by hand in the
+# Supabase SQL editor, never needed by the running app.
+supabase/
+
+# Local tooling
+.vercel
+.env*
