@@ -40,6 +40,7 @@ export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },
   { feature: "Storage", free: "500MB per claim, 2GB per account", pro: "10GB per account" },
   { feature: "Deadline Tracker", free: "Included", pro: "Included" },
+  { feature: "Claim Binder PDF export", free: "Not included", pro: "Included" },
   { feature: "Loss-of-Use Tracker", free: "Not included", pro: "Included" },
   {
     feature: "Active claims",
