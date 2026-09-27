@@ -47,6 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     (files ?? []).map(async (file) => {
       const { data: signed } = await supabase.storage.from("evidence").createSignedUrl(file.storage_path, 3600);
       let thumbnailDataUrl: string | null = null;
+      let thumbnailFormat: "JPEG" | "PNG" | undefined;
       if (file.kind === "photo" && signed?.signedUrl) {
         try {
           const response = await fetch(signed.signedUrl);
@@ -55,12 +56,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             const bytes = await response.arrayBuffer();
             const base64 = Buffer.from(bytes).toString("base64");
             thumbnailDataUrl = `data:${mime};base64,${base64}`;
+            thumbnailFormat = mime.toLowerCase().includes("png") ? "PNG" : "JPEG";
           }
         } catch {
           thumbnailDataUrl = null;
+          thumbnailFormat = undefined;
         }
       }
-      return { ...file, thumbnailDataUrl, thumbnailFormat: signed?.signedUrl ? (file.kind === "photo" ? (thumbnailDataUrl?.includes("image/png") ? "PNG" : "JPEG") : undefined) : undefined };
+      return { ...file, thumbnailDataUrl, thumbnailFormat };
     }),
   );
 

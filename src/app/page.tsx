@@ -560,11 +560,9 @@ export default async function Page() {
             <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
               Founder note
             </span>
-            <h2 className="font-hp-display text-2xl font-bold tracking-tight mb-4">
-              [FOUNDER COPY]
-            </h2>
-            <p className="text-sm text-hp-ink-soft leading-relaxed">
-              Placeholder founder note text goes here until final copy is approved.
+            <p className="font-hp-display text-2xl font-bold tracking-tight mb-4 whitespace-pre-line">
+              I built WholeClaim after going through a property insurance claim of my own. What I learned: a claim often comes down to what you can prove — the dates, the photos, the receipts, who said what and when. WholeClaim is the file I wish I'd started on day one.
+              {'\n'}— Benjamin, Founder
             </p>
           </div>
         </div>
