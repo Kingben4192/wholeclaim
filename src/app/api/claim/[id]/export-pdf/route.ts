@@ -39,9 +39,33 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       supabase.from("entries").select("type, date, summary, created_at").eq("claim_id", id).order("date", { ascending: false }),
       supabase.from("deadlines").select("title, due_date, created_at").eq("claim_id", id).order("due_date", { ascending: true }),
       supabase.from("evidence_items").select("label, checked, file_id, category, created_at").eq("claim_id", id),
-      supabase.from("files").select("id, original_name, kind, uploaded_at").eq("claim_id", id).order("uploaded_at", { ascending: false }),
+      supabase.from("files").select("id, original_name, kind, uploaded_at, storage_path").eq("claim_id", id).order("uploaded_at", { ascending: false }),
       supabase.from("promised_items").select("description, promised_by, target_date, file_id").eq("claim_id", id),
     ]);
+
+  const filesWithPreviews = await Promise.all(
+    (files ?? []).map(async (file) => {
+      const { data: signed } = await supabase.storage.from("evidence").createSignedUrl(file.storage_path, 3600);
+      let thumbnailDataUrl: string | null = null;
+      let thumbnailFormat: "JPEG" | "PNG" | undefined;
+      if (file.kind === "photo" && signed?.signedUrl) {
+        try {
+          const response = await fetch(signed.signedUrl);
+          if (response.ok) {
+            const mime = response.headers.get("content-type") ?? "image/jpeg";
+            const bytes = await response.arrayBuffer();
+            const base64 = Buffer.from(bytes).toString("base64");
+            thumbnailDataUrl = `data:${mime};base64,${base64}`;
+            thumbnailFormat = mime.toLowerCase().includes("png") ? "PNG" : "JPEG";
+          }
+        } catch {
+          thumbnailDataUrl = null;
+          thumbnailFormat = undefined;
+        }
+      }
+      return { ...file, thumbnailDataUrl, thumbnailFormat };
+    }),
+  );
 
   const score = computeDocumentationScore({
     claim: {
@@ -67,7 +91,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     },
     score: toClientView(score),
     evidenceItems: evidenceItems ?? [],
-    files: files ?? [],
+    files: filesWithPreviews,
     entries: entries ?? [],
     deadlines: deadlines ?? [],
     promisedItems: promisedItems ?? [],

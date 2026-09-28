@@ -182,8 +182,8 @@ export default async function HelpPage() {
                 </li>
               </ul>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
-                Pro unlocks unlimited Evidence Vault uploads and the Loss-of-Use Tracker. You
-                can review or change your plan any time from{" "}
+                Pro unlocks unlimited Evidence Vault uploads, the Claim Binder PDF export,
+                and the Loss-of-Use Tracker. You can review or change your plan any time from{" "}
                 <Link href="/pricing" className="text-ledger font-semibold">
                   the pricing page
                 </Link>

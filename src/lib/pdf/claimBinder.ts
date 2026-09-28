@@ -28,7 +28,7 @@ export type ClaimBinderInput = {
   };
   score: DocumentationScoreClientView;
   evidenceItems: { label: string; checked: boolean; file_id: string | null }[];
-  files: { original_name: string; kind: string; uploaded_at: string }[];
+  files: { original_name: string; kind: string; uploaded_at: string; storage_path?: string; thumbnailDataUrl?: string | null; thumbnailFormat?: "JPEG" | "PNG" }[];
   entries: { type: string; date: string; summary: string | null }[];
   deadlines: { title: string; due_date: string }[];
   promisedItems: { description: string; promised_by: string | null; target_date: string | null; file_id: string | null }[];
@@ -104,10 +104,51 @@ export function buildClaimBinderPdf(input: ClaimBinderInput): ArrayBuffer {
   }
   y += 4;
 
-  heading(`Files (${input.files.length})`);
-  if (input.files.length === 0) line("No files uploaded yet.");
-  for (const f of input.files) {
-    line(`${f.original_name} — ${f.kind}, uploaded ${new Date(f.uploaded_at).toLocaleDateString()}`);
+  heading("Evidence index");
+  const photoFiles = input.files.filter((file) => file.kind === "photo");
+  if (photoFiles.length === 0) {
+    line("No photo evidence uploaded yet.");
+  } else {
+    const thumbWidth = 40;
+    const thumbHeight = 30;
+    for (let index = 0; index < photoFiles.length; index += 2) {
+      ensureRoom(8);
+      const row = photoFiles.slice(index, index + 2);
+      row.forEach((file, column) => {
+        const x = PAGE_MARGIN + column * 90;
+        const imageY = y;
+        doc.setDrawColor(180);
+        doc.rect(x, imageY, thumbWidth, thumbHeight);
+        if (file.thumbnailDataUrl) {
+          try {
+            doc.addImage(file.thumbnailDataUrl, file.thumbnailFormat ?? "JPEG", x + 1, imageY + 1, thumbWidth - 2, thumbHeight - 2);
+          } catch {
+            doc.setFontSize(8);
+            doc.text("Photo preview", x + 4, imageY + 16);
+          }
+        } else {
+          doc.setFontSize(8);
+          doc.text("Photo preview", x + 4, imageY + 16);
+        }
+        doc.setFontSize(8);
+        const nameLines = doc.splitTextToSize(file.original_name, 36) as string[];
+        let labelY = imageY + thumbHeight + 5;
+        for (const nameLine of nameLines.slice(0, 2)) {
+          doc.text(nameLine, x, labelY);
+          labelY += 4.5;
+        }
+        doc.text(new Date(file.uploaded_at).toLocaleDateString(), x, labelY + 1);
+      });
+      y += thumbHeight + 20;
+    }
+  }
+  y += 4;
+
+  heading("Receipts & documents");
+  const otherFiles = input.files.filter((file) => file.kind !== "photo");
+  if (otherFiles.length === 0) line("No receipts or PDFs uploaded yet.");
+  for (const file of otherFiles) {
+    line(`${file.original_name} — ${file.kind}, uploaded ${new Date(file.uploaded_at).toLocaleDateString()}`);
   }
   y += 4;
 

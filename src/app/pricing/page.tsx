@@ -104,6 +104,9 @@ export default async function PricingPreviewPage() {
         <p className="text-sm text-ink/60 max-w-xl mx-auto mt-2">
           Holomark™ by WholeClaim powers Holomark Claim Grade and Holomark Score.
         </p>
+        <p className="mt-2 text-xs font-mono uppercase tracking-[0.12em] text-ledger">
+          Launched September 2026
+        </p>
       </header>
 
       <FreeVsProTable />
