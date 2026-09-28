@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    "**/.next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
@@ -26,6 +27,8 @@ const eslintConfig = defineConfig([
     // `node generate.js`, never imported by src/, no reason to hold it to
     // the app's ESM/import-style rules.
     "01_Brand/**",
+    // Local side project, not part of the WholeClaim app codebase.
+    "13_PollSite/**",
   ]),
 ]);
 

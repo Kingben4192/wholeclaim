@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
@@ -44,6 +45,7 @@ yarn-error.log*
 # proprietary/confidential reference docs — never committed, never pushed
 /docs/confidential/
 /legal/
+/13_PollSite/
 
 # typescript
 *.tsbuildinfo
