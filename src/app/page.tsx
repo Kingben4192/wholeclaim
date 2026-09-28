@@ -76,7 +76,7 @@ const LEDGER_ENTRIES = [
 
 const FEATURES = [
   {
-    kicker: "Claim Grade",
+    kicker: "Holomark Claim Grade",
     badge: "free" as const,
     title: "Know where your claim file stands",
     body: "Get a quick assessment of your documentation and see what areas you can organize next.",
@@ -197,12 +197,15 @@ export default async function Page() {
         <p className="text-base md:text-lg text-hp-ink-soft max-w-md mx-auto mb-8">
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
+        <p className="text-sm text-hp-ink-soft max-w-xl mx-auto mb-8">
+          Holomark™ by WholeClaim powers our AI grading experience: Holomark Claim Grade and Holomark Score.
+        </p>
         <div className="flex justify-center mb-5">
           <Link
             href="/grade"
             className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
-            Check Your Claim Grade
+            Check Your Holomark Claim Grade
           </Link>
         </div>
         <p className="text-sm text-hp-ink-soft mb-1.5">
@@ -369,8 +372,23 @@ export default async function Page() {
               <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2">
                 Claim overview
               </div>
-              <div className="font-hp-display font-bold text-xl tracking-tight mb-3">
-                Water Damage
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <div className="font-hp-display font-bold text-xl md:text-2xl tracking-tight">
+                    Water Damage
+                  </div>
+                  <span className="inline-block font-mono text-xs font-medium text-hp-pine bg-hp-sage rounded-full px-3 py-1 mt-2">
+                    STATUS · DOCUMENTATION STARTED
+                  </span>
+                </div>
+                <div className="shrink-0 text-center">
+                  <div className="w-[74px] h-[74px] border-[2.5px] border-hp-ink rounded-lg flex items-center justify-center font-hp-display font-extrabold text-3xl">
+                    B+
+                  </div>
+                  <div className="font-mono text-[0.62rem] tracking-wider uppercase text-hp-ink-soft mt-1.5">
+                    Holomark Score
+                  </div>
+                </div>
               </div>
               <div className="space-y-2 text-sm text-hp-ink-soft">
                 <p><span className="font-semibold text-hp-ink">Status:</span> Documentation started</p>
@@ -585,7 +603,7 @@ export default async function Page() {
             href="/grade"
             className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
-            Check Your Claim Grade
+            Check Your Holomark Claim Grade
           </Link>
         </div>
         <p className="text-sm text-hp-ink-soft mb-10">

@@ -101,6 +101,9 @@ export default async function PricingPreviewPage() {
         <p className="text-sm text-ink/60 max-w-xl mx-auto">
           {PRO_LIFETIME_ENABLED ? "Two ways to go Pro." : "Go Pro."}
         </p>
+        <p className="text-sm text-ink/60 max-w-xl mx-auto mt-2">
+          Holomark™ by WholeClaim powers Holomark Claim Grade and Holomark Score.
+        </p>
         <p className="mt-2 text-xs font-mono uppercase tracking-[0.12em] text-ledger">
           Launched September 2026
         </p>
@@ -174,7 +177,7 @@ export default async function PricingPreviewPage() {
          no external service. */}
       <div className="border border-ink/15 rounded-sm p-8 flex flex-col items-center text-center gap-4">
         <h2 className="font-display text-xs font-bold uppercase tracking-[0.1em] text-ink/60">
-          Scan to grade a claim, free
+          Scan to run Holomark Claim Grade, free
         </h2>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

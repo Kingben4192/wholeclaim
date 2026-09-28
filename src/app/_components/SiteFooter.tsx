@@ -6,6 +6,9 @@ const LINKS = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
   { label: "Refund Policy", href: "/refund-policy" },
+  { label: "AI Disclaimer", href: "/ai-disclaimer" },
+  { label: "Help", href: "/help" },
+  { label: "Free Guide", href: "/free-book?p=site-footer" },
 ] as const;
 
 export function SiteFooter() {
@@ -21,6 +24,7 @@ export function SiteFooter() {
             <a href={`mailto:${SUPPORT_EMAIL}`} className="underline underline-offset-2">
               {SUPPORT_EMAIL}
             </a>
+            {" "}· Holomark is a trademark of WholeClaim LLC.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-ledger">
