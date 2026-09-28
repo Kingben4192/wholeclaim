@@ -561,7 +561,7 @@ export default async function Page() {
               Founder note
             </span>
             <p className="font-hp-display text-2xl font-bold tracking-tight mb-4 whitespace-pre-line">
-              I built WholeClaim after going through a property insurance claim of my own. What I learned: a claim often comes down to what you can prove — the dates, the photos, the receipts, who said what and when. WholeClaim is the file I wish I'd started on day one.
+              I built WholeClaim after going through a property insurance claim of my own. What I learned: a claim often comes down to what you can prove — the dates, the photos, the receipts, who said what and when. WholeClaim is the file I wish I&apos;d started on day one.
               {'\n'}— Benjamin, Founder
             </p>
           </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalLayout, PlaceholderNotice } from "../(legal)/LegalLayout";
+import { LegalLayout } from "../(legal)/LegalLayout";
 
 export const metadata: Metadata = { title: "Refund Policy | WholeClaim" };
 
