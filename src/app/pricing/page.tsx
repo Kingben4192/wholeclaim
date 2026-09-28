@@ -101,6 +101,9 @@ export default async function PricingPreviewPage() {
         <p className="text-sm text-ink/60 max-w-xl mx-auto">
           {PRO_LIFETIME_ENABLED ? "Two ways to go Pro." : "Go Pro."}
         </p>
+        <p className="mt-2 text-xs font-mono uppercase tracking-[0.12em] text-ledger">
+          Launched September 2026
+        </p>
       </header>
 
       <FreeVsProTable />

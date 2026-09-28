@@ -3,6 +3,7 @@ import { Archivo, Bricolage_Grotesque, Public_Sans, IBM_Plex_Mono } from "next/f
 import "./globals.css";
 import { ServiceWorkerRegister } from "./ServiceWorkerRegister";
 import { SentryUserSync } from "./SentryUserSync";
+import { SiteFooter } from "./_components/SiteFooter";
 
 const archivo = Archivo({
   variable: "--font-archivo",
@@ -58,7 +59,8 @@ export default function RootLayout({
       className={`${archivo.variable} ${bricolageGrotesque.variable} ${publicSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
-        {children}
+        <div className="flex-1 flex flex-col">{children}</div>
+        <SiteFooter />
         <ServiceWorkerRegister />
         <SentryUserSync />
       </body>

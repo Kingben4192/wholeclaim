@@ -106,10 +106,10 @@ const FEATURES = [
     body: "Follow a simple workflow that helps you build a more complete claim file.",
   },
   {
-    kicker: "Sharing",
-    badge: "planned" as const,
-    title: "Share your organized claim file",
-    body: "Future feature for securely sharing claim information with approved recipients.",
+    kicker: "Claim Binder PDF export",
+    badge: "pro" as const,
+    title: "Export a complete claim binder PDF",
+    body: "One-click PDF export with a cover page, timeline, evidence index, and receipts.",
   },
 ] as const;
 
@@ -145,13 +145,7 @@ const TRUST_ITEMS = [
   },
 ] as const;
 
-const FOOTER_LINKS: [string, string | null][] = [
-  ["Privacy", "/privacy"],
-  ["Terms", "/terms"],
-  ["AI Disclaimer", "/ai-disclaimer"],
-  ["Help", "/help"],
-  ["Free Guide", "/free-book?p=site-footer"],
-];
+const PRICING_LAUNCH_NOTE = "Launched September 2026";
 
 export default async function Page() {
   let isSignedIn = false;
@@ -277,6 +271,9 @@ export default async function Page() {
             <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
               {PRO_LIFETIME_ENABLED ? "Two ways to go Pro." : "Go Pro."}
             </h2>
+            <p className="mt-2 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-hp-pine">
+              {PRICING_LAUNCH_NOTE}
+            </p>
           </div>
 
           <div
@@ -356,7 +353,7 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Example Claim File preview — SAMPLE stamp + caption are mandatory, non-negotiable */}
+      {/* Example Claim File preview — sample data only, no real user content. */}
       <section className="px-6 py-16 bg-hp-paper-deep border-y border-hp-line">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-11">
@@ -364,81 +361,63 @@ export default async function Page() {
               Inside the workspace
             </span>
             <h2 className="font-hp-display text-2xl md:text-3xl font-bold tracking-tight">
-              Everything lives in one claim file
+              Three views of the same claim file
             </h2>
           </div>
-          <div className="max-w-xl mx-auto">
-            <span className="inline-block font-mono text-xs font-semibold uppercase tracking-wider bg-white border border-hp-line border-b-0 rounded-t-lg px-5 py-2 ml-6 relative z-10">
-              Example claim file
-            </span>
-            <div className="relative bg-white border border-hp-line rounded-[10px] p-7 md:p-8 shadow-[0_1px_0_var(--color-hp-line),0_14px_34px_-22px_rgba(20,32,26,0.35)] overflow-hidden">
-              <div
-                aria-hidden
-                className="absolute top-[46%] left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-[14deg] font-mono font-semibold text-4xl md:text-5xl tracking-[0.3em] text-hp-stamp opacity-[0.13] border-4 border-hp-stamp rounded-lg px-7 py-1.5 pointer-events-none whitespace-nowrap"
-              >
-                SAMPLE
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="bg-white border border-hp-line rounded-[10px] p-6 shadow-[0_1px_0_var(--color-hp-line),0_14px_34px_-22px_rgba(20,32,26,0.35)]">
+              <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2">
+                Claim overview
               </div>
-
-              <div className="flex items-start justify-between gap-4 mb-6">
-                <div>
-                  <div className="font-hp-display font-bold text-xl md:text-2xl tracking-tight">
-                    Water Damage
-                  </div>
-                  <span className="inline-block font-mono text-xs font-medium text-hp-pine bg-hp-sage rounded-full px-3 py-1 mt-2">
-                    STATUS · DOCUMENTATION STARTED
-                  </span>
-                </div>
-                <div className="shrink-0 text-center">
-                  <div className="w-[74px] h-[74px] border-[2.5px] border-hp-ink rounded-lg flex items-center justify-center font-hp-display font-extrabold text-3xl">
-                    B+
-                  </div>
-                  <div className="font-mono text-[0.62rem] tracking-wider uppercase text-hp-ink-soft mt-1.5">
-                    Claim Grade
-                  </div>
-                </div>
+              <div className="font-hp-display font-bold text-xl tracking-tight mb-3">
+                Water Damage
               </div>
+              <div className="space-y-2 text-sm text-hp-ink-soft">
+                <p><span className="font-semibold text-hp-ink">Status:</span> Documentation started</p>
+                <p><span className="font-semibold text-hp-ink">Grade:</span> B+</p>
+                <p><span className="font-semibold text-hp-ink">Claim file:</span> 47 photos · 6 documents · 3 receipts</p>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-px bg-hp-line border border-hp-line rounded-lg overflow-hidden mb-6">
+            <div className="bg-white border border-hp-line rounded-[10px] p-6 shadow-[0_1px_0_var(--color-hp-line),0_14px_34px_-22px_rgba(20,32,26,0.35)]">
+              <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2">
+                Evidence grid
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  ["47", "Photos"],
-                  ["6", "Documents"],
-                  ["3", "Receipts"],
-                ].map(([n, label]) => (
-                  <div key={label} className="bg-hp-paper px-4 py-3.5">
-                    <b className="font-hp-display font-extrabold text-xl md:text-2xl tracking-tight block">
-                      {n}
-                    </b>
-                    <span className="font-mono text-[0.66rem] tracking-wider uppercase text-hp-ink-soft">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2.5">
-                Timeline · 12 events added
-              </div>
-              <div className="border border-hp-line rounded-lg overflow-hidden">
-                {LEDGER_ENTRIES.map((entry, i) => (
-                  <div
-                    key={entry.label}
-                    className={`grid grid-cols-[70px_1fr_auto] sm:grid-cols-[78px_1fr_auto] gap-3 items-center px-4 py-2.5 text-sm bg-white ${
-                      i > 0 ? "border-t border-hp-line" : ""
-                    }`}
-                  >
-                    <span className="font-mono text-xs font-semibold tracking-wide text-hp-pine">
-                      {entry.type}
-                    </span>
-                    <span>{entry.label}</span>
-                    <span className="font-mono text-xs text-hp-ink-soft">{entry.date}</span>
+                  "Before photos",
+                  "Mitigation invoice",
+                  "Adjuster email",
+                  "Drying logs",
+                  "Plumber estimate",
+                  "Receipt batch",
+                ].map((item) => (
+                  <div key={item} className="rounded-lg border border-hp-line bg-hp-paper px-3 py-2 text-sm font-medium text-hp-ink">
+                    {item}
                   </div>
                 ))}
               </div>
             </div>
-            <p className="text-center font-mono text-xs text-hp-ink-soft mt-4">
-              Sample data shown for illustration. Your file starts empty — and fills fast.
-            </p>
+
+            <div className="bg-white border border-hp-line rounded-[10px] p-6 shadow-[0_1px_0_var(--color-hp-line),0_14px_34px_-22px_rgba(20,32,26,0.35)]">
+              <div className="font-mono text-[0.66rem] font-semibold tracking-[0.18em] uppercase text-hp-ink-soft mb-2">
+                Timeline
+              </div>
+              <div className="flex flex-col gap-3">
+                {LEDGER_ENTRIES.map((entry) => (
+                  <div key={entry.label} className="border-b border-hp-line pb-2 last:border-b-0 last:pb-0">
+                    <div className="flex items-center justify-between gap-3 text-sm font-medium text-hp-ink mb-0.5">
+                      <span>{entry.type} · {entry.label}</span>
+                      <span className="font-mono text-[0.72rem] text-hp-ink-soft">{entry.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+          <p className="text-center font-mono text-xs text-hp-ink-soft mt-4">
+            Sample data shown for illustration. Your file starts empty — and fills fast.
+          </p>
         </div>
       </section>
 
@@ -458,7 +437,7 @@ export default async function Page() {
               <div
                 key={f.kicker}
                 className={`border border-hp-line rounded-[10px] p-6 flex flex-col gap-2.5 ${
-                  f.badge === "planned" ? "bg-hp-paper" : "bg-white"
+                  f.badge === "free" ? "bg-white" : "bg-hp-paper"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2.5">
@@ -469,10 +448,10 @@ export default async function Page() {
                     className={`font-mono text-[0.6rem] font-semibold uppercase tracking-wider rounded-full px-2.5 py-1 ${
                       f.badge === "free"
                         ? "bg-hp-sage text-hp-pine"
-                        : "border border-hp-line text-hp-ink-soft"
+                        : "bg-hp-pine text-white"
                     }`}
                   >
-                    {f.badge === "free" ? "Free" : "Planned"}
+                    {f.badge === "free" ? "Free" : "Pro"}
                   </span>
                 </div>
                 <h3 className="font-hp-display font-bold text-[1.08rem] tracking-tight">
@@ -543,6 +522,52 @@ export default async function Page() {
         </div>
       </section>
 
+      {/* Security block */}
+      <section className="px-6 py-16">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-white border border-hp-line rounded-[10px] p-6">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              Where your files live
+            </span>
+            <h2 className="font-hp-display text-2xl font-bold tracking-tight mb-4">
+              Private storage, owner-only access, signed file delivery
+            </h2>
+            <ul className="space-y-3 text-sm text-hp-ink-soft leading-relaxed">
+              <li className="flex gap-3">
+                <Lock size={16} className="mt-0.5 shrink-0 text-hp-pine" />
+                <span>Evidence files live in a private Supabase bucket named <span className="font-semibold text-hp-ink">evidence</span>, not a public bucket.</span>
+              </li>
+              <li className="flex gap-3">
+                <FolderOpen size={16} className="mt-0.5 shrink-0 text-hp-pine" />
+                <span>Storage policies only allow the owning user to select, insert, and delete evidence objects.</span>
+              </li>
+              <li className="flex gap-3">
+                <Download size={16} className="mt-0.5 shrink-0 text-hp-pine" />
+                <span>Claim pages render private files with expiring signed URLs instead of a public file bucket.</span>
+              </li>
+              <li className="flex gap-3">
+                <Clock3 size={16} className="mt-0.5 shrink-0 text-hp-pine" />
+                <span>Claim, entry, deadline, evidence, and file tables run under row-level security and claim-ownership checks.</span>
+              </li>
+              <li className="flex gap-3">
+                <Clock3 size={16} className="mt-0.5 shrink-0 text-hp-pine" />
+                <span>The live site is hosted on Vercel and served over HTTPS.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-hp-paper-deep border border-hp-line rounded-[10px] p-6">
+            <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
+              Founder note
+            </span>
+            <p className="font-hp-display text-2xl font-bold tracking-tight mb-4 whitespace-pre-line">
+              I built WholeClaim after going through a property insurance claim of my own. What I learned: a claim often comes down to what you can prove — the dates, the photos, the receipts, who said what and when. WholeClaim is the file I wish I&apos;d started on day one.
+              {'\n'}— Benjamin, Founder
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="px-6 py-20 text-center">
         <span className="block font-mono text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-hp-ink-soft mb-3">
@@ -587,32 +612,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-hp-line py-9 bg-hp-paper-deep">
-        <div className="max-w-4xl mx-auto px-6 flex flex-wrap gap-4 items-baseline justify-between">
-          <span className="font-display font-extrabold uppercase tracking-[0.06em] text-sm">
-            Whole<span className="text-ledger">Claim</span>
-          </span>
-          <small className="font-mono text-xs text-hp-ink-soft leading-relaxed max-w-xl">
-            getwholeclaim.com · WholeClaim helps organize documentation. It does not provide
-            insurance advice, guarantee claim approval, or determine claim outcomes. © 2026
-            WholeClaim.
-            <span className="mx-1" />
-            {FOOTER_LINKS.map(([label, href], i) => (
-              <span key={label}>
-                {i === 0 ? " · " : " · "}
-                {href ? (
-                  <Link href={href} className="underline">
-                    {label}
-                  </Link>
-                ) : (
-                  label
-                )}
-              </span>
-            ))}
-          </small>
-        </div>
-      </footer>
     </main>
   );
 }
