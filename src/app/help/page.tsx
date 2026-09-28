@@ -30,8 +30,8 @@ const FAQS: { q: string; a: string }[] = [
     a: "No. Claim decisions are made by insurance companies, government agencies, contractors, or other third parties. WholeClaim does not control or predict those decisions.",
   },
   {
-    q: "What is Claim Grade?",
-    a: "Claim Grade is WholeClaim's documentation completeness assessment. It evaluates how organized and complete your claim file is based on information entered into WholeClaim. It is not a prediction of claim approval, settlement amount, or outcome.",
+    q: "What is Holomark Claim Grade?",
+    a: "Holomark Claim Grade is WholeClaim's documentation completeness assessment. It evaluates how organized and complete your claim file is based on information entered into WholeClaim. The resulting Holomark Score is not a prediction of claim approval, settlement amount, or outcome.",
   },
   {
     q: "Can I export my claim file?",
@@ -53,12 +53,12 @@ const GUIDES: { title: string; steps?: string[]; body?: string }[] = [
     ],
   },
   {
-    title: "How to use Claim Grade",
+    title: "How to use Holomark Claim Grade",
     steps: [
       "Add your claim information.",
       "Upload relevant documentation.",
       "Complete the recommended documentation steps.",
-      "Review your documentation grade.",
+      "Review your Holomark Score.",
       "Identify missing records.",
     ],
   },
@@ -113,6 +113,10 @@ export default async function HelpPage() {
           Help &amp; Support
         </h1>
 
+        <p className="text-sm text-ink/70 leading-relaxed mb-6">
+          Holomark™ by WholeClaim powers Holomark Claim Grade and Holomark Score.
+        </p>
+
         <div className="border-2 border-ledger bg-ledger/10 rounded-sm px-4 py-3 text-sm text-ink mb-12">
           {DISCLAIMER}
         </div>
@@ -154,7 +158,7 @@ export default async function HelpPage() {
             <div className="border border-ink/15 rounded-sm px-4 py-4">
               <p className="font-display font-bold text-sm mb-2">Billing &amp; Upgrades</p>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
-                The free plan includes the Binder &amp; Claim Grade, up to 25 Evidence Vault
+                The free plan includes the Binder &amp; Holomark Claim Grade, up to 25 Evidence Vault
                 uploads per claim (500MB per claim, 2GB per account), the Deadline Tracker,
                 and 1 active claim per dispute category.
               </p>

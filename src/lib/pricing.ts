@@ -36,7 +36,7 @@ export const PRO_LIFETIME = {
 // tools themselves are unchanged by this fix and remain fully live in
 // the product; only this pricing-page listing is affected.
 export const FEATURE_COMPARISON: { feature: string; free: string; pro: string }[] = [
-  { feature: "The Binder & Claim Grade", free: "Included", pro: "Included" },
+  { feature: "The Binder & Holomark Claim Grade", free: "Included", pro: "Included" },
   { feature: "Evidence Vault uploads", free: "Up to 25 files per claim", pro: "Unlimited" },
   { feature: "Storage", free: "500MB per claim, 2GB per account", pro: "10GB per account" },
   { feature: "Deadline Tracker", free: "Included", pro: "Included" },

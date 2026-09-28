@@ -76,7 +76,7 @@ const LEDGER_ENTRIES = [
 
 const FEATURES = [
   {
-    kicker: "Claim Grade",
+    kicker: "Holomark Claim Grade",
     badge: "free" as const,
     title: "Know where your claim file stands",
     body: "Get a quick assessment of your documentation and see what areas you can organize next.",
@@ -203,12 +203,15 @@ export default async function Page() {
         <p className="text-base md:text-lg text-hp-ink-soft max-w-md mx-auto mb-8">
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
+        <p className="text-sm text-hp-ink-soft max-w-xl mx-auto mb-8">
+          Holomark™ by WholeClaim powers our AI grading experience: Holomark Claim Grade and Holomark Score.
+        </p>
         <div className="flex justify-center mb-5">
           <Link
             href="/grade"
             className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
-            Check Your Claim Grade
+            Check Your Holomark Claim Grade
           </Link>
         </div>
         <p className="text-sm text-hp-ink-soft mb-1.5">
@@ -393,7 +396,7 @@ export default async function Page() {
                     B+
                   </div>
                   <div className="font-mono text-[0.62rem] tracking-wider uppercase text-hp-ink-soft mt-1.5">
-                    Claim Grade
+                    Holomark Score
                   </div>
                 </div>
               </div>
@@ -560,7 +563,7 @@ export default async function Page() {
             href="/grade"
             className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-6 py-3.5 rounded-[10px] font-bold text-sm transition-colors"
           >
-            Check Your Claim Grade
+            Check Your Holomark Claim Grade
           </Link>
         </div>
         <p className="text-sm text-hp-ink-soft mb-10">
@@ -596,7 +599,7 @@ export default async function Page() {
           <small className="font-mono text-xs text-hp-ink-soft leading-relaxed max-w-xl">
             getwholeclaim.com · WholeClaim helps organize documentation. It does not provide
             insurance advice, guarantee claim approval, or determine claim outcomes. © 2026
-            WholeClaim.
+            WholeClaim. Holomark is a trademark of WholeClaim LLC.
             <span className="mx-1" />
             {FOOTER_LINKS.map(([label, href], i) => (
               <span key={label}>
