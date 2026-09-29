@@ -143,6 +143,9 @@ export default async function PricingPreviewPage() {
             <p className="text-sm text-ink/60 flex-1">
               {PRO_SUBSCRIPTION.description}
             </p>
+            <p className="text-xs text-ink/50">
+              Renews monthly until canceled. Cancel anytime in account settings.
+            </p>
             <Link
               href="/login"
               className="inline-flex items-center justify-center bg-ledger text-paper px-4 py-3 rounded-sm font-semibold text-sm"
