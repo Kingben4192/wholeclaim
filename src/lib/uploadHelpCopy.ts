@@ -3,23 +3,15 @@
 // (UploadHelp.tsx) and /help's FAQ list, so the two surfaces can't drift
 // out of sync.
 //
-// IMPORTANT: this copy describes the 25-file-per-claim cap ONLY -- the
-// actual, currently-shipped limit (FREE_UPLOAD_LIMIT_PER_CLAIM,
-// src/lib/uploadLimits.ts). Decisions #52 (soft delete frees a count slot,
-// bytes only free on hard purge) and #55 (500MB per-claim / 2GB
-// per-account byte limits, storage_status enum) are both explicitly
-// "policy only, nothing built" as of 2026-07-26 -- no soft-delete flag,
-// no byte tracking, no account-level ceiling exist anywhere in the schema
-// or code today. This copy MUST be rewritten when #52 and/or #55 actually
-// ship: question 2's answer changes once deletion stops being an
-// immediate hard delete, and question 3 should be replaced with a real
-// per-claim-vs-per-account explanation once an account ceiling exists to
-// explain.
+// File-count and byte limits below match src/lib/uploadLimits.ts and the
+// upload gate in src/lib/uploadGate.ts. Deleting a file is a hard delete
+// (src/app/claim/actions.ts deleteFile) and frees both a count slot and
+// the stored bytes.
 
 export const UPLOAD_HELP_ITEMS: { q: string; a: string }[] = [
   {
     q: "Why can't I upload?",
-    a: "Free accounts include 25 uploaded files per claim. You've reached that limit for this claim — upgrade to Pro for unlimited uploads, or delete a file you no longer need to make room.",
+    a: "Free accounts include 25 uploaded files per claim, 500MB of storage per claim, and 2GB per account. Each file also has to be 15MB or smaller, and it has to be a photo or a supported document (PDF, Word, Excel, text, or CSV). Videos are not accepted. Upgrade to Pro for unlimited file count and 10GB of storage per account, or delete a file you no longer need.",
   },
   {
     q: "Does deleting a file free up space?",

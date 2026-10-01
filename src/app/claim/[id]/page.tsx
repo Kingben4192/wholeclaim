@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -259,7 +260,16 @@ export default async function ClaimDetailPage({
           />
         </div>
         <div className="mt-3">
-          <ClaimBinderExportButton claimId={id} />
+          {isPro ? (
+            <ClaimBinderExportButton claimId={id} />
+          ) : (
+            <p className="text-sm text-ink/70">
+              Claim Binder PDF export is included with Pro.{" "}
+              <Link href="/pricing" className="font-semibold text-ledger">
+                See pricing
+              </Link>
+            </p>
+          )}
         </div>
       </header>
 

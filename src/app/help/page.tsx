@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
+import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UPLOAD_HELP_ITEMS } from "@/lib/uploadHelpCopy";
@@ -163,7 +164,9 @@ export default async function HelpPage() {
                 and 1 active claim per dispute category.
               </p>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
-                WholeClaim Pro is available two ways:
+                {PRO_LIFETIME_ENABLED
+                  ? "WholeClaim Pro is available two ways:"
+                  : "WholeClaim Pro is a monthly subscription:"}
               </p>
               <ul className="text-sm text-ink/70 leading-relaxed flex flex-col gap-1 mb-3">
                 <li>
@@ -171,18 +174,20 @@ export default async function HelpPage() {
                     {PRO_SUBSCRIPTION.priceAmount}
                     {PRO_SUBSCRIPTION.pricePeriod}
                   </span>{" "}
-                  — {PRO_SUBSCRIPTION.description}
+                  — {PRO_SUBSCRIPTION.description} Storage on Pro is 10GB per account.
                 </li>
-                <li>
-                  <span className="font-mono font-bold text-ink">
-                    {PRO_LIFETIME.priceAmount}
-                    {PRO_LIFETIME.pricePeriod}
-                  </span>{" "}
-                  — {PRO_LIFETIME.description}
-                </li>
+                {PRO_LIFETIME_ENABLED && (
+                  <li>
+                    <span className="font-mono font-bold text-ink">
+                      {PRO_LIFETIME.priceAmount}
+                      {PRO_LIFETIME.pricePeriod}
+                    </span>{" "}
+                    — {PRO_LIFETIME.description}
+                  </li>
+                )}
               </ul>
               <p className="text-sm text-ink/70 leading-relaxed mb-3">
-                Pro unlocks unlimited Evidence Vault uploads, the Claim Binder PDF export,
+                Pro unlocks unlimited Evidence Vault file count, up to 10GB of storage per account, the Claim Binder PDF export,
                 and the Loss-of-Use Tracker. You can review or change your plan any time from{" "}
                 <Link href="/pricing" className="text-ledger font-semibold">
                   the pricing page

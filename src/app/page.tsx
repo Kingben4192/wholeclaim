@@ -121,7 +121,7 @@ const FEATURES: {
 ];
 
 const NEED_ITEMS = [
-  "Photos and short videos (up to 15MB each)",
+  "Photos and documents (up to 15MB each)",
   "Repair estimates",
   "Receipts",
   "Emails & text messages",
@@ -205,7 +205,7 @@ export default async function Page() {
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
         <p className="text-sm text-hp-ink-soft max-w-xl mx-auto mb-8">
-          Holomark™ by WholeClaim powers our AI grading experience: Holomark Claim Grade and Holomark Score.
+          Holomark™ Claim Grade and Holomark Score measure how complete and organized your documentation is. The same answers always produce the same score. They are not a prediction of whether or how much an insurer will pay.
         </p>
         <div className="flex justify-center mb-5">
           <Link
