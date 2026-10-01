@@ -74,12 +74,19 @@ const LEDGER_ENTRIES = [
   { type: "CALL", label: "Plumber estimate received", date: "2026-07-12" },
 ] as const;
 
-const FEATURES = [
+const FEATURES: {
+  kicker: string;
+  badge: "free" | "pro";
+  title: string;
+  body: string;
+  note?: string;
+}[] = [
   {
     kicker: "Holomark Claim Grade",
     badge: "free" as const,
     title: "Know where your claim file stands",
     body: "Get a quick assessment of your documentation and see what areas you can organize next.",
+    note: "The grade reflects how complete and organized your documentation is. It is not a prediction of whether or how much an insurer will pay.",
   },
   {
     kicker: "Claim Binder",
@@ -111,10 +118,10 @@ const FEATURES = [
     title: "Export a complete claim binder PDF",
     body: "One-click PDF export with a cover page, timeline, evidence index, and receipts.",
   },
-] as const;
+];
 
 const NEED_ITEMS = [
-  "Photos & videos",
+  "Photos and documents (up to 15MB each)",
   "Repair estimates",
   "Receipts",
   "Emails & text messages",
@@ -198,7 +205,7 @@ export default async function Page() {
           Store photos, documents, timelines, and conversations in one secure claim file.
         </p>
         <p className="text-sm text-hp-ink-soft max-w-xl mx-auto mb-8">
-          Holomark™ by WholeClaim powers our AI grading experience: Holomark Claim Grade and Holomark Score.
+          Holomark™ Claim Grade and Holomark Score measure how complete and organized your documentation is. The same answers always produce the same score. They are not a prediction of whether or how much an insurer will pay.
         </p>
         <div className="flex justify-center mb-5">
           <Link
@@ -393,7 +400,7 @@ export default async function Page() {
               <div className="space-y-2 text-sm text-hp-ink-soft">
                 <p><span className="font-semibold text-hp-ink">Status:</span> Documentation started</p>
                 <p><span className="font-semibold text-hp-ink">Grade:</span> B+</p>
-                <p><span className="font-semibold text-hp-ink">Claim file:</span> 47 photos · 6 documents · 3 receipts</p>
+                <p><span className="font-semibold text-hp-ink">Claim file:</span> 16 photos · 6 documents · 3 receipts</p>
               </div>
             </div>
 
@@ -476,6 +483,7 @@ export default async function Page() {
                   {f.title}
                 </h3>
                 <p className="text-sm text-hp-ink-soft">{f.body}</p>
+                {f.note && <p className="text-xs text-hp-ink-soft/80">{f.note}</p>}
               </div>
             ))}
           </div>
@@ -548,28 +556,28 @@ export default async function Page() {
               Where your files live
             </span>
             <h2 className="font-hp-display text-2xl font-bold tracking-tight mb-4">
-              Private storage, owner-only access, signed file delivery
+              Private storage. Only you can get to your files.
             </h2>
             <ul className="space-y-3 text-sm text-hp-ink-soft leading-relaxed">
               <li className="flex gap-3">
                 <Lock size={16} className="mt-0.5 shrink-0 text-hp-pine" />
-                <span>Evidence files live in a private Supabase bucket named <span className="font-semibold text-hp-ink">evidence</span>, not a public bucket.</span>
+                <span>The photos and documents you upload are stored privately, not published anywhere public.</span>
               </li>
               <li className="flex gap-3">
                 <FolderOpen size={16} className="mt-0.5 shrink-0 text-hp-pine" />
-                <span>Storage policies only allow the owning user to select, insert, and delete evidence objects.</span>
+                <span>Only your account can view, add, or delete the files in your claim.</span>
               </li>
               <li className="flex gap-3">
                 <Download size={16} className="mt-0.5 shrink-0 text-hp-pine" />
-                <span>Claim pages render private files with expiring signed URLs instead of a public file bucket.</span>
+                <span>When you open a file from your claim, you get a temporary link that expires on its own, not a permanent public one.</span>
               </li>
               <li className="flex gap-3">
                 <Clock3 size={16} className="mt-0.5 shrink-0 text-hp-pine" />
-                <span>Claim, entry, deadline, evidence, and file tables run under row-level security and claim-ownership checks.</span>
+                <span>Every part of your claim file — entries, deadlines, evidence, and file records — is restricted to your account only.</span>
               </li>
               <li className="flex gap-3">
                 <Clock3 size={16} className="mt-0.5 shrink-0 text-hp-pine" />
-                <span>The live site is hosted on Vercel and served over HTTPS.</span>
+                <span>The site is hosted on Vercel and served over HTTPS, so your connection is encrypted.</span>
               </li>
             </ul>
           </div>
@@ -580,7 +588,7 @@ export default async function Page() {
             </span>
             <p className="font-hp-display text-2xl font-bold tracking-tight mb-4 whitespace-pre-line">
               I built WholeClaim after going through a property insurance claim of my own. What I learned: a claim often comes down to what you can prove — the dates, the photos, the receipts, who said what and when. WholeClaim is the file I wish I&apos;d started on day one.
-              {'\n'}— Benjamin, Founder
+              {'\n'}— Benjamin Hammonds, Founder, WholeClaim LLC
             </p>
           </div>
         </div>

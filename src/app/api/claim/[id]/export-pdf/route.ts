@@ -4,6 +4,7 @@ import { computeDocumentationScore, toClientView } from "@/lib/scoring/documenta
 import { filesForScoring } from "@/lib/scoringFileFilter";
 import { getClaimDisplayTitle } from "@/lib/claimDisplay";
 import { buildClaimBinderPdf } from "@/lib/pdf/claimBinder";
+import { isPro } from "@/lib/entitlements";
 
 // Per-claim binder PDF (Claim Grade A-Action-Center, approved 2026-08-01).
 // User-session-scoped, not the service-role client -- same pattern as
@@ -32,6 +33,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
   if (!claim) {
     return NextResponse.json({ error: "Claim not found." }, { status: 404 });
+  }
+
+  // Pricing lists Claim Binder PDF export as Pro-only. The button is hidden
+  // for free accounts; this is the check a direct request cannot skip.
+  const pro = await isPro(supabase, id, user.id);
+  if (!pro) {
+    return NextResponse.json(
+      { error: "Claim Binder PDF export is a Pro feature." },
+      { status: 403 },
+    );
   }
 
   const [{ data: entries }, { data: deadlines }, { data: evidenceItems }, { data: files }, { data: promisedItems }] =
