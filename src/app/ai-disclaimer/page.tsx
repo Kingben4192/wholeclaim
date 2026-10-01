@@ -23,10 +23,10 @@ export default function AIDisclaimerPage() {
         Every score and grade WholeClaim shows you — including the WholeClaim
         Documentation Score and Claim Grade — is computed deterministically by fixed
         rules, not by AI. The same inputs always produce the same score, and
-        every component is explained with its points and maximum. AI is used
-        only to write plain-English explanations, letter drafts, and
-        breakdowns from information already in your file or your answers —
-        never to decide a score, a grade, or a coverage conclusion.
+        every component is explained with its points and maximum. Plain-English
+        explanations, letter drafts, and other AI writing tools are not
+        currently available. They are not used to decide a score, a grade, or
+        a coverage conclusion.
       </p>
       <p>
         Every AI-assisted output is something you review before you rely on
