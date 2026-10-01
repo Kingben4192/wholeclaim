@@ -51,8 +51,15 @@ export default function AuthCallbackPage() {
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
-          setError("This sign-in link has expired. Enter the code from your email or request a new link.");
-          return;
+          // A session here means this code was already exchanged successfully.
+          // Do not treat that as a failed login.
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (!session) {
+            setError("This sign-in link has expired. Enter the code from your email or request a new link.");
+            return;
+          }
         }
         window.location.assign(next);
         return;
