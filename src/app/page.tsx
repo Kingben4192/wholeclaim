@@ -10,6 +10,7 @@ import { PRO_SUBSCRIPTION, PRO_LIFETIME, FEATURE_COMPARISON } from "@/lib/pricin
 import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { HomeSubscribeButton } from "./_components/HomeSubscribeButton";
 
 // Page-level override of layout.tsx's shared default metadata -- scoped to
 // "/" only, same pattern as /free-book's own metadata export. Editing
@@ -291,12 +292,19 @@ export default async function Page() {
                 </span>
               </div>
               <p className="text-sm text-hp-ink-soft flex-1">{PRO_SUBSCRIPTION.description}</p>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
-              >
-                Sign in to subscribe
-              </Link>
+              <p className="text-xs text-hp-ink-soft">
+                Renews monthly until canceled. Cancel anytime in account settings.
+              </p>
+              {isSignedIn ? (
+                <HomeSubscribeButton />
+              ) : (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center bg-hp-pine hover:bg-hp-pine-deep text-white px-4 py-3 rounded-[10px] font-bold text-sm transition-colors"
+                >
+                  Sign in to subscribe
+                </Link>
+              )}
             </div>
 
             {PRO_LIFETIME_ENABLED && (

@@ -72,6 +72,9 @@ export function UpgradeOptions({
           <p className="text-xs text-ink/60 flex-1">
             {PRO_SUBSCRIPTION.description}
           </p>
+          <p className="text-xs text-ink/40">
+            Renews monthly until canceled. Cancel anytime in account settings.
+          </p>
           <button
             type="button"
             onClick={() => startCheckout("subscription")}
