@@ -5,7 +5,6 @@ const SUPPORT_EMAIL = "support@getwholeclaim.com";
 const LINKS = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
-  { label: "Cookies", href: "/cookies" },
   { label: "Refund Policy", href: "/refund-policy" },
   { label: "AI Disclaimer", href: "/ai-disclaimer" },
   { label: "Help", href: "/help" },
