@@ -25,7 +25,7 @@ import { FreeVsProTable } from "./FreeVsProTable";
 //   1 claim   -> that claim's detail page directly
 //   2+ claims -> /claim (pick one, then continue from its detail page)
 
-const QR_TARGET = `${process.env.NEXT_PUBLIC_APP_URL || "https://wholeclaim.vercel.app"}/grade`;
+const QR_TARGET = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.getwholeclaim.com"}/grade`;
 
 export default async function PricingPreviewPage() {
   const qrDataUrl = await QRCode.toDataURL(QR_TARGET, {
