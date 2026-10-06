@@ -37,8 +37,11 @@ export function LoginForm() {
         <h1 className="font-display text-2xl font-extrabold mb-2 text-center">
           Back to the file
         </h1>
-        <p className="text-sm text-ink/60 mb-4 text-center">
+        <p className="text-sm text-ink/60 mb-2 text-center">
           Email me a sign-in link
+        </p>
+        <p className="text-xs text-ink/50 mb-4 text-center">
+          There is no password. A new sign-in email is how you get back in.
         </p>
 
         {/* Decision #68 -- free user conversion banner. Copy as specified:
@@ -60,7 +63,11 @@ export function LoginForm() {
               </p>
               <form action={verifyAction} className="flex flex-col gap-3">
                 <input type="hidden" name="email" value={submittedEmail} />
+                <label htmlFor="sent-code" className="text-xs font-semibold text-center">
+                  Sign-in code
+                </label>
                 <input
+                  id="sent-code"
                   type="text"
                   name="token"
                   required
@@ -96,10 +103,15 @@ export function LoginForm() {
         ) : (
           <>
             <form action={sendAction} className="flex flex-col gap-3">
+              <label htmlFor="login-email" className="text-xs font-semibold">
+                Email
+              </label>
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 required
+                autoComplete="email"
                 placeholder="you@example.com"
                 className="w-full text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white focus:outline-none focus:ring-2 focus:ring-ledger"
               />
@@ -123,14 +135,23 @@ export function LoginForm() {
                   Enter the email and code from a sign-in email you already
                   received.
                 </p>
+                <label htmlFor="code-email" className="text-xs font-semibold">
+                  Email
+                </label>
                 <input
+                  id="code-email"
                   type="email"
                   name="email"
                   required
+                  autoComplete="email"
                   placeholder="you@example.com"
                   className="w-full text-sm px-3 py-2 rounded-sm border border-ink/20 bg-white focus:outline-none focus:ring-2 focus:ring-ledger"
                 />
+                <label htmlFor="login-code" className="text-xs font-semibold">
+                  Sign-in code
+                </label>
                 <input
+                  id="login-code"
                   type="text"
                   name="token"
                   required

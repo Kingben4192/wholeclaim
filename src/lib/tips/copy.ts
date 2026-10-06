@@ -52,7 +52,7 @@ Continue building your file: ${claimFileLink}
     body: ({ name, claimFileLink, unsubscribeLink }) => `${name}, today's tip is short: what does "thorough documentation" actually mean for a property claim?
 
 At minimum, a complete file usually includes:
-- Photos and video of the damage, before and during repairs
+- Photos of the damage, before and during repairs. If you also recorded video, keep those files with your own records. WholeClaim does not accept video uploads.
 - Your policy documents — declarations page, forms, endorsements
 - Every estimate you've received, from your carrier and from any contractor
 - Receipts and invoices for anything you've paid for already

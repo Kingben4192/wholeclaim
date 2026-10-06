@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: "Sign in first." }, { status: 401 });
   }
 
-  const [profile, claims, entries, deadlines, evidenceItems, files, promisedItems, leads] = await Promise.all([
+  const [profile, claims, entries, deadlines, evidenceItems, files, promisedItems, lossOfUse, leads] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("claims").select("*").eq("user_id", user.id),
     supabase.from("entries").select("*").eq("user_id", user.id),
@@ -22,6 +22,7 @@ export async function GET() {
     supabase.from("evidence_items").select("*").eq("user_id", user.id),
     supabase.from("files").select("*").eq("user_id", user.id),
     supabase.from("promised_items").select("*").eq("user_id", user.id),
+    supabase.from("loss_of_use_expenses").select("*").eq("user_id", user.id),
     user.email
       ? supabase.from("leads").select("*").ilike("email", user.email)
       : Promise.resolve({ data: [] as unknown[] }),
@@ -40,6 +41,7 @@ export async function GET() {
         evidence_items: evidenceItems.data,
         files: files.data,
         promised_items: promisedItems.data,
+        loss_of_use_expenses: lossOfUse.data,
         grader_leads: leads.data,
       },
       null,
@@ -53,7 +55,7 @@ export async function GET() {
       .from("evidence")
       .download(file.storage_path);
     if (blob) {
-      filesFolder?.file(file.original_name, await blob.arrayBuffer());
+      filesFolder?.file(`${file.id}-${file.original_name}`, await blob.arrayBuffer());
     }
   }
 

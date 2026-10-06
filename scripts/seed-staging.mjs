@@ -191,7 +191,7 @@ async function main() {
       us_state: "GA",
       baseline_grade: "C",
     });
-    await addEvidenceItem(userId, claimId, "Damage photos / video", "evidence_coverage", { checked: true });
+    await addEvidenceItem(userId, claimId, "Damage photos (video files are not uploaded)", "evidence_coverage", { checked: true });
     await addEvidenceItem(userId, claimId, "Written contact log (calls & emails)", "documentation_completeness", { checked: false });
     await admin.from("leads").insert({
       name: "Frank Fromgrader",

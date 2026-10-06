@@ -36,7 +36,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "WholeClaim — The Insurance Claim Workspace for Homeowners",
   description:
-    "WholeClaim turns scattered photos, letters, and phone calls into an organized, deadline-tracked claim file — with AI analysis you review and control.",
+    "WholeClaim turns scattered photos, letters, and phone calls into an organized, deadline-tracked claim file.",
   appleWebApp: {
     capable: true,
     title: "WholeClaim",

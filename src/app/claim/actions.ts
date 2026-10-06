@@ -711,14 +711,17 @@ export async function deleteFile(
   // its owner) rather than a fresh auth.getUser() call.
   const { data: fileRow, error: fetchError } = await supabase
     .from("files")
-    .select("size_bytes, user_id")
+    .select("size_bytes, user_id, storage_path, claim_id")
     .eq("id", fileId)
+    .eq("claim_id", claimId)
     .single();
-  if (fetchError || !fileRow) throw new Error("Could not find that file.");
+  if (fetchError || !fileRow || fileRow.storage_path !== storagePath) {
+    throw new Error("Could not find that file.");
+  }
 
   const { error: storageError } = await supabase.storage
     .from("evidence")
-    .remove([storagePath]);
+    .remove([fileRow.storage_path]);
   if (storageError) throw new Error(storageError.message);
 
   const { error } = await supabase.from("files").delete().eq("id", fileId);

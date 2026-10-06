@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       await supabase.from("evidence_items").insert({
         claim_id: claimId,
         user_id: user.id,
-        label: "Damage photos / video",
+        label: "Damage photos (video files are not uploaded)",
         checked: photosChoice === 0,
         category: "evidence_coverage",
       });

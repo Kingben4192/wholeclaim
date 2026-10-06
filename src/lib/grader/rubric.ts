@@ -49,7 +49,7 @@ export const QUESTIONS: GraderQuestion[] = [
   {
     id: "photos",
     cat: "Evidence",
-    q: "Did you photograph or video the damage before anything was repaired or cleaned up?",
+    q: "Did you photograph the damage before anything was repaired or cleaned up? If you also recorded video, that still counts as documentation you have. WholeClaim does not accept video files.",
     opts: [
       { t: "Yes — thorough, every room and angle", pts: 20 },
       { t: "Some photos, not systematic", pts: 10 },
