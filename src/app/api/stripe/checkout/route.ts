@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isStripeConfigured, getStripeClient } from "@/lib/stripe/client";
 import { isPro, SUBSCRIPTION_STATUSES_GRANTING_PRO } from "@/lib/entitlements";
@@ -23,7 +24,6 @@ type CheckoutBody = {
 };
 
 async function resolveStripeCustomer(
-  supabase: Awaited<ReturnType<typeof createClient>>,
   stripe: Stripe,
   userId: string,
   userEmail: string | undefined,
@@ -36,7 +36,10 @@ async function resolveStripeCustomer(
     metadata: { user_id: userId },
   });
 
-  const { error } = await supabase
+  // stripe_customer_id is server-only (migration 0035): the user's own
+  // client can't write it, so this goes through the service role. userId
+  // comes from the verified session in POST, so it's still the caller's row.
+  const { error } = await getAdminClient()
     .from("profiles")
     .update({ stripe_customer_id: customer.id })
     .eq("id", userId);
@@ -99,7 +102,6 @@ export async function POST(request: NextRequest) {
 
     try {
       const customerId = await resolveStripeCustomer(
-        supabase,
         stripe,
         user.id,
         user.email,
@@ -171,7 +173,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const customerId = await resolveStripeCustomer(
-      supabase,
       stripe,
       user.id,
       user.email,
