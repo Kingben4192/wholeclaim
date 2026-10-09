@@ -1,7 +1,7 @@
 // Server-side upload validation (security review, 2026-07-24): the
 // `accept=""` attribute on the upload <input> is a client-side hint only
 // and doesn't stop a crafted request from reaching claim/actions.ts's
-// uploadFile server action, so the allow/deny decision has to be made
+// upload server actions (prepare/finalizeEvidenceUpload), so the allow/deny decision has to be made
 // here, not just in the browser. Checked two ways: the reported MIME type
 // must match a known-safe type, AND the filename's extension must not be
 // one of the block-listed executable/script types — either the MIME type

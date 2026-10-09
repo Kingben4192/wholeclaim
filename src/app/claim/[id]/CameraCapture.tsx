@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Camera, FolderOpen, X, Loader2 } from "lucide-react";
-import { uploadFile } from "@/app/claim/actions";
+import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface PendingCapture {
@@ -50,7 +50,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
 
   // Fix (2026-08-04): the previous version wrapped the whole loop in one
   // try/catch -- a single failure (wrong file type, oversized, storage
-  // limit reached, all of which uploadFile already reports with a real,
+  // limit reached, all of which uploadEvidenceFile already reports with a real,
   // specific message) stopped the loop immediately, silently abandoning
   // every file after it, and collapsed whatever happened into one generic
   // "Some photos failed to upload." It also never cleared already-
@@ -69,15 +69,15 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
     const failedMessages: string[] = [];
 
     for (const item of pending) {
-      try {
-        const formData = new FormData();
-        formData.append("file", item.file);
-        if (evidenceStage) formData.append("evidence_stage", evidenceStage);
-        await uploadFile(claimId, evidenceItemId ?? null, formData);
+      const result = await uploadEvidenceFile(item.file, {
+        claimId,
+        evidenceItemId,
+        evidenceStage,
+      });
+      if (result.ok) {
         succeededIds.push(item.id);
-      } catch (err) {
-        console.error("Photo upload failed:", err);
-        failedMessages.push(err instanceof Error ? err.message : "Upload failed.");
+      } else {
+        failedMessages.push(`${item.file.name}: ${result.error}`);
       }
     }
 

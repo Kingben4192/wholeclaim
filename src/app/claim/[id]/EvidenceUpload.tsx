@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Paperclip, Loader2 } from "lucide-react";
-import { uploadFile } from "../actions";
+import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface EvidenceUploadProps {
@@ -18,10 +18,6 @@ interface EvidenceUploadProps {
   variant?: "inline" | "block";
 }
 
-// Matches the server action's own cap (src/app/claim/actions.ts) — checked
-// here too so oversized files fail fast without a round trip.
-const MAX_FILE_BYTES = 15 * 1024 * 1024;
-
 export function EvidenceUpload({
   claimId,
   evidenceItemId,
@@ -36,23 +32,20 @@ export function EvidenceUpload({
   const handleFile = useCallback(
     async (file: File) => {
       setError(null);
-
-      if (file.size > MAX_FILE_BYTES) {
-        setError("File is larger than 15MB.");
-        return;
-      }
-
       setUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (evidenceStage) formData.append("evidence_stage", evidenceStage);
-        await uploadFile(claimId, evidenceItemId ?? null, formData, promisedItemId ?? null);
+      // Size, type and limit checks (and their plain messages) live in
+      // uploadEvidenceFile; an oversized file fails there before any upload.
+      const result = await uploadEvidenceFile(file, {
+        claimId,
+        evidenceItemId,
+        promisedItemId,
+        evidenceStage,
+      });
+      setUploading(false);
+      if (result.ok) {
         onUploadComplete?.();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed.");
-      } finally {
-        setUploading(false);
+      } else {
+        setError(result.error);
       }
     },
     [claimId, evidenceItemId, promisedItemId, evidenceStage, onUploadComplete],

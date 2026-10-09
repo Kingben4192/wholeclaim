@@ -12,7 +12,15 @@ import {
   finalizeGuaranteeIfComplete,
 } from "@/lib/guarantee";
 import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
-import { isAllowedUpload } from "@/lib/uploadValidation";
+import {
+  buildEvidenceStoragePath,
+  isEvidencePathForClaim,
+  kindForType,
+  validateEvidenceFile,
+  UPLOAD_FAILED_MESSAGE,
+  type EvidenceKind,
+  type UploadResult,
+} from "@/lib/evidenceUpload";
 import { checkClaimCategoryAccess, getCategoryClaimState, type ClaimCategoryGateResult } from "@/lib/claimCategoryGate";
 import { isClaimCategory, isClaimStatus, type ClaimCategory } from "@/lib/claimCategories";
 import { isEvidenceStage } from "@/lib/evidenceStage";
@@ -356,201 +364,267 @@ export async function toggleEvidenceItem(
   revalidatePath(`/claim/${claimId}`);
 }
 
-const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15MB — plenty for phone photos and scanned PDFs.
-
-function kindForFile(file: File): "photo" | "pdf" | "doc" {
-  if (file.type === "application/pdf") return "pdf";
-  if (file.type.startsWith("image/")) return "photo";
-  return "doc";
-}
-
-const KIND_LABEL: Record<ReturnType<typeof kindForFile>, string> = {
+const KIND_LABEL: Record<EvidenceKind, string> = {
   photo: "Photo",
   pdf: "PDF",
   doc: "Document",
 };
 
-export async function uploadFile(
+// Direct-to-Storage upload, step 1 of 2. The browser sends only the file's
+// name, type and size; this checks the claim, the file and the free-tier
+// limits, then hands back a signed upload URL for a path this server
+// picked. The bytes then go straight from the browser to Supabase Storage
+// (evidenceUploadClient.ts), never through a Server Action body.
+//
+// Expected failures are RETURNED, not thrown: production React replaces a
+// thrown Server Action error with a generic minified message (#441), so a
+// thrown "That file is larger than 15MB." never reached the customer.
+export type PrepareEvidenceUploadResult =
+  | { ok: true; path: string; token: string }
+  | { ok: false; error: string };
+
+export async function prepareEvidenceUpload(
   claimId: string,
-  evidenceItemId: string | null,
-  formData: FormData,
-  promisedItemId: string | null = null,
-) {
+  file: { name: string; type: string; size: number },
+): Promise<PrepareEvidenceUploadResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Step 6, item 2: confirm claim ownership before anything else. RLS
-  // (auth.uid() = user_id on `claims`) already makes a mismatched claimId
-  // return no row via this authenticated client — this makes the rejection
-  // explicit rather than incidental, same reasoning as the Step 4 checkout
-  // ownership check.
-  const { data: claim, error: claimError } = await supabase
+  try {
+    const claimProblem = await claimAccessProblem(supabase, claimId, user.id);
+    if (claimProblem) return { ok: false, error: claimProblem };
+
+    const invalid = validateEvidenceFile(file);
+    if (invalid) return { ok: false, error: invalid };
+
+    // Uses the size the browser reports, so a blocked upload is refused
+    // before anything is sent. finalize re-checks against the real size.
+    const gateProblem = await uploadGateProblem(supabase, user.id, claimId, file.size);
+    if (gateProblem) return { ok: false, error: gateProblem };
+
+    const path = buildEvidenceStoragePath(user.id, claimId, crypto.randomUUID(), file.name);
+    const { data, error } = await supabase.storage.from("evidence").createSignedUploadUrl(path);
+    if (error || !data) {
+      console.error("prepareEvidenceUpload: createSignedUploadUrl failed:", error?.message);
+      return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+    }
+    return { ok: true, path: data.path, token: data.token };
+  } catch (err) {
+    console.error("prepareEvidenceUpload failed:", err instanceof Error ? err.message : err);
+    return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+  }
+}
+
+// Direct-to-Storage upload, step 2 of 2. Runs after the browser's upload to
+// the signed URL succeeded. Nothing about the file is trusted from the
+// browser: size and type come from Storage's own record of the object, and
+// the file, type and limit checks run again on those. Any rejection removes
+// the stored object so it can't sit in the bucket uncounted.
+export async function finalizeEvidenceUpload(
+  claimId: string,
+  input: {
+    path: string;
+    originalName: string;
+    evidenceItemId: string | null;
+    promisedItemId: string | null;
+    evidenceStage: string | null;
+  },
+): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { path, originalName, evidenceItemId, promisedItemId } = input;
+
+  try {
+    const claimProblem = await claimAccessProblem(supabase, claimId, user.id);
+    if (claimProblem) return { ok: false, error: claimProblem };
+
+    // Never act on (or delete) a path outside this user's claim folder.
+    if (!isEvidencePathForClaim(path, user.id, claimId)) {
+      return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+    }
+
+    const reject = async (message: string): Promise<UploadResult> => {
+      await supabase.storage.from("evidence").remove([path]);
+      return { ok: false, error: message };
+    };
+
+    // Before/After Photo Tags (Documentation Coverage Gaps, 2026-07-25) --
+    // optional. Absent/empty stays untagged; a present-but-invalid value is
+    // refused rather than silently dropped (defense against a tampered call).
+    let evidenceStage: string | null = null;
+    if (input.evidenceStage && input.evidenceStage.trim().length > 0) {
+      if (!isEvidenceStage(input.evidenceStage)) return reject("Invalid evidence stage.");
+      evidenceStage = input.evidenceStage;
+    }
+
+    // A second finalize for the same object (double click, retry) must not
+    // create a second files row or count the bytes twice.
+    const { data: existing } = await supabase
+      .from("files")
+      .select("id")
+      .eq("storage_path", path)
+      .maybeSingle();
+    if (existing) {
+      revalidatePath(`/claim/${claimId}`);
+      return { ok: true };
+    }
+
+    const { data: info, error: infoError } = await supabase.storage.from("evidence").info(path);
+    if (infoError || !info) {
+      console.error("finalizeEvidenceUpload: storage info failed:", infoError?.message);
+      return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+    }
+    const sizeBytes = typeof info.size === "number" ? info.size : 0;
+    const contentType = info.contentType ?? "";
+
+    const invalid = validateEvidenceFile({ name: originalName, type: contentType, size: sizeBytes });
+    if (invalid) return reject(invalid);
+
+    const gateProblem = await uploadGateProblem(supabase, user.id, claimId, sizeBytes);
+    if (gateProblem) return reject(gateProblem);
+
+    const kind = kindForType(contentType);
+
+    const { data: fileRow, error: insertError } = await supabase
+      .from("files")
+      .insert({
+        claim_id: claimId,
+        user_id: user.id,
+        storage_path: path,
+        kind,
+        original_name: originalName,
+        evidence_stage: evidenceStage,
+        size_bytes: sizeBytes,
+      })
+      .select("id")
+      .single();
+    if (insertError || !fileRow) {
+      console.error("finalizeEvidenceUpload: files insert failed:", insertError?.message);
+      return reject(UPLOAD_FAILED_MESSAGE);
+    }
+
+    const { error: usageError } = await supabase.rpc("increment_storage_usage", {
+      p_claim_id: claimId,
+      p_user_id: user.id,
+      p_delta_bytes: sizeBytes,
+    });
+    if (usageError) {
+      // The file itself is already saved and usable -- a running-total miss
+      // here is a drift bug to fix, not a reason to fail the whole upload
+      // the user is waiting on.
+      console.error("finalizeEvidenceUpload: increment_storage_usage failed:", usageError.message);
+    }
+
+    let linkError: { message: string } | null = null;
+    if (promisedItemId) {
+      // Promised-Document Tracker (2026-07-26) -- mutually exclusive with
+      // evidenceItemId. Marks the promise received; statusForPromisedItem()
+      // (src/lib/promisedItems.ts) derives "received" purely from file_id
+      // being set, same derived-status philosophy as evidence_items.
+      ({ error: linkError } = await supabase
+        .from("promised_items")
+        .update({ file_id: fileRow.id })
+        .eq("id", promisedItemId)
+        .eq("claim_id", claimId));
+    } else if (evidenceItemId) {
+      ({ error: linkError } = await supabase
+        .from("evidence_items")
+        .update({ file_id: fileRow.id, checked: true })
+        .eq("id", evidenceItemId)
+        .eq("claim_id", claimId));
+    } else {
+      // General Vault upload (CameraCapture, PendingPhotoUploader) — not tied
+      // to an existing checklist row. Create a real checklist row labeled
+      // from what was actually uploaded, so it moves the Evidence score
+      // (scoreEvidence() only reads evidence_items) — never an invented
+      // description (Product Bible: "Never auto-generates entries the user
+      // didn't make").
+      ({ error: linkError } = await supabase.from("evidence_items").insert({
+        claim_id: claimId,
+        user_id: user.id,
+        label: `${KIND_LABEL[kind]} — ${originalName}`,
+        checked: false,
+        file_id: fileRow.id,
+      }));
+    }
+
+    revalidatePath(`/claim/${claimId}`);
+
+    if (linkError) {
+      // The file is saved and counted; only the link to the item failed.
+      console.error("finalizeEvidenceUpload: linking the file failed:", linkError.message);
+      return {
+        ok: false,
+        error: "The file was saved to your Evidence Vault, but couldn't be attached to that item. Refresh the page.",
+      };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("finalizeEvidenceUpload failed:", err instanceof Error ? err.message : err);
+    return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+  }
+}
+
+// Step 6, item 2: confirm claim ownership before anything else. RLS
+// (auth.uid() = user_id on `claims`) already makes a mismatched claimId
+// return no row via this authenticated client — this makes the rejection
+// explicit rather than incidental, same reasoning as the Step 4 checkout
+// ownership check.
+async function claimAccessProblem(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  claimId: string,
+  userId: string,
+): Promise<string | null> {
+  const { data: claim, error } = await supabase
     .from("claims")
     .select("id")
     .eq("id", claimId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
-  if (claimError) throw new Error("Could not verify this claim. Try again.");
-  if (!claim) throw new Error("You don't have access to this claim.");
+  if (error) return "Could not verify this claim. Try again.";
+  if (!claim) return "You don't have access to this claim.";
+  return null;
+}
 
-  // File itself is validated first now (Decision #88 storage enforcement)
-  // so its size is known before the gate runs -- the gate needs to check
-  // "current usage + this file" against both the count and storage limits
-  // in one pass, before anything touches Storage or the database.
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error("Choose a photo or PDF to upload.");
-  }
-  if (file.size > MAX_FILE_BYTES) {
-    throw new Error("That file is larger than 15MB.");
-  }
-  if (!isAllowedUpload(file)) {
-    throw new Error("That file type isn't supported. Upload a photo, PDF, or common document file.");
-  }
-
-  // Step 6 + Decision #88: free-tier file-count cap, then storage bytes.
-  // Pro (any grant) skips the count check entirely (isPro() short-circuits,
-  // same as before) but NOT the storage check -- Decision #81 gives Pro a
-  // real 10GB + 500MB-buffer ceiling, not "unlimited," unlike uploads
-  // themselves. Runs BEFORE the file is uploaded/inserted anywhere, so a
-  // blocked attempt touches neither Storage nor the database.
-  const gate = await checkUploadAccess(supabase, user.id, claimId, file.size);
-  if (!gate.allowed) {
-    if (gate.reason === "STORAGE_LIMIT_REACHED") {
-      const limitLabel = gate.bindingLimit === "claim" ? "this claim's" : "your account's";
-      // Analytics instrumentation (metric 3, 2026-07-31) -- checkUploadAccess
-      // returning blocked was previously invisible: nothing persisted the
-      // event, only the CURRENT running total. Awaited so it reliably
-      // completes before the throw ends this Server Action; a failed
-      // insert is logged, not surfaced -- a missed analytics event is not
-      // a reason to give the user a worse error message.
-      const { error: analyticsError } = await supabase.from("analytics_events").insert({
-        user_id: user.id,
-        event_type: "storage_limit_blocked",
-        metadata: { claim_id: claimId, binding_limit: gate.bindingLimit, upgrade_required: gate.upgradeRequired },
-      });
-      if (analyticsError) {
-        console.error("uploadFile: analytics_events insert failed:", analyticsError.message);
-      }
-      throw new Error(
-        gate.upgradeRequired
-          ? `You've reached ${limitLabel} storage limit on the free plan. Upgrade to Pro for more space.`
-          : `You've reached ${limitLabel} storage limit. Delete some files to free up space.`,
-      );
+// Step 6 + Decision #88: free-tier file-count cap, then storage bytes.
+// Pro (any grant) skips the count check entirely (isPro() short-circuits)
+// but NOT the storage check -- Decision #81 gives Pro a real 10GB +
+// 500MB-buffer ceiling, not "unlimited," unlike uploads themselves.
+async function uploadGateProblem(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  claimId: string,
+  sizeBytes: number,
+): Promise<string | null> {
+  const gate = await checkUploadAccess(supabase, userId, claimId, sizeBytes);
+  if (gate.allowed) return null;
+  if (gate.reason === "STORAGE_LIMIT_REACHED") {
+    const limitLabel = gate.bindingLimit === "claim" ? "this claim's" : "your account's";
+    // Analytics instrumentation (metric 3, 2026-07-31) -- a blocked upload
+    // was previously invisible: nothing persisted the event, only the
+    // CURRENT running total. A failed insert is logged, not surfaced -- a
+    // missed analytics event is not a reason to give the user a worse
+    // error message.
+    const { error: analyticsError } = await supabase.from("analytics_events").insert({
+      user_id: userId,
+      event_type: "storage_limit_blocked",
+      metadata: { claim_id: claimId, binding_limit: gate.bindingLimit, upgrade_required: gate.upgradeRequired },
+    });
+    if (analyticsError) {
+      console.error("upload gate: analytics_events insert failed:", analyticsError.message);
     }
-    throw new Error(
-      `Free plan includes ${FREE_UPLOAD_LIMIT_PER_CLAIM} uploads per claim. Upgrade to Pro for unlimited uploads.`,
-    );
+    return gate.upgradeRequired
+      ? `You've reached ${limitLabel} storage limit on the free plan. Upgrade to Pro for more space.`
+      : `You've reached ${limitLabel} storage limit. Delete some files to free up space.`;
   }
-
-  const kind = kindForFile(file);
-
-  // Before/After Photo Tags (Documentation Coverage Gaps, 2026-07-25) --
-  // optional. Absent/empty stays untagged, exactly today's behavior. A
-  // present-but-invalid value throws rather than silently dropping it --
-  // defense in depth against a tampered form field, same pattern as
-  // isClaimCategory elsewhere in this file.
-  const evidenceStageRaw = formData.get("evidence_stage");
-  let evidenceStage: string | null = null;
-  if (typeof evidenceStageRaw === "string" && evidenceStageRaw.trim().length > 0) {
-    if (!isEvidenceStage(evidenceStageRaw)) throw new Error("Invalid evidence stage.");
-    evidenceStage = evidenceStageRaw;
-  }
-
-  const storagePath = `${user.id}/${claimId}/${crypto.randomUUID()}-${file.name}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("evidence")
-    .upload(storagePath, file, {
-      contentType: file.type || undefined,
-    });
-  if (uploadError) throw new Error(uploadError.message);
-
-  // Don't trust the client-reported File.size as final (STORAGE_ENFORCEMENT_BRIEF.md's
-  // explicit open design item) -- reconcile against what Storage actually
-  // recorded for the object immediately after upload. Falls back to the
-  // client-reported size only if the list lookup itself fails, rather than
-  // blocking the upload over a metadata read.
-  let sizeBytes = file.size;
-  const folderPath = `${user.id}/${claimId}`;
-  const objectName = storagePath.slice(folderPath.length + 1);
-  const { data: listData } = await supabase.storage
-    .from("evidence")
-    .list(folderPath, { search: objectName });
-  const actualSize = listData?.find((entry) => entry.name === objectName)?.metadata?.size;
-  if (typeof actualSize === "number") sizeBytes = actualSize;
-
-  const { data: fileRow, error: insertError } = await supabase
-    .from("files")
-    .insert({
-      claim_id: claimId,
-      user_id: user.id,
-      storage_path: storagePath,
-      kind,
-      original_name: file.name,
-      evidence_stage: evidenceStage,
-      size_bytes: sizeBytes,
-    })
-    .select("id")
-    .single();
-  if (insertError || !fileRow) {
-    await supabase.storage.from("evidence").remove([storagePath]);
-    throw new Error(insertError?.message ?? "Could not save the upload.");
-  }
-
-  const { error: usageError } = await supabase.rpc("increment_storage_usage", {
-    p_claim_id: claimId,
-    p_user_id: user.id,
-    p_delta_bytes: sizeBytes,
-  });
-  if (usageError) {
-    // The file itself is already saved and usable -- a running-total miss
-    // here is a drift bug to fix, not a reason to fail the whole upload
-    // the user is waiting on.
-    console.error("uploadFile: increment_storage_usage failed:", usageError.message);
-  }
-
-  if (promisedItemId) {
-    // Promised-Document Tracker (2026-07-26) -- mutually exclusive with
-    // evidenceItemId. Marks the promise received; statusForPromisedItem()
-    // (src/lib/promisedItems.ts) derives "received" purely from file_id
-    // being set, same derived-status philosophy as evidence_items.
-    const { error: linkError } = await supabase
-      .from("promised_items")
-      .update({ file_id: fileRow.id })
-      .eq("id", promisedItemId)
-      .eq("claim_id", claimId);
-    if (linkError) throw new Error(linkError.message);
-  } else if (evidenceItemId) {
-    const { error: linkError } = await supabase
-      .from("evidence_items")
-      .update({ file_id: fileRow.id, checked: true })
-      .eq("id", evidenceItemId)
-      .eq("claim_id", claimId);
-    if (linkError) throw new Error(linkError.message);
-  } else {
-    // General Vault upload (CameraCapture, PendingPhotoUploader) — not tied
-    // to an existing checklist row. Previously this left the file
-    // completely unlinked from evidence_items, so it never moved the
-    // Evidence score: scoreEvidence() (src/lib/claimHealth.ts) only reads
-    // evidence_items, never `files` directly. Create a real checklist row
-    // instead, labeled from what was actually uploaded — never an invented
-    // description (Product Bible: "Never auto-generates entries the user
-    // didn't make").
-    const { error: createError } = await supabase.from("evidence_items").insert({
-      claim_id: claimId,
-      user_id: user.id,
-      label: `${KIND_LABEL[kind]} — ${file.name}`,
-      checked: false,
-      file_id: fileRow.id,
-    });
-    if (createError) throw new Error(createError.message);
-  }
-
-  revalidatePath(`/claim/${claimId}`);
+  return `Free plan includes ${FREE_UPLOAD_LIMIT_PER_CLAIM} uploads per claim. Upgrade to Pro for unlimited uploads.`;
 }
 
 // Loss-of-Use Tracker (Roadmap Phase 1, Pro). Billing Build Order Step 5:
