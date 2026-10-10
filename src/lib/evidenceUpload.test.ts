@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  autoChecklistLabel,
   buildEvidenceStoragePath,
   isEvidencePathForClaim,
   kindForType,
@@ -78,6 +79,18 @@ describe("kindForType", () => {
     expect(kindForType("image/png")).toBe("photo");
     expect(kindForType("application/pdf")).toBe("pdf");
     expect(kindForType("text/csv")).toBe("doc");
+  });
+});
+
+describe("autoChecklistLabel", () => {
+  it("builds the label a Vault upload gives its checklist row", () => {
+    expect(autoChecklistLabel("photo", "133798837418027976.jpg")).toBe("Photo — 133798837418027976.jpg");
+    expect(autoChecklistLabel("pdf", "estimate.pdf")).toBe("PDF — estimate.pdf");
+    expect(autoChecklistLabel("doc", "notes.csv")).toBe("Document — notes.csv");
+  });
+
+  it("returns null for an unknown kind, so no user row is mistaken for an upload row", () => {
+    expect(autoChecklistLabel("video", "clip.mp4")).toBeNull();
   });
 });
 

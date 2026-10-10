@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, FolderOpen, X, Loader2 } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
@@ -26,6 +26,15 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
   const [evidenceStage, setEvidenceStage] = useState("");
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // A success note ("1 photo added.") clears itself; it otherwise stayed on
+  // screen after the file was deleted. Failures stay until the next batch so
+  // the reasons aren't missed.
+  useEffect(() => {
+    if (!summary || summary.failed > 0) return;
+    const timer = setTimeout(() => setSummary(null), 5000);
+    return () => clearTimeout(timer);
+  }, [summary]);
 
   const addFiles = useCallback((fileList: FileList | null) => {
     if (!fileList) return;

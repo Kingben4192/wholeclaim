@@ -26,6 +26,21 @@ export function kindForType(type: string): EvidenceKind {
   return "doc";
 }
 
+const KIND_LABEL: Record<EvidenceKind, string> = {
+  photo: "Photo",
+  pdf: "PDF",
+  doc: "Document",
+};
+
+// Label of the checklist row a general Vault upload creates for its file.
+// deleteFile uses the same function to recognize that row: a row whose label
+// still matches was created by the upload and goes away with the file; a
+// renamed row is the user's own and is kept.
+export function autoChecklistLabel(kind: string, originalName: string): string | null {
+  const prefix = KIND_LABEL[kind as EvidenceKind];
+  return prefix ? `${prefix} — ${originalName}` : null;
+}
+
 // Returns the message to show, or null if the file can be uploaded. Run in
 // the browser before anything is sent, and again on the server against the
 // size and type Storage actually recorded.

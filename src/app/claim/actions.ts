@@ -15,10 +15,10 @@ import { checklistTemplateFor } from "@/lib/scoring/checklistTemplates";
 import {
   buildEvidenceStoragePath,
   isEvidencePathForClaim,
+  autoChecklistLabel,
   kindForType,
   validateEvidenceFile,
   UPLOAD_FAILED_MESSAGE,
-  type EvidenceKind,
   type UploadResult,
 } from "@/lib/evidenceUpload";
 import { checkClaimCategoryAccess, getCategoryClaimState, type ClaimCategoryGateResult } from "@/lib/claimCategoryGate";
@@ -364,12 +364,6 @@ export async function toggleEvidenceItem(
   revalidatePath(`/claim/${claimId}`);
 }
 
-const KIND_LABEL: Record<EvidenceKind, string> = {
-  photo: "Photo",
-  pdf: "PDF",
-  doc: "Document",
-};
-
 // Direct-to-Storage upload, step 1 of 2. The browser sends only the file's
 // name, type and size; this checks the claim, the file and the free-tier
 // limits, then hands back a signed upload URL for a path this server
@@ -549,7 +543,7 @@ export async function finalizeEvidenceUpload(
       ({ error: linkError } = await supabase.from("evidence_items").insert({
         claim_id: claimId,
         user_id: user.id,
-        label: `${KIND_LABEL[kind]} — ${originalName}`,
+        label: autoChecklistLabel(kind, originalName) ?? originalName,
         checked: false,
         file_id: fileRow.id,
       }));
@@ -785,13 +779,21 @@ export async function deleteFile(
   // its owner) rather than a fresh auth.getUser() call.
   const { data: fileRow, error: fetchError } = await supabase
     .from("files")
-    .select("size_bytes, user_id, storage_path, claim_id")
+    .select("size_bytes, user_id, storage_path, claim_id, kind, original_name")
     .eq("id", fileId)
     .eq("claim_id", claimId)
     .single();
   if (fetchError || !fileRow || fileRow.storage_path !== storagePath) {
     throw new Error("Could not find that file.");
   }
+
+  // Read before the files row goes: its FK is "on delete set null", so after
+  // the delete these rows no longer point at this file.
+  const { data: linkedItems } = await supabase
+    .from("evidence_items")
+    .select("id, label")
+    .eq("claim_id", claimId)
+    .eq("file_id", fileId);
 
   const { error: storageError } = await supabase.storage
     .from("evidence")
@@ -800,6 +802,31 @@ export async function deleteFile(
 
   const { error } = await supabase.from("files").delete().eq("id", fileId);
   if (error) throw new Error(error.message);
+
+  // The Evidence score should only count evidence that still exists. A row
+  // the Vault upload created for this file (label unchanged) goes with it;
+  // the user's own checklist item stays but is unticked, since Attach is
+  // what ticked it. A failure here is logged, not surfaced: the file is
+  // already gone, which is what the user asked for.
+  const autoLabel = autoChecklistLabel(fileRow.kind, fileRow.original_name);
+  const autoIds = (linkedItems ?? []).filter((item) => item.label === autoLabel).map((item) => item.id);
+  const ownIds = (linkedItems ?? []).filter((item) => item.label !== autoLabel).map((item) => item.id);
+  if (autoIds.length > 0) {
+    const { error: removeError } = await supabase
+      .from("evidence_items")
+      .delete()
+      .in("id", autoIds)
+      .eq("claim_id", claimId);
+    if (removeError) console.error("deleteFile: removing upload checklist row failed:", removeError.message);
+  }
+  if (ownIds.length > 0) {
+    const { error: untickError } = await supabase
+      .from("evidence_items")
+      .update({ checked: false, file_id: null })
+      .in("id", ownIds)
+      .eq("claim_id", claimId);
+    if (untickError) console.error("deleteFile: unticking checklist item failed:", untickError.message);
+  }
 
   if (fileRow.size_bytes) {
     const { error: usageError } = await supabase.rpc("increment_storage_usage", {
