@@ -396,7 +396,19 @@ export async function renameEvidenceItem(claimId: string, itemId: string, label:
   return { ok: true };
 }
 
-export async function deleteEvidenceItem(claimId: string, itemId: string): Promise<UploadResult> {
+// What "Undo" needs to put a deleted item back exactly as it was.
+export type DeletedEvidenceItem = {
+  id: string;
+  label: string;
+  checked: boolean;
+  file_id: string | null;
+  created_at: string;
+};
+
+export async function deleteEvidenceItem(
+  claimId: string,
+  itemId: string,
+): Promise<{ ok: true; deleted: DeletedEvidenceItem } | { ok: false; error: string }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -409,12 +421,54 @@ export async function deleteEvidenceItem(claimId: string, itemId: string): Promi
     .eq("id", itemId)
     .eq("claim_id", claimId)
     .is("category", null)
-    .select("id");
+    .select("id, label, checked, file_id, created_at");
   if (error) {
     console.error("deleteEvidenceItem failed:", error.message);
     return { ok: false, error: "Couldn't remove that item. Try again." };
   }
   if (!data || data.length === 0) return { ok: false, error: "That item can't be removed." };
+
+  revalidatePath(`/claim/${claimId}`);
+  return { ok: true, deleted: data[0] as DeletedEvidenceItem };
+}
+
+// "Undo" after deleteEvidenceItem: re-inserts the same row (same id, tick
+// state and created_at, so it returns to the same place in the list). The
+// file link is restored only if that file is still in this claim's Vault.
+export async function restoreEvidenceItem(claimId: string, item: DeletedEvidenceItem): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const invalid = validateChecklistLabel(item.label);
+  if (invalid) return { ok: false, error: "Couldn't restore that item." };
+
+  let fileId: string | null = null;
+  if (item.file_id) {
+    const { data: file } = await supabase
+      .from("files")
+      .select("id")
+      .eq("id", item.file_id)
+      .eq("claim_id", claimId)
+      .maybeSingle();
+    fileId = file?.id ?? null;
+  }
+
+  const { error } = await supabase.from("evidence_items").insert({
+    id: item.id,
+    claim_id: claimId,
+    user_id: user.id,
+    label: item.label.trim(),
+    checked: fileId ? item.checked : item.checked && !item.file_id,
+    file_id: fileId,
+    created_at: item.created_at,
+  });
+  if (error) {
+    console.error("restoreEvidenceItem failed:", error.message);
+    return { ok: false, error: "Couldn't restore that item." };
+  }
 
   revalidatePath(`/claim/${claimId}`);
   return { ok: true };

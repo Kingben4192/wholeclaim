@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Paperclip, Pencil, Trash2 } from "lucide-react";
-import { toggleEvidenceItem, renameEvidenceItem, deleteEvidenceItem } from "../actions";
+import { toggleEvidenceItem, renameEvidenceItem, deleteEvidenceItem, type DeletedEvidenceItem } from "../actions";
 import { EvidenceUpload } from "./EvidenceUpload";
 import { safetyNoteForLabel } from "@/lib/scoring/checklistTemplates";
 import { MAX_CHECKLIST_LABEL_LENGTH } from "@/lib/evidenceUpload";
@@ -11,11 +11,14 @@ export function EvidenceRow({
   claimId,
   item,
   fileName,
+  onDeleted,
 }: {
   claimId: string;
   item: { id: string; label: string; checked: boolean; category: string | null };
   // Name of the Vault file attached to this item, if any.
   fileName: string | null;
+  // Called after a successful delete, so the list can offer Undo.
+  onDeleted?: (item: DeletedEvidenceItem) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
@@ -42,7 +45,8 @@ export function EvidenceRow({
     setError(null);
     startTransition(async () => {
       const result = await deleteEvidenceItem(claimId, item.id);
-      if (!result.ok) setError(result.error);
+      if (result.ok) onDeleted?.(result.deleted);
+      else setError(result.error);
     });
   }
 

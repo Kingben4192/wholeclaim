@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { addEntry, addDeadline, addEvidenceItem } from "../actions";
-import { EvidenceRow } from "./EvidenceRow";
+import { EvidenceChecklist } from "./EvidenceChecklist";
 import { FileRow } from "./FileRow";
 import { AddEntryForm } from "./AddEntryForm";
 import CameraCapture from "./CameraCapture";
@@ -429,23 +429,11 @@ export default async function ClaimDetailPage({
           Evidence Checklist
         </h2>
         <div className="border border-ink/15 rounded-sm mb-4">
-          {evidenceItems && evidenceItems.length > 0 ? (
-            evidenceItems.map((item) => (
-              // The tick state is part of the key so a server-side change
-              // (attach ticks, deleting the linked file unticks) redraws the
-              // row instead of leaving the old checkbox state on screen.
-              <EvidenceRow
-                key={`${item.id}:${item.checked}:${item.file_id ?? ""}`}
-                claimId={id}
-                item={item}
-                fileName={item.file_id ? (files ?? []).find((f) => f.id === item.file_id)?.original_name ?? null : null}
-              />
-            ))
-          ) : (
-            <p className="px-3 py-3 text-sm text-ink/50">
-              Nothing logged yet. The first entry takes thirty seconds.
-            </p>
-          )}
+          <EvidenceChecklist
+            claimId={id}
+            items={evidenceItems ?? []}
+            fileNames={Object.fromEntries((files ?? []).map((f) => [f.id, f.original_name]))}
+          />
         </div>
         <form action={boundAddEvidenceItem} className="flex gap-2">
           <input
