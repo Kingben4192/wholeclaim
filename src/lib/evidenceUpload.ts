@@ -18,6 +18,12 @@ export const EMPTY_FILE_MESSAGE = "Choose a photo or document to upload.";
 
 export type UploadResult = { ok: true } | { ok: false; error: string };
 
+export const DUPLICATE_SKIPPED_MESSAGE = "Skipped — a file with this name is already in this claim.";
+
+export function duplicateNamePrompt(fileName: string): string {
+  return `"${fileName}" is already in this claim's Evidence Vault. Upload it again?`;
+}
+
 export type EvidenceKind = "photo" | "pdf" | "doc";
 
 export function kindForType(type: string): EvidenceKind {

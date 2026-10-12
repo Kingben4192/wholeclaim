@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, FolderOpen, X, Loader2 } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
+import { duplicateNamePrompt } from "@/lib/evidenceUpload";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface PendingCapture {
@@ -82,6 +83,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
         claimId,
         evidenceItemId,
         evidenceStage,
+        confirmDuplicate: (name) => window.confirm(duplicateNamePrompt(name)),
       });
       if (result.ok) {
         succeededIds.push(item.id);

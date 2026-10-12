@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   autoChecklistLabel,
   buildEvidenceStoragePath,
+  duplicateNamePrompt,
+  DUPLICATE_SKIPPED_MESSAGE,
   isEvidencePathForClaim,
   kindForType,
   messageForStorageUploadError,
@@ -91,6 +93,18 @@ describe("autoChecklistLabel", () => {
 
   it("returns null for an unknown kind, so no user row is mistaken for an upload row", () => {
     expect(autoChecklistLabel("video", "clip.mp4")).toBeNull();
+  });
+});
+
+describe("duplicate file names", () => {
+  it("asks in plain words, naming the file", () => {
+    expect(duplicateNamePrompt("IMG_0412.jpg")).toBe(
+      '"IMG_0412.jpg" is already in this claim\'s Evidence Vault. Upload it again?',
+    );
+  });
+
+  it("explains a skipped upload without calling it an error", () => {
+    expect(DUPLICATE_SKIPPED_MESSAGE).toBe("Skipped — a file with this name is already in this claim.");
   });
 });
 

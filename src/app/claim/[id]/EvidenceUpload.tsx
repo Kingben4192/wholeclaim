@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Paperclip, Loader2 } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
+import { duplicateNamePrompt } from "@/lib/evidenceUpload";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface EvidenceUploadProps {
@@ -40,6 +41,7 @@ export function EvidenceUpload({
         evidenceItemId,
         promisedItemId,
         evidenceStage,
+        confirmDuplicate: (name) => window.confirm(duplicateNamePrompt(name)),
       });
       setUploading(false);
       if (result.ok) {

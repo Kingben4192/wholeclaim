@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { prepareEvidenceUpload, finalizeEvidenceUpload } from "@/app/claim/actions";
 import {
+  DUPLICATE_SKIPPED_MESSAGE,
   messageForStorageUploadError,
   validateEvidenceFile,
   UPLOAD_FAILED_MESSAGE,
@@ -21,6 +22,10 @@ export async function uploadEvidenceFile(
     evidenceItemId?: string | null;
     promisedItemId?: string | null;
     evidenceStage?: string | null;
+    // Asked when this claim's Vault already has a file with the same name.
+    // Return false to skip the upload. Omit it to upload without asking
+    // (PendingPhotoUploader runs with no one to answer).
+    confirmDuplicate?: (fileName: string) => boolean;
   },
 ): Promise<UploadResult> {
   const invalid = validateEvidenceFile(file);
@@ -33,6 +38,9 @@ export async function uploadEvidenceFile(
       size: file.size,
     });
     if (!prepared.ok) return prepared;
+    if (prepared.duplicateName && options.confirmDuplicate && !options.confirmDuplicate(file.name)) {
+      return { ok: false, error: DUPLICATE_SKIPPED_MESSAGE };
+    }
 
     const { error: uploadError } = await createClient()
       .storage.from("evidence")

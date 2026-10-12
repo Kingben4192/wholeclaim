@@ -374,7 +374,7 @@ export async function toggleEvidenceItem(
 // thrown Server Action error with a generic minified message (#441), so a
 // thrown "That file is larger than 15MB." never reached the customer.
 export type PrepareEvidenceUploadResult =
-  | { ok: true; path: string; token: string }
+  | { ok: true; path: string; token: string; duplicateName: boolean }
   | { ok: false; error: string };
 
 export async function prepareEvidenceUpload(
@@ -399,13 +399,22 @@ export async function prepareEvidenceUpload(
     const gateProblem = await uploadGateProblem(supabase, user.id, claimId, file.size);
     if (gateProblem) return { ok: false, error: gateProblem };
 
+    // A file with this exact name already in this claim's Vault is usually an
+    // accidental re-upload. The browser asks before sending it; it's allowed
+    // either way, since two different photos can share a camera file name.
+    const { count: sameNameCount } = await supabase
+      .from("files")
+      .select("id", { count: "exact", head: true })
+      .eq("claim_id", claimId)
+      .eq("original_name", file.name);
+
     const path = buildEvidenceStoragePath(user.id, claimId, crypto.randomUUID(), file.name);
     const { data, error } = await supabase.storage.from("evidence").createSignedUploadUrl(path);
     if (error || !data) {
       console.error("prepareEvidenceUpload: createSignedUploadUrl failed:", error?.message);
       return { ok: false, error: UPLOAD_FAILED_MESSAGE };
     }
-    return { ok: true, path: data.path, token: data.token };
+    return { ok: true, path: data.path, token: data.token, duplicateName: (sameNameCount ?? 0) > 0 };
   } catch (err) {
     console.error("prepareEvidenceUpload failed:", err instanceof Error ? err.message : err);
     return { ok: false, error: UPLOAD_FAILED_MESSAGE };
@@ -540,13 +549,35 @@ export async function finalizeEvidenceUpload(
       // (scoreEvidence() only reads evidence_items) — never an invented
       // description (Product Bible: "Never auto-generates entries the user
       // didn't make").
-      ({ error: linkError } = await supabase.from("evidence_items").insert({
-        claim_id: claimId,
-        user_id: user.id,
-        label: autoChecklistLabel(kind, originalName) ?? originalName,
-        checked: false,
-        file_id: fileRow.id,
-      }));
+      //
+      // If an unlinked row with this exact upload label already exists (left
+      // behind when a file was deleted before deleteFile cleaned rows up),
+      // relink that row instead of adding a second one with the same name.
+      const label = autoChecklistLabel(kind, originalName) ?? originalName;
+      const { data: unlinkedRow } = await supabase
+        .from("evidence_items")
+        .select("id")
+        .eq("claim_id", claimId)
+        .eq("label", label)
+        .is("file_id", null)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (unlinkedRow) {
+        ({ error: linkError } = await supabase
+          .from("evidence_items")
+          .update({ file_id: fileRow.id })
+          .eq("id", unlinkedRow.id)
+          .eq("claim_id", claimId));
+      } else {
+        ({ error: linkError } = await supabase.from("evidence_items").insert({
+          claim_id: claimId,
+          user_id: user.id,
+          label,
+          checked: false,
+          file_id: fileRow.id,
+        }));
+      }
     }
 
     revalidatePath(`/claim/${claimId}`);
