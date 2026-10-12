@@ -107,7 +107,9 @@ export default async function ClaimDetailPage({
         .order("due_date", { ascending: true }),
       supabase
         .from("evidence_items")
-        .select("id, label, checked, file_id, category, created_at")
+        // "*" rather than a column list so the page keeps working whether or
+        // not migration 0038 (not_applicable) has been applied yet.
+        .select("*")
         .eq("claim_id", id)
         .order("created_at", { ascending: true }),
       supabase
@@ -431,7 +433,14 @@ export default async function ClaimDetailPage({
         <div className="border border-ink/15 rounded-sm mb-4">
           <EvidenceChecklist
             claimId={id}
-            items={evidenceItems ?? []}
+            items={(evidenceItems ?? []).map((item) => ({
+              id: item.id,
+              label: item.label,
+              checked: item.checked,
+              category: item.category ?? null,
+              file_id: item.file_id ?? null,
+              notApplicable: item.not_applicable === true,
+            }))}
             fileNames={Object.fromEntries((files ?? []).map((f) => [f.id, f.original_name]))}
           />
         </div>

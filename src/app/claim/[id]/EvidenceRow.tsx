@@ -2,7 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { Paperclip, Pencil, Trash2 } from "lucide-react";
-import { toggleEvidenceItem, renameEvidenceItem, deleteEvidenceItem, type DeletedEvidenceItem } from "../actions";
+import {
+  toggleEvidenceItem,
+  renameEvidenceItem,
+  deleteEvidenceItem,
+  setEvidenceItemNotApplicable,
+  type DeletedEvidenceItem,
+} from "../actions";
 import { EvidenceUpload } from "./EvidenceUpload";
 import { safetyNoteForLabel } from "@/lib/scoring/checklistTemplates";
 import { MAX_CHECKLIST_LABEL_LENGTH } from "@/lib/evidenceUpload";
@@ -14,7 +20,7 @@ export function EvidenceRow({
   onDeleted,
 }: {
   claimId: string;
-  item: { id: string; label: string; checked: boolean; category: string | null };
+  item: { id: string; label: string; checked: boolean; category: string | null; notApplicable: boolean };
   // Name of the Vault file attached to this item, if any.
   fileName: string | null;
   // Called after a successful delete, so the list can offer Undo.
@@ -29,6 +35,14 @@ export function EvidenceRow({
   // fixed; items the user made, or a Vault upload made, can be renamed or
   // removed.
   const editable = item.category === null;
+
+  function toggleNotApplicable() {
+    setError(null);
+    startTransition(async () => {
+      const result = await setEvidenceItemNotApplicable(claimId, item.id, !item.notApplicable);
+      if (!result.ok) setError(result.error);
+    });
+  }
 
   function saveRename() {
     setError(null);
@@ -95,7 +109,9 @@ export function EvidenceRow({
   }
 
   return (
-    <div className="flex flex-col px-3 py-2.5 text-sm border-t border-ink/10 first:border-t-0">
+    <div
+      className={`flex flex-col px-3 py-2.5 text-sm border-t border-ink/10 first:border-t-0 ${item.notApplicable ? "opacity-50" : ""}`}
+    >
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
           <input
@@ -116,6 +132,11 @@ export function EvidenceRow({
               <span className="flex items-center gap-1 text-xs text-ink/50 mt-0.5 min-w-0">
                 <Paperclip size={11} className="shrink-0" />
                 <span className="truncate">{fileName}</span>
+              </span>
+            )}
+            {item.notApplicable && (
+              <span className="block text-xs text-ink/60 mt-0.5">
+                Marked not applicable — still counts toward your Documentation Score
               </span>
             )}
             {safetyNote && <span className="block text-xs text-brass mt-0.5">{safetyNote}</span>}
@@ -146,7 +167,17 @@ export function EvidenceRow({
             </button>
           </>
         )}
-        <EvidenceUpload claimId={claimId} evidenceItemId={item.id} />
+        {!editable && (
+          <button
+            type="button"
+            onClick={toggleNotApplicable}
+            disabled={pending}
+            className="text-xs text-ink/50 hover:text-ink shrink-0 disabled:opacity-50"
+          >
+            {item.notApplicable ? "Mark applicable" : "Not applicable"}
+          </button>
+        )}
+        {!item.notApplicable && <EvidenceUpload claimId={claimId} evidenceItemId={item.id} />}
       </div>
       {error && <p className="text-xs text-red-700 mt-1">{error}</p>}
     </div>

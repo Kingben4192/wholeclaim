@@ -15,12 +15,22 @@ export function EvidenceChecklist({
   fileNames,
 }: {
   claimId: string;
-  items: { id: string; label: string; checked: boolean; category: string | null; file_id: string | null }[];
+  items: {
+    id: string;
+    label: string;
+    checked: boolean;
+    category: string | null;
+    file_id: string | null;
+    notApplicable: boolean;
+  }[];
   fileNames: Record<string, string>;
 }) {
   const [deleted, setDeleted] = useState<DeletedEvidenceItem | null>(null);
   const [undoError, setUndoError] = useState<string | null>(null);
   const [restoring, startRestore] = useTransition();
+  const [showNotApplicable, setShowNotApplicable] = useState(true);
+  const notApplicableCount = items.filter((i) => i.notApplicable).length;
+  const visible = showNotApplicable ? items : items.filter((i) => !i.notApplicable);
 
   useEffect(() => {
     if (!deleted) return;
@@ -45,12 +55,12 @@ export function EvidenceChecklist({
   return (
     <>
       {items.length > 0 ? (
-        items.map((item) => (
+        visible.map((item) => (
           // The tick state is part of the key so a server-side change
           // (attach ticks, deleting the linked file unticks) redraws the
           // row instead of leaving the old checkbox state on screen.
           <EvidenceRow
-            key={`${item.id}:${item.checked}:${item.file_id ?? ""}`}
+            key={`${item.id}:${item.checked}:${item.file_id ?? ""}:${item.notApplicable}`}
             claimId={claimId}
             item={item}
             fileName={item.file_id ? fileNames[item.file_id] ?? null : null}
@@ -62,6 +72,17 @@ export function EvidenceChecklist({
         ))
       ) : (
         <p className="px-3 py-3 text-sm text-ink/50">Nothing logged yet. The first entry takes thirty seconds.</p>
+      )}
+      {notApplicableCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowNotApplicable((v) => !v)}
+          className="w-full text-left px-3 py-2 text-xs text-ink/50 border-t border-ink/10 hover:text-ink"
+        >
+          {showNotApplicable
+            ? `Hide ${notApplicableCount} not-applicable ${notApplicableCount === 1 ? "item" : "items"}`
+            : `Show ${notApplicableCount} not-applicable ${notApplicableCount === 1 ? "item" : "items"}`}
+        </button>
       )}
       {deleted && (
         <div

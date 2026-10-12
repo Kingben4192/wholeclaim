@@ -396,6 +396,37 @@ export async function renameEvidenceItem(claimId: string, itemId: string, label:
   return { ok: true };
 }
 
+// "Not applicable" on a built-in checklist item (Decision #134, Option A):
+// display only and reversible. The score engine never reads this column,
+// so the Documentation Score and Success Guarantee eligibility don't change.
+export async function setEvidenceItemNotApplicable(
+  claimId: string,
+  itemId: string,
+  notApplicable: boolean,
+): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("evidence_items")
+    .update({ not_applicable: notApplicable })
+    .eq("id", itemId)
+    .eq("claim_id", claimId)
+    .not("category", "is", null)
+    .select("id");
+  if (error) {
+    console.error("setEvidenceItemNotApplicable failed:", error.message);
+    return { ok: false, error: "Couldn't update that item. Try again." };
+  }
+  if (!data || data.length === 0) return { ok: false, error: "That item can't be marked not applicable." };
+
+  revalidatePath(`/claim/${claimId}`);
+  return { ok: true };
+}
+
 // What "Undo" needs to put a deleted item back exactly as it was.
 export type DeletedEvidenceItem = {
   id: string;
