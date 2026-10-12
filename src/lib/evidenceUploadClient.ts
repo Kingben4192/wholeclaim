@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/client";
-import { prepareEvidenceUpload, finalizeEvidenceUpload } from "@/app/claim/actions";
+import { prepareEvidenceUpload, finalizeEvidenceUpload, linkExistingEvidenceFile } from "@/app/claim/actions";
 import {
   DUPLICATE_SKIPPED_MESSAGE,
   messageForStorageUploadError,
   validateEvidenceFile,
   UPLOAD_FAILED_MESSAGE,
+  type DuplicateChoice,
   type UploadResult,
 } from "@/lib/evidenceUpload";
 
@@ -22,10 +23,11 @@ export async function uploadEvidenceFile(
     evidenceItemId?: string | null;
     promisedItemId?: string | null;
     evidenceStage?: string | null;
-    // Asked when this claim's Vault already has a file with the same name.
-    // Return false to skip the upload. Omit it to upload without asking
+    // Asked when this claim's Vault already has a file with the same name:
+    // "link" reuses that file for this item (no new upload), "upload" sends a
+    // separate copy, "skip" does nothing. Omit it to upload without asking
     // (PendingPhotoUploader runs with no one to answer).
-    confirmDuplicate?: (fileName: string) => boolean;
+    onDuplicate?: (fileName: string) => DuplicateChoice;
   },
 ): Promise<UploadResult> {
   const invalid = validateEvidenceFile(file);
@@ -38,8 +40,16 @@ export async function uploadEvidenceFile(
       size: file.size,
     });
     if (!prepared.ok) return prepared;
-    if (prepared.duplicateName && options.confirmDuplicate && !options.confirmDuplicate(file.name)) {
-      return { ok: false, error: DUPLICATE_SKIPPED_MESSAGE };
+    if (prepared.duplicateName && options.onDuplicate) {
+      const choice = options.onDuplicate(file.name);
+      if (choice === "skip") return { ok: false, error: DUPLICATE_SKIPPED_MESSAGE };
+      if (choice === "link") {
+        return await linkExistingEvidenceFile(options.claimId, {
+          fileName: file.name,
+          evidenceItemId: options.evidenceItemId ?? null,
+          promisedItemId: options.promisedItemId ?? null,
+        });
+      }
     }
 
     const { error: uploadError } = await createClient()

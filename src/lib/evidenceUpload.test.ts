@@ -3,6 +3,10 @@ import {
   autoChecklistLabel,
   buildEvidenceStoragePath,
   duplicateNamePrompt,
+  isPermanentUploadError,
+  linkExistingPrompt,
+  uploadButtonLabel,
+  validateChecklistLabel,
   DUPLICATE_SKIPPED_MESSAGE,
   isEvidencePathForClaim,
   kindForType,
@@ -105,6 +109,52 @@ describe("duplicate file names", () => {
 
   it("explains a skipped upload without calling it an error", () => {
     expect(DUPLICATE_SKIPPED_MESSAGE).toBe("Skipped — a file with this name is already in this claim.");
+  });
+});
+
+describe("isPermanentUploadError", () => {
+  it("treats size, type, empty, skipped-duplicate and plan-limit failures as permanent", () => {
+    for (const m of [
+      FILE_TOO_LARGE_MESSAGE,
+      FILE_TYPE_MESSAGE,
+      EMPTY_FILE_MESSAGE,
+      DUPLICATE_SKIPPED_MESSAGE,
+      "You've reached this claim's storage limit on the free plan. Upgrade to Pro for more space.",
+      "Free plan includes 25 uploads per claim. Upgrade to Pro for unlimited uploads.",
+    ]) {
+      expect(isPermanentUploadError(m)).toBe(true);
+    }
+  });
+
+  it("keeps network and server failures retryable", () => {
+    expect(isPermanentUploadError(UPLOAD_FAILED_MESSAGE)).toBe(false);
+    expect(isPermanentUploadError("Could not verify this claim. Try again.")).toBe(false);
+  });
+});
+
+describe("uploadButtonLabel", () => {
+  it("says photo only when every staged file is an image", () => {
+    expect(uploadButtonLabel([{ type: "image/jpeg" }])).toBe("Upload 1 photo");
+    expect(uploadButtonLabel([{ type: "image/jpeg" }, { type: "image/png" }])).toBe("Upload 2 photos");
+    expect(uploadButtonLabel([{ type: "application/pdf" }])).toBe("Upload 1 file");
+    expect(uploadButtonLabel([{ type: "image/jpeg" }, { type: "application/pdf" }])).toBe("Upload 2 files");
+  });
+});
+
+describe("validateChecklistLabel", () => {
+  it("requires a name and caps its length", () => {
+    expect(validateChecklistLabel("Contractor estimate")).toBeNull();
+    expect(validateChecklistLabel("   ")).toBe("Enter a name for this item.");
+    expect(validateChecklistLabel("x".repeat(201))).toMatch(/too long/);
+  });
+});
+
+describe("linkExistingPrompt", () => {
+  it("explains both choices", () => {
+    const text = linkExistingPrompt("estimate.docx");
+    expect(text).toContain('"estimate.docx" is already in this claim\'s Evidence Vault.');
+    expect(text).toContain("OK — use that same file for this item.");
+    expect(text).toContain("Cancel — upload a separate copy.");
   });
 });
 

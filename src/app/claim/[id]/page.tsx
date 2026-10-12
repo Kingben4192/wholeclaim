@@ -431,7 +431,15 @@ export default async function ClaimDetailPage({
         <div className="border border-ink/15 rounded-sm mb-4">
           {evidenceItems && evidenceItems.length > 0 ? (
             evidenceItems.map((item) => (
-              <EvidenceRow key={item.id} claimId={id} item={item} />
+              // The tick state is part of the key so a server-side change
+              // (attach ticks, deleting the linked file unticks) redraws the
+              // row instead of leaving the old checkbox state on screen.
+              <EvidenceRow
+                key={`${item.id}:${item.checked}:${item.file_id ?? ""}`}
+                claimId={id}
+                item={item}
+                fileName={item.file_id ? (files ?? []).find((f) => f.id === item.file_id)?.original_name ?? null : null}
+              />
             ))
           ) : (
             <p className="px-3 py-3 text-sm text-ink/50">

@@ -20,8 +20,46 @@ export type UploadResult = { ok: true } | { ok: false; error: string };
 
 export const DUPLICATE_SKIPPED_MESSAGE = "Skipped — a file with this name is already in this claim.";
 
+export type DuplicateChoice = "link" | "upload" | "skip";
+
 export function duplicateNamePrompt(fileName: string): string {
   return `"${fileName}" is already in this claim's Evidence Vault. Upload it again?`;
+}
+
+// Attach on a checklist item: OK reuses the copy already in the Vault (one
+// file, linked to both items), Cancel uploads a separate copy.
+export function linkExistingPrompt(fileName: string): string {
+  return `"${fileName}" is already in this claim's Evidence Vault.\n\nOK — use that same file for this item.\nCancel — upload a separate copy.`;
+}
+
+// Failures that retrying the same file can't fix. The batch uploader drops
+// these files from its staged list; anything else (network, server) stays
+// staged so it can be retried without picking the file again.
+export function isPermanentUploadError(message: string): boolean {
+  return (
+    message === FILE_TOO_LARGE_MESSAGE ||
+    message === FILE_TYPE_MESSAGE ||
+    message === EMPTY_FILE_MESSAGE ||
+    message === DUPLICATE_SKIPPED_MESSAGE ||
+    message.startsWith("You've reached") ||
+    message.startsWith("Free plan includes")
+  );
+}
+
+export function uploadButtonLabel(files: { type: string }[]): string {
+  const n = files.length;
+  const allPhotos = n > 0 && files.every((f) => f.type.startsWith("image/"));
+  const noun = allPhotos ? "photo" : "file";
+  return `Upload ${n} ${noun}${n === 1 ? "" : "s"}`;
+}
+
+export const MAX_CHECKLIST_LABEL_LENGTH = 200;
+
+export function validateChecklistLabel(label: string): string | null {
+  const trimmed = label.trim();
+  if (!trimmed) return "Enter a name for this item.";
+  if (trimmed.length > MAX_CHECKLIST_LABEL_LENGTH) return "That name is too long. Keep it under 200 characters.";
+  return null;
 }
 
 export type EvidenceKind = "photo" | "pdf" | "doc";

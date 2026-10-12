@@ -17,6 +17,7 @@ import {
   isEvidencePathForClaim,
   autoChecklistLabel,
   kindForType,
+  validateChecklistLabel,
   validateEvidenceFile,
   UPLOAD_FAILED_MESSAGE,
   type UploadResult,
@@ -362,6 +363,118 @@ export async function toggleEvidenceItem(
   if (error) throw new Error(error.message);
 
   revalidatePath(`/claim/${claimId}`);
+}
+
+// Rename / delete a checklist item the user made (or one a Vault upload made).
+// Template items seeded for the claim type carry a `category` and are left
+// alone -- they're the fixed documentation standard the score is built on.
+// Deleting an item never deletes its file: the file stays in the Vault.
+export async function renameEvidenceItem(claimId: string, itemId: string, label: string): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const invalid = validateChecklistLabel(label);
+  if (invalid) return { ok: false, error: invalid };
+
+  const { data, error } = await supabase
+    .from("evidence_items")
+    .update({ label: label.trim() })
+    .eq("id", itemId)
+    .eq("claim_id", claimId)
+    .is("category", null)
+    .select("id");
+  if (error) {
+    console.error("renameEvidenceItem failed:", error.message);
+    return { ok: false, error: "Couldn't rename that item. Try again." };
+  }
+  if (!data || data.length === 0) return { ok: false, error: "That item can't be renamed." };
+
+  revalidatePath(`/claim/${claimId}`);
+  return { ok: true };
+}
+
+export async function deleteEvidenceItem(claimId: string, itemId: string): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("evidence_items")
+    .delete()
+    .eq("id", itemId)
+    .eq("claim_id", claimId)
+    .is("category", null)
+    .select("id");
+  if (error) {
+    console.error("deleteEvidenceItem failed:", error.message);
+    return { ok: false, error: "Couldn't remove that item. Try again." };
+  }
+  if (!data || data.length === 0) return { ok: false, error: "That item can't be removed." };
+
+  revalidatePath(`/claim/${claimId}`);
+  return { ok: true };
+}
+
+// Attach an existing Vault file to a checklist item or promised document
+// instead of uploading a second copy. The same file can back several items;
+// deleting it unticks all of them (deleteFile).
+export async function linkExistingEvidenceFile(
+  claimId: string,
+  input: { fileName: string; evidenceItemId: string | null; promisedItemId: string | null },
+): Promise<UploadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  try {
+    const claimProblem = await claimAccessProblem(supabase, claimId, user.id);
+    if (claimProblem) return { ok: false, error: claimProblem };
+
+    const { data: existing } = await supabase
+      .from("files")
+      .select("id")
+      .eq("claim_id", claimId)
+      .eq("user_id", user.id)
+      .eq("original_name", input.fileName)
+      .order("uploaded_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!existing) return { ok: false, error: "That file is no longer in the Vault. Upload it again." };
+
+    let linkError: { message: string } | null = null;
+    if (input.promisedItemId) {
+      ({ error: linkError } = await supabase
+        .from("promised_items")
+        .update({ file_id: existing.id })
+        .eq("id", input.promisedItemId)
+        .eq("claim_id", claimId));
+    } else if (input.evidenceItemId) {
+      ({ error: linkError } = await supabase
+        .from("evidence_items")
+        .update({ file_id: existing.id, checked: true })
+        .eq("id", input.evidenceItemId)
+        .eq("claim_id", claimId));
+    } else {
+      return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+    }
+    if (linkError) {
+      console.error("linkExistingEvidenceFile failed:", linkError.message);
+      return { ok: false, error: "Couldn't attach that file. Try again." };
+    }
+
+    revalidatePath(`/claim/${claimId}`);
+    return { ok: true };
+  } catch (err) {
+    console.error("linkExistingEvidenceFile failed:", err instanceof Error ? err.message : err);
+    return { ok: false, error: UPLOAD_FAILED_MESSAGE };
+  }
 }
 
 // Direct-to-Storage upload, step 1 of 2. The browser sends only the file's

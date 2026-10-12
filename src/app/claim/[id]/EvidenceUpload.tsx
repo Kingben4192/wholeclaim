@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { Paperclip, Loader2 } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
-import { duplicateNamePrompt } from "@/lib/evidenceUpload";
+import { linkExistingPrompt } from "@/lib/evidenceUpload";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface EvidenceUploadProps {
@@ -41,7 +41,9 @@ export function EvidenceUpload({
         evidenceItemId,
         promisedItemId,
         evidenceStage,
-        confirmDuplicate: (name) => window.confirm(duplicateNamePrompt(name)),
+        // Already in the Vault: OK links that same file to this item (one file,
+        // both items ticked); Cancel uploads a separate copy.
+        onDuplicate: (name) => (window.confirm(linkExistingPrompt(name)) ? "link" : "upload"),
       });
       setUploading(false);
       if (result.ok) {

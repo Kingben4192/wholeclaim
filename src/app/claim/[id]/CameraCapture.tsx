@@ -1,15 +1,21 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, FolderOpen, X, Loader2 } from "lucide-react";
+import { Camera, FolderOpen, X, Loader2, FileText, File as FileIcon } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
-import { duplicateNamePrompt } from "@/lib/evidenceUpload";
+import {
+  duplicateNamePrompt,
+  isPermanentUploadError,
+  uploadButtonLabel,
+  validateEvidenceFile,
+} from "@/lib/evidenceUpload";
 import { EVIDENCE_STAGES } from "@/lib/evidenceStage";
 
 interface PendingCapture {
   id: string;
   file: File;
-  previewUrl: string;
+  // Only photos get a preview; PDFs and documents show an icon and their name.
+  previewUrl: string | null;
 }
 
 interface CameraCaptureProps {
@@ -18,7 +24,8 @@ interface CameraCaptureProps {
   onUploadComplete?: () => void;
 }
 
-type BatchSummary = { succeeded: number; failed: number; failedMessages: string[] };
+// notAdded: refused at selection, before any upload was attempted.
+type BatchSummary = { succeeded: number; failed: number; failedMessages: string[]; notAdded?: boolean };
 
 export default function CameraCapture({ claimId, evidenceItemId, onUploadComplete }: CameraCaptureProps) {
   const [pending, setPending] = useState<PendingCapture[]>([]);
@@ -39,21 +46,32 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
 
   const addFiles = useCallback((fileList: FileList | null) => {
     if (!fileList) return;
-    const newItems: PendingCapture[] = Array.from(fileList).map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
-    // A fresh batch is being staged -- the last summary now describes an
-    // older, already-cleared batch, not what's about to be uploaded.
-    setSummary(null);
+    // Files that can never upload (over 15MB, unsupported type, empty) are
+    // refused here, at selection, instead of after the user clicks Upload.
+    const rejected: string[] = [];
+    const newItems: PendingCapture[] = [];
+    for (const file of Array.from(fileList)) {
+      const problem = validateEvidenceFile(file);
+      if (problem) {
+        rejected.push(`${file.name}: ${problem}`);
+        continue;
+      }
+      newItems.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
+        previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+      });
+    }
+    // A fresh batch is being staged -- the last summary described an older,
+    // already-cleared batch. Show only what this selection refused, if any.
+    setSummary(rejected.length > 0 ? { succeeded: 0, failed: rejected.length, failedMessages: rejected, notAdded: true } : null);
     setPending((prev) => [...prev, ...newItems]);
   }, []);
 
   const removeItem = (id: string) => {
     setPending((prev) => {
       const item = prev.find((p) => p.id === id);
-      if (item) URL.revokeObjectURL(item.previewUrl);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
       return prev.filter((p) => p.id !== id);
     });
   };
@@ -76,6 +94,10 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
     setSummary(null);
 
     const succeededIds: string[] = [];
+    // Failed for a reason retrying can't fix (too large, wrong type, a
+    // skipped duplicate, a plan limit): dropped from the staged list. Other
+    // failures stay staged so they can be retried without re-picking.
+    const droppedIds: string[] = [];
     const failedMessages: string[] = [];
 
     for (const item of pending) {
@@ -83,20 +105,22 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
         claimId,
         evidenceItemId,
         evidenceStage,
-        confirmDuplicate: (name) => window.confirm(duplicateNamePrompt(name)),
+        onDuplicate: (name) => (window.confirm(duplicateNamePrompt(name)) ? "upload" : "skip"),
       });
       if (result.ok) {
         succeededIds.push(item.id);
       } else {
         failedMessages.push(`${item.file.name}: ${result.error}`);
+        if (isPermanentUploadError(result.error)) droppedIds.push(item.id);
       }
     }
 
+    const clearedIds = [...succeededIds, ...droppedIds];
     setPending((prev) => {
       prev
-        .filter((p) => succeededIds.includes(p.id))
-        .forEach((p) => URL.revokeObjectURL(p.previewUrl));
-      return prev.filter((p) => !succeededIds.includes(p.id));
+        .filter((p) => clearedIds.includes(p.id))
+        .forEach((p) => p.previewUrl && URL.revokeObjectURL(p.previewUrl));
+      return prev.filter((p) => !clearedIds.includes(p.id));
     });
     setUploading(false);
     setSummary({ succeeded: succeededIds.length, failed: failedMessages.length, failedMessages });
@@ -146,12 +170,21 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
                 key={item.id}
                 className="relative aspect-square rounded-sm overflow-hidden border border-ink/15"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- local object URL preview, not an optimizable remote image */}
-                <img
-                  src={item.previewUrl}
-                  alt="Pending upload"
-                  className="w-full h-full object-cover"
-                />
+                {item.previewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- local object URL preview, not an optimizable remote image
+                  <img
+                    src={item.previewUrl}
+                    alt={`Pending upload: ${item.file.name}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-2 bg-ink/5 text-ink/70">
+                    {item.file.type === "application/pdf" ? <FileText size={28} /> : <FileIcon size={28} />}
+                    <span className="text-[11px] text-center leading-tight break-all line-clamp-3">
+                      {item.file.name}
+                    </span>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => removeItem(item.id)}
@@ -187,29 +220,38 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
             className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-ledger px-4 py-3 text-sm font-semibold text-paper disabled:opacity-50"
           >
             {uploading && <Loader2 size={14} className="animate-spin" />}
-            {uploading
-              ? `Uploading ${pending.length}…`
-              : `Upload ${pending.length} photo${pending.length > 1 ? "s" : ""}`}
+            {uploading ? `Uploading ${pending.length}…` : uploadButtonLabel(pending.map((p) => p.file))}
           </button>
         </div>
       )}
       {summary && (
         <div
-          className={`rounded-sm px-3 py-2 text-sm ${
+          className={`relative rounded-sm px-3 py-2 pr-9 text-sm ${
             summary.failed === 0
               ? "border-2 border-ledger bg-ledger/10 text-ledger"
               : "border-2 border-amber-700 bg-amber-50 text-amber-800"
           }`}
+          role={summary.failed === 0 ? "status" : "alert"}
         >
+          <button
+            type="button"
+            onClick={() => setSummary(null)}
+            className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center rounded-full hover:bg-ink/10"
+            aria-label="Dismiss"
+          >
+            <X size={13} />
+          </button>
           {summary.failed === 0 ? (
             <p>
-              {summary.succeeded} photo{summary.succeeded > 1 ? "s" : ""} added.
+              {summary.succeeded} {summary.succeeded === 1 ? "file" : "files"} added.
             </p>
           ) : (
             <>
               <p>
-                {summary.succeeded} of {summary.succeeded + summary.failed} uploaded
-                {summary.succeeded > 0 ? " — the rest are still staged above, ready to retry." : "."}
+                {summary.notAdded
+                  ? `${summary.failed} ${summary.failed === 1 ? "file wasn't" : "files weren't"} added.`
+                  : `${summary.succeeded} of ${summary.succeeded + summary.failed} uploaded.`}
+                {!summary.notAdded && pending.length > 0 ? " Files that can be retried are still staged above." : ""}
               </p>
               <ul className="mt-1 list-disc list-inside">
                 {summary.failedMessages.map((m, i) => (
