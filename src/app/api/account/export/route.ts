@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
 import { createClient } from "@/lib/supabase/server";
+import { isServiceRoleConfigured, getAdminClient } from "@/lib/supabase/admin";
 
 // Product Bible, Account & Billing: "Always self-serve export (JSON + files)."
 // Reads only through the user's own RLS-scoped session — no service role
@@ -14,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: "Sign in first." }, { status: 401 });
   }
 
-  const [profile, claims, entries, deadlines, evidenceItems, files, promisedItems, lossOfUse, leads] = await Promise.all([
+  const [profile, claims, entries, deadlines, evidenceItems, files, promisedItems, lossOfUse, leads, waitlist] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("claims").select("*").eq("user_id", user.id),
     supabase.from("entries").select("*").eq("user_id", user.id),
@@ -25,6 +26,11 @@ export async function GET() {
     supabase.from("loss_of_use_expenses").select("*").eq("user_id", user.id),
     user.email
       ? supabase.from("leads").select("*").ilike("email", user.email)
+      : Promise.resolve({ data: [] as unknown[] }),
+    // waitlist_signups has no user-readable policies (service role only), so
+    // the account's own rows are read with the admin client, by its email.
+    user.email && isServiceRoleConfigured()
+      ? getAdminClient().from("waitlist_signups").select("plan, unit_count, created_at").eq("email", user.email.toLowerCase())
       : Promise.resolve({ data: [] as unknown[] }),
   ]);
 
@@ -43,6 +49,7 @@ export async function GET() {
         promised_items: promisedItems.data,
         loss_of_use_expenses: lossOfUse.data,
         grader_leads: leads.data,
+        waitlist_signups: waitlist.data,
       },
       null,
       2,

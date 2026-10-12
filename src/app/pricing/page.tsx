@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { UpgradeOptions } from "../claim/[id]/UpgradeOptions";
+import { ComingSoonPlans } from "./ComingSoonPlans";
 import { SUBSCRIPTION_STATUSES_GRANTING_PRO, LIFETIME_ENTITLEMENT_TYPES } from "@/lib/entitlements";
 import { PRO_SUBSCRIPTION, PRO_LIFETIME } from "@/lib/pricing";
 import { PRO_LIFETIME_ENABLED } from "@/lib/featureFlags";
@@ -171,6 +172,8 @@ export default async function PricingPreviewPage() {
           )}
         </div>
       )}
+
+      <ComingSoonPlans />
 
       {/* Scan to grade a claim free — customer-acquisition QR (Decision
          #29: the free grader is the front door). Generated locally,

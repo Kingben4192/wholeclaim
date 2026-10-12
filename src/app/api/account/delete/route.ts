@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
 
   if (user.email) {
     await admin.from("leads").delete().ilike("email", user.email);
+    await admin.from("waitlist_signups").delete().eq("email", user.email.toLowerCase());
   }
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
