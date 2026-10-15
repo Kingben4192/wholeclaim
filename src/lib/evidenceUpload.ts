@@ -11,6 +11,7 @@ import { isAllowedUpload } from "./uploadValidation";
 export const MAX_EVIDENCE_FILE_BYTES = 15 * 1024 * 1024; // 15MB — plenty for phone photos and scanned PDFs.
 
 export const UPLOAD_FAILED_MESSAGE = "Upload failed. Try again.";
+export const UPLOAD_TIMEOUT_MESSAGE = "The upload took too long. Check your connection and try again.";
 export const FILE_TOO_LARGE_MESSAGE = "That file is larger than 15MB.";
 export const FILE_TYPE_MESSAGE =
   "That file type isn't supported. Upload a photo, PDF, or common document file.";
@@ -22,14 +23,34 @@ export const DUPLICATE_SKIPPED_MESSAGE = "Skipped — a file with this name is a
 
 export type DuplicateChoice = "link" | "upload" | "skip";
 
+export const DUPLICATE_DIALOG_TITLE = "Already in your Evidence Vault";
+
 export function duplicateNamePrompt(fileName: string): string {
-  return `"${fileName}" is already in this claim's Evidence Vault. Upload it again?`;
+  return `"${fileName}" is already in this claim's Evidence Vault.`;
 }
 
-// Attach on a checklist item: OK reuses the copy already in the Vault (one
-// file, linked to both items), Cancel uploads a separate copy.
-export function linkExistingPrompt(fileName: string): string {
-  return `"${fileName}" is already in this claim's Evidence Vault.\n\nOK — use that same file for this item.\nCancel — upload a separate copy.`;
+// Time limits for each step of an upload. Without them, a stalled request
+// (most often the direct transfer to Storage) left the spinner running
+// forever with no message.
+export const SERVER_STEP_TIMEOUT_MS = 20_000;
+export const STORAGE_UPLOAD_TIMEOUT_MS = 60_000;
+
+export class UploadTimeoutError extends Error {
+  constructor(step: string) {
+    super(`Upload step timed out: ${step}`);
+    this.name = "UploadTimeoutError";
+  }
+}
+
+// Rejects with UploadTimeoutError if `promise` hasn't settled within `ms`.
+// The underlying request isn't cancelled -- it just stops being waited on,
+// so the uploader can tell the user and let them retry.
+export function withTimeout<T>(promise: Promise<T>, ms: number, step: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new UploadTimeoutError(step)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 // Failures that retrying the same file can't fix. The batch uploader drops

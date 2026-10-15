@@ -1,12 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   autoChecklistLabel,
   buildEvidenceStoragePath,
   duplicateNamePrompt,
   isPermanentUploadError,
-  linkExistingPrompt,
   uploadButtonLabel,
   validateChecklistLabel,
+  withTimeout,
+  UploadTimeoutError,
+  UPLOAD_TIMEOUT_MESSAGE,
   DUPLICATE_SKIPPED_MESSAGE,
   isEvidencePathForClaim,
   kindForType,
@@ -102,9 +104,7 @@ describe("autoChecklistLabel", () => {
 
 describe("duplicate file names", () => {
   it("asks in plain words, naming the file", () => {
-    expect(duplicateNamePrompt("IMG_0412.jpg")).toBe(
-      '"IMG_0412.jpg" is already in this claim\'s Evidence Vault. Upload it again?',
-    );
+    expect(duplicateNamePrompt("IMG_0412.jpg")).toBe('"IMG_0412.jpg" is already in this claim\'s Evidence Vault.');
   });
 
   it("explains a skipped upload without calling it an error", () => {
@@ -149,12 +149,27 @@ describe("validateChecklistLabel", () => {
   });
 });
 
-describe("linkExistingPrompt", () => {
-  it("explains both choices", () => {
-    const text = linkExistingPrompt("estimate.docx");
-    expect(text).toContain('"estimate.docx" is already in this claim\'s Evidence Vault.');
-    expect(text).toContain("OK — use that same file for this item.");
-    expect(text).toContain("Cancel — upload a separate copy.");
+describe("withTimeout", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("passes through a result that arrives in time", async () => {
+    await expect(withTimeout(Promise.resolve("done"), 1000, "prepare")).resolves.toBe("done");
+  });
+
+  it("rejects with UploadTimeoutError when the step stalls", async () => {
+    vi.useFakeTimers();
+    const stalled = new Promise<string>(() => {});
+    const result = withTimeout(stalled, 60_000, "storage");
+    const assertion = expect(result).rejects.toBeInstanceOf(UploadTimeoutError);
+    await vi.advanceTimersByTimeAsync(60_000);
+    await assertion;
+  });
+
+  it("keeps a timed-out upload retryable, with a plain message", () => {
+    expect(isPermanentUploadError(UPLOAD_TIMEOUT_MESSAGE)).toBe(false);
+    expect(UPLOAD_TIMEOUT_MESSAGE).toBe("The upload took too long. Check your connection and try again.");
   });
 });
 

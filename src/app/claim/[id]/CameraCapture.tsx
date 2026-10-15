@@ -3,8 +3,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, FolderOpen, X, Loader2, FileText, File as FileIcon } from "lucide-react";
 import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
+import { useChoiceDialog } from "./ChoiceDialog";
 import {
   duplicateNamePrompt,
+  DUPLICATE_DIALOG_TITLE,
+  type DuplicateChoice,
   isPermanentUploadError,
   uploadButtonLabel,
   validateEvidenceFile,
@@ -34,6 +37,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
   const [evidenceStage, setEvidenceStage] = useState("");
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { ask, dialog } = useChoiceDialog<DuplicateChoice>();
 
   // A success note ("1 photo added.") clears itself; it otherwise stayed on
   // screen after the file was deleted. Failures stay until the next batch so
@@ -105,7 +109,16 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
         claimId,
         evidenceItemId,
         evidenceStage,
-        onDuplicate: (name) => (window.confirm(duplicateNamePrompt(name)) ? "upload" : "skip"),
+        onDuplicate: (name) =>
+          ask({
+            title: DUPLICATE_DIALOG_TITLE,
+            body: duplicateNamePrompt(name),
+            options: [
+              { value: "upload", label: "Upload again", primary: true },
+              { value: "skip", label: "Skip this file" },
+            ],
+            cancelValue: "skip",
+          }),
       });
       if (result.ok) {
         succeededIds.push(item.id);
@@ -129,6 +142,7 @@ export default function CameraCapture({ claimId, evidenceItemId, onUploadComplet
 
   return (
     <div className="flex flex-col gap-3">
+      {dialog}
       <input
         ref={cameraInputRef}
         type="file"
