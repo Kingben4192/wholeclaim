@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { readPendingPhoto, clearPendingPhoto } from "@/lib/pendingPhoto";
-import { uploadFile } from "../actions";
+import { uploadEvidenceFile } from "@/lib/evidenceUploadClient";
 
 // Completes the invisible-signup hand-off: picks up a photo captured on the
 // free grader results page (held in localStorage across the magic-link
@@ -60,11 +60,10 @@ export function PendingPhotoUploader({
       .then((r) => r.blob())
       .then((blob) => {
         const file = new File([blob], pending.fileName, { type: pending.mimeType });
-        const formData = new FormData();
-        formData.append("file", file);
-        return uploadFile(claimId, null, formData);
+        return uploadEvidenceFile(file, { claimId });
       })
-      .then(() => {
+      .then((result) => {
+        if (!result.ok) throw new Error(result.error);
         clearPendingPhoto();
         setOutcome("done");
       })

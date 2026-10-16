@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { addEntry, addDeadline, addEvidenceItem } from "../actions";
-import { EvidenceRow } from "./EvidenceRow";
+import { EvidenceChecklist } from "./EvidenceChecklist";
 import { FileRow } from "./FileRow";
 import { AddEntryForm } from "./AddEntryForm";
 import CameraCapture from "./CameraCapture";
@@ -107,7 +107,9 @@ export default async function ClaimDetailPage({
         .order("due_date", { ascending: true }),
       supabase
         .from("evidence_items")
-        .select("id, label, checked, file_id, category, created_at")
+        // "*" rather than a column list so the page keeps working whether or
+        // not migration 0038 (not_applicable) has been applied yet.
+        .select("*")
         .eq("claim_id", id)
         .order("created_at", { ascending: true }),
       supabase
@@ -429,15 +431,18 @@ export default async function ClaimDetailPage({
           Evidence Checklist
         </h2>
         <div className="border border-ink/15 rounded-sm mb-4">
-          {evidenceItems && evidenceItems.length > 0 ? (
-            evidenceItems.map((item) => (
-              <EvidenceRow key={item.id} claimId={id} item={item} />
-            ))
-          ) : (
-            <p className="px-3 py-3 text-sm text-ink/50">
-              Nothing logged yet. The first entry takes thirty seconds.
-            </p>
-          )}
+          <EvidenceChecklist
+            claimId={id}
+            items={(evidenceItems ?? []).map((item) => ({
+              id: item.id,
+              label: item.label,
+              checked: item.checked,
+              category: item.category ?? null,
+              file_id: item.file_id ?? null,
+              notApplicable: item.not_applicable === true,
+            }))}
+            fileNames={Object.fromEntries((files ?? []).map((f) => [f.id, f.original_name]))}
+          />
         </div>
         <form action={boundAddEvidenceItem} className="flex gap-2">
           <input

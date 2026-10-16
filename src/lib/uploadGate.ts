@@ -10,11 +10,11 @@ import { computeFreeStorageStatus, computeProStorageStatus, type StorageStatus }
 // grace) skips the counter entirely. This exact structured shape is what
 // the spec calls "the block response format" — kept as this function's
 // real return type so it's independently verifiable and directly reusable
-// by a future API route. uploadFile (a Server Action) translates a
-// blocked result into a thrown Error for its existing callers, since
-// Next.js Server Actions only reliably serialize an Error's .message
-// across the client/server boundary, not custom properties on a thrown
-// object — see the comment at its call site in claim/actions.ts.
+// by a future API route. The upload Server Actions translate a
+// blocked result into a returned { ok: false, error } message, not a
+// thrown Error: production React replaces a thrown Server Action error's
+// message with a generic one, so a thrown message never reaches the
+// customer — see uploadGateProblem in claim/actions.ts.
 export type UploadGateResult =
   | { allowed: true }
   | { allowed: false; blocked: true; reason: "UPLOAD_LIMIT_REACHED"; upgradeRequired: true }
